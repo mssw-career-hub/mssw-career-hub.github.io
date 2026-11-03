@@ -2243,7 +2243,7 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   x.fillStyle="#F2543D";x.font="800 40px "+F;x.fillText("→",W-P-80,H-108);
   return c}
 function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that item.");return}const kind=ref.split(":")[0];const K=SHARE_KIND[kind]||SHARE_KIND.notice;const on={what:1,for:1,when:1,link:1,hub:1};
-  const url=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/#"+K[2];
+  const url=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
   const msg=note=>{const L=[K[1]+" *MSSW Career Hub · "+K[0]+"*","*"+s.title+"*",""];s.parts.filter(([k,t])=>t&&on[k]).forEach(x=>L.push(x[1]));if(note)L.push("","_"+note+"_");if(on.hub)L.push("","🔗 Full details: "+url);return L.join("\n").replace(/\n{3,}/g,"\n\n").trim()};
   const {body}=drawer("Share on WhatsApp",`<span class="eyebrow" style="color:#137A41">Share</span><h2 style="margin:4px 0 14px">Send on WhatsApp</h2>
    <span class="lab">Include</span>${[["what","What happened and what to do"],["for","Who it's for"],["when","Date, time and deadline"],["hub","Link to the hub"]].map(([k,l])=>`<label class="check"><input type="checkbox" data-on="${k}" checked> ${l}</label>`).join("")}
