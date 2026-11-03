@@ -2327,9 +2327,9 @@ function qaBlock(it,label){return `<h3>${label}</h3>${it.qa&&it.qa.length?`<ul c
   ${it.sample?"":`<form class="row" data-ask="${esc(it.id)}"><input class="field" id="ask-${esc(it.id)}" maxlength="600" placeholder="Ask a question or add a tip" style="flex:1" aria-label="Your question"><button class="btn primary">Send</button></form>`}`}
 
 /* participation */
-function partStrip(){const st=D.stats||{};const shared=(st.journeys||0)+(st.posts||0)+(st.community||0);
+function partStrip(){const st=LV()>=3?(D.stats||{}):{};const shared=(st.journeys||0)+(st.posts||0)+(st.community||0);
   const items=[[st.students,"Students signed in","cap","#5A36E0"],[st.alumni,"Alumni signed in","heart","#C2412A"],[shared,"Stories and posts shared","chat","#13827B"],[st.questions,"Questions and replies","users","#2849A8"]].filter(x=>x[0]>0);
-  return `<section class="sec part gl"><div class="part-h"><span class="eyebrow" style="color:#13827B">Our community</span><h2>Built by MSSW, for MSSW</h2><p>${items.length?"Every sign-in, story and reply makes the hub more useful for the next batch.":"Be among the first to sign in, share your journey or start a conversation."}</p>
+  return `<section class="sec part gl"><div class="part-h"><span class="eyebrow" style="color:#13827B">Our community</span><h2>Built by MSSW, for MSSW</h2><p>${LV()>=3?(items.length?"Every sign-in, story and reply makes the hub more useful for the next batch. These numbers are visible only to the placement team.":"No one has signed in yet."):"Sign in, share your journey or start a conversation. Every story and reply makes the hub more useful for the next batch."}</p>
    <div class="row"><button class="btn primary small" data-go="community">${ic("chat",14)} Join the conversation</button>${ME?"":`<button class="btn light small" data-signin>Sign in</button>`}</div></div>
    ${items.length?`<div class="part-n">${items.map(([n,l,i,c])=>`<div><span class="pi" style="color:${c}">${ic(i,18)}</span><b>${n}</b><small>${l}</small></div>`).join("")}</div>`:""}</section>`}
 function deskPeople(){const host=document.querySelector("#main > .wrap");if(!host||!ME||LV()<3)return;const pp=D.people||[];const st=D.stats||{};
