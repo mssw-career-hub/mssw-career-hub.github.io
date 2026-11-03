@@ -911,6 +911,24 @@ body{min-height:100vh;display:flex;flex-direction:column}#main{flex:1 0 auto}bod
 .pill[aria-pressed="true"]{background:linear-gradient(180deg,#6E55F0,#4A32C7);color:#fff;box-shadow:0 8px 18px -10px rgba(74,50,199,.9)}
 @media (max-width:400px){.dock button{padding:7px 5px}.dock button span{font-size:9px}}
 body:has(.scrim) .dock{opacity:0;pointer-events:none}
+/* header scrolls away with the page */
+.top{position:relative;top:auto;z-index:60}
+/* phone and tablet menu: dark glass panel instead of a white strip */
+@media (max-width:1150px){
+.nav.open{position:absolute;left:0;right:0;top:calc(100% + 8px);display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:20px;border:0;
+  background:linear-gradient(180deg,rgba(30,25,80,.98),rgba(18,15,56,.98));box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 30px 60px -20px rgba(18,15,56,.8);z-index:70}
+.nav.open button{width:100%;text-align:left;font-size:16px;padding:13px 16px;border-radius:14px;color:#E7E3FF}
+.nav.open button[aria-current="page"]{background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.06));color:#fff}
+.menu-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.2)!important;background:rgba(255,255,255,.06)}
+}
+/* the 3D island is a desktop treat; on phones it is hidden with its button */
+@media (max-width:760px){.isle-band,[data-jump="isle"]{display:none!important}}
+@media (max-width:1150px){.nav.open{background:#1A1650!important;backdrop-filter:none!important;opacity:1!important}.nav.open::before,.nav.open::after{display:none!important}}
+.gwrap{margin:18px 0 6px}
+.gwrap #gBtn{min-height:44px;display:flex}
+.orline{display:flex;align-items:center;gap:12px;margin:18px 0 4px;color:var(--muted,#7a7695);font-size:13px;font-weight:600;letter-spacing:.02em}
+.orline::before,.orline::after{content:"";flex:1;height:1px;background:rgba(90,54,224,.16)}
+.gfake{display:inline-flex;align-items:center;gap:10px;padding:11px 22px;border-radius:999px;border:0;background:#1a73e8;color:#fff;font:600 15px/1 inherit;cursor:pointer}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -927,7 +945,7 @@ body:has(.scrim) .dock{opacity:0;pointer-events:none}
 <script>
 (function(){
 "use strict";
-const CONFIG={api:"https://script.google.com/macros/s/AKfycbxbYe57GAGcyop4wnb2hXn_0XFIPcCNrhoXaMVZ9pdWskcsJ_peujypDgHXzS6uQN9Pww/exec",site:"https://script.google.com/macros/s/AKfycbxbYe57GAGcyop4wnb2hXn_0XFIPcCNrhoXaMVZ9pdWskcsJ_peujypDgHXzS6uQN9Pww/exec",domain:"mssw.in"};
+const CONFIG={api:"https://script.google.com/macros/s/AKfycbxbYe57GAGcyop4wnb2hXn_0XFIPcCNrhoXaMVZ9pdWskcsJ_peujypDgHXzS6uQN9Pww/exec",site:"https://mssw-career-hub.github.io",gid:"",domain:"mssw.in"};
 const PREVIEW=!CONFIG.api;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1215,6 +1233,7 @@ let PSEQ=0;
 function previewApi(a,b){const id="L"+(++PSEQ);const now=new Date().toISOString();
   if(PAPI[a]){if(!ME&&a!=="upload")throw new Error("Sign in first.");return PAPI[a](b)}
   if(a==="start"){if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(b.email||""))throw new Error("Please check your email address.");return{sent:true}}
+  if(a==="google"){if(!b.confirm)return{need:true,name:"Preview Person",email:"preview@mssw.in",mssw:true};return previewApi("verify",{...b,email:"preview@mssw.in",code:"123456"})}
   if(a==="verify"){if(String(b.code).trim()!=="123456")throw new Error("That code didn't match. In this preview the code is 123456.");const mssw=/@mssw\.in$/i.test(b.email);const team=/^umashaan25@mssw\.in$/i.test(b.email)||TEAM.some(t=>t.email===String(b.email).toLowerCase());return{me:{id:"p1",key:"k",name:b.name,role:mssw?b.role:"Alumni",programme:b.programme,batch:b.batch,mssw,team,owner:/^umashaan25@/i.test(b.email)}}}
   if(!ME)throw new Error("Sign in first.");
   if(["notice","drive","hide"].includes(a)&&!ME.team)throw new Error("Only the placement team can do this.");
@@ -1614,25 +1633,42 @@ function openCompany(key){const c=companies().find(x=>x.key===key);if(!c){toast(
 
 /* ---------- sign in: name, email, code ---------- */
 function needMe(then){if(ME)return true;openSignIn(then);return false}
-function openSignIn(then){let step=1,data={};
-  const {body,close}=drawer("Sign in",`<h2>Sign in</h2><p style="color:var(--body);margin:0">No password. We email you a 6-digit code.</p>
-   <ul class="levels"><li><b>@${CONFIG.domain} email</b><span>Students and staff: this season's drives, notices and sessions, plus everything below.</span></li><li><b>Any email</b><span>Alumni: full placement journeys, company insights, and sharing your own story or an opening.</span></li></ul>
+function gsiOn(){return !!CONFIG.gid&&(PREVIEW||location.origin===CONFIG.site)}
+function loadGsi(cb){if(window.google&&google.accounts&&google.accounts.id)return cb();const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;s.onload=cb;s.onerror=()=>{const w=document.getElementById("gWrap");if(w)w.hidden=true};document.head.appendChild(s)}
+function openSignIn(then){let step=1,data={},cred="";const G=gsiOn();
+  const {body,close}=drawer("Sign in",`<h2>Sign in</h2><p style="color:var(--body);margin:0" id="siLead">${G?"One tap with your Google account. No password, and it remembers you on every device.":"No password. We email you a 6-digit code."}</p>
+   ${G?`<div id="gWrap" class="gwrap"><div id="gBtn"></div><p class="hint" style="margin:8px 0 0">Use your <b>@${CONFIG.domain}</b> account for this season's drives and notices. Alumni can use any Google account.</p><div class="orline"><span>or get a code by email</span></div></div>`:""}
+   <ul class="levels" id="siLevels"><li><b>@${CONFIG.domain} email</b><span>Students and staff: this season's drives, notices and sessions, plus everything below.</span></li><li><b>Any email</b><span>Alumni: full placement journeys, company insights, and sharing your own story or an opening.</span></li></ul>
    <form id="siF"><div id="s1"><label class="lab" for="siName">Your name</label><input class="field" id="siName" maxlength="60" autocomplete="name">
-    <label class="lab" for="siEmail">Email</label><input class="field" id="siEmail" type="email" maxlength="120" autocomplete="email">
+    <div id="siEmailBox"><label class="lab" for="siEmail">Email</label><input class="field" id="siEmail" type="email" maxlength="120" autocomplete="email"></div>
     <p class="hint" id="siHint"></p>
     <div id="siMore"><span class="lab">I am</span><div class="pick" id="siRole">${["Student","Alumni","Faculty"].map((r,i)=>`<button type="button" data-v="${r}" aria-pressed="${i===0}">${r}</button>`).join("")}</div></div>
     <div class="two"><div><label class="lab" for="siProg">Programme <small>(optional)</small></label><input class="field" id="siProg" list="progList" maxlength="60"><datalist id="progList">${PROGRAMMES.map(p=>`<option value="${p}">`).join("")}</datalist></div><div><label class="lab" for="siBatch">Batch <small>(year you graduate)</small></label><input class="field" id="siBatch" inputmode="numeric" maxlength="4" placeholder="2026"></div></div></div>
     <div id="s2" hidden><label class="lab" for="siCode">Enter the 6-digit code we emailed you${PREVIEW?" (preview: 123456)":""}</label><input class="field" id="siCode" inputmode="numeric" maxlength="6" style="font-size:1.3rem;letter-spacing:.3em;max-width:220px"><p class="hint">Can't see it? Check spam. The code works for 15 minutes.</p></div>
     <p class="err" id="siErr" role="alert"></p><button class="btn primary" id="siGo">Email me a code</button></form>`);
-  let role="Student";const roleEl=body.querySelector("#siRole");
+  let role="Student";const roleEl=body.querySelector("#siRole");const err=body.querySelector("#siErr");const goB=body.querySelector("#siGo");
+  async function done(r){ME=r.me;store.set("mch-me",ME);applyAccess();close();afterSignIn();toast("Welcome, "+ME.name.split(" ")[0]+"!");
+    if(!PREVIEW&&DONE.size)api("readiness",{items:[...DONE]}).catch(()=>{});await refresh();then&&then()}
+  async function onCred(resp){err.textContent="";cred=resp&&resp.credential||"";if(!cred)return;
+    try{const r=await api("google",{cred});if(r.me)return done(r);
+      step=3;["#gWrap","#siLevels","#siEmailBox"].forEach(q=>body.querySelector(q).style.display="none");
+      body.querySelector("#siLead").innerHTML="Welcome! You're signing in as <b>"+esc(r.email)+"</b>. Tell us a little about you, just this once.";
+      body.querySelector("#siName").value=r.name||"";body.querySelector("#siMore").hidden=!r.mssw;
+      body.querySelector("#siHint").textContent=r.mssw?"":"You'll be listed as MSSW alumni. Add your batch so juniors know when you graduated.";goB.textContent="Finish signing in"}
+    catch(x){err.textContent=x.message}}
+  if(G){const gb=body.querySelector("#gBtn");
+    if(PREVIEW){gb.innerHTML=`<button type="button" class="gfake">Continue with Google</button>`;gb.firstChild.onclick=()=>onCred({credential:"preview"})}
+    else loadGsi(()=>{try{google.accounts.id.initialize({client_id:CONFIG.gid,callback:onCred,ux_mode:"popup",auto_select:false,cancel_on_tap_outside:true});
+      google.accounts.id.renderButton(gb,{theme:"filled_blue",size:"large",shape:"pill",text:"continue_with",logo_alignment:"left",width:Math.max(220,Math.min(340,gb.clientWidth||300))})}catch(x){body.querySelector("#gWrap").hidden=true}})}
   roleEl.addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;role=b.dataset.v;roleEl.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   body.querySelector("#siEmail").addEventListener("input",e=>{const v=e.target.value.trim();const ext=/@/.test(v)&&!new RegExp("@"+CONFIG.domain.replace(".","\\.")+"$","i").test(v)&&/\.[a-z]{2,}$/i.test(v);
     body.querySelector("#siMore").hidden=ext;body.querySelector("#siHint").textContent=ext?"You'll be listed as MSSW alumni. Add your batch so juniors know when you graduated.":""});
-  body.querySelector("#siF").addEventListener("submit",async e=>{e.preventDefault();const err=body.querySelector("#siErr");err.textContent="";const goB=body.querySelector("#siGo");goB.disabled=true;
-    try{if(step===1){data={name:body.querySelector("#siName").value.trim(),email:body.querySelector("#siEmail").value.trim(),role:body.querySelector("#siMore").hidden?"Alumni":role,programme:body.querySelector("#siProg").value.trim(),batch:body.querySelector("#siBatch").value.trim()};
+  body.querySelector("#siF").addEventListener("submit",async e=>{e.preventDefault();err.textContent="";goB.disabled=true;
+    try{if(step===3){const name=body.querySelector("#siName").value.trim();if(name.length<2)throw new Error("Add your name.");
+        return await done(await api("google",{cred,confirm:true,name,role:body.querySelector("#siMore").hidden?"Alumni":role,programme:body.querySelector("#siProg").value.trim(),batch:body.querySelector("#siBatch").value.trim()}))}
+      if(step===1){data={name:body.querySelector("#siName").value.trim(),email:body.querySelector("#siEmail").value.trim(),role:body.querySelector("#siMore").hidden?"Alumni":role,programme:body.querySelector("#siProg").value.trim(),batch:body.querySelector("#siBatch").value.trim()};
         if(data.name.length<2)throw new Error("Add your name.");await api("start",data);step=2;body.querySelector("#s1").hidden=true;body.querySelector("#s2").hidden=false;goB.textContent="Sign in";body.querySelector("#siCode").focus()}
-      else{const r=await api("verify",{...data,code:body.querySelector("#siCode").value.trim()});ME=r.me;store.set("mch-me",ME);applyAccess();close();afterSignIn();toast("Welcome, "+ME.name.split(" ")[0]+"!");
-        if(!PREVIEW&&DONE.size)api("readiness",{items:[...DONE]}).catch(()=>{});await refresh();then&&then()}}
+      else await done(await api("verify",{...data,code:body.querySelector("#siCode").value.trim()}))}
     catch(x){err.textContent=x.message}finally{goB.disabled=false}})}
 function paintMe(){$("#meSlot").innerHTML=ME?`<button class="avatar" data-mine aria-label="Your profile" style="--c:${tone(ME.name)}">${esc(initials(ME.name))}</button>`:`<button class="btn small" data-signin>Sign in</button>`}
 function openMine(){const mine=k=>D[k].filter(x=>x.mine);
