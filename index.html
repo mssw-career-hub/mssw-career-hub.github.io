@@ -929,6 +929,49 @@ body:has(.scrim) .dock{opacity:0;pointer-events:none}
 .orline{display:flex;align-items:center;gap:12px;margin:18px 0 4px;color:var(--muted,#7a7695);font-size:13px;font-weight:600;letter-spacing:.02em}
 .orline::before,.orline::after{content:"";flex:1;height:1px;background:rgba(90,54,224,.16)}
 .gfake{display:inline-flex;align-items:center;gap:10px;padding:11px 22px;border-radius:999px;border:0;background:#1a73e8;color:#fff;font:600 15px/1 inherit;cursor:pointer}
+html:not(.is-team) [data-form="event"]{display:none!important}
+/* community composer v2 */
+.cpose{padding:20px 22px!important}
+.cp-who{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cp-id{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.cp-id b{color:var(--ink,#17143F);font-size:16px}.cp-id small{color:var(--muted,#7a7695);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-photo{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px dashed rgba(90,54,224,.45);background:rgba(90,54,224,.06);color:#5A36E0;font-weight:600;font-size:13px;white-space:nowrap;cursor:pointer}
+.cpose textarea{min-height:96px;border-radius:16px;font-size:16px}
+.cp-kind{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.cp-lab{font-size:13px;font-weight:600;color:var(--muted,#7a7695)}
+.cp-kind .ctags{display:flex;gap:8px;margin:0;flex-wrap:wrap}
+.cp-kind .ctags span{padding:7px 14px;font-size:14px}
+.cp-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(90,54,224,.1)}
+.cp-foot small{color:var(--muted,#7a7695);font-size:13px;line-height:1.45}
+.cp-foot .btn{flex:none}
+@media (max-width:600px){
+ .cpose{padding:16px!important}
+ .cp-kind{flex-direction:column;align-items:flex-start;gap:8px}
+ .cp-kind .ctags{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ .cp-kind .ctags::-webkit-scrollbar{display:none}
+ .cp-kind .ctags label{flex:none}
+ .cp-foot{flex-direction:column;align-items:stretch}
+ .cp-foot .btn{width:100%;justify-content:center}
+}
+/* "Show me" filter v2: a clean chip row instead of a blob */
+.clbar{display:flex!important;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto;background:none!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:2px 0 6px!important;margin:22px 0 16px!important;border-radius:0!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.clbar::-webkit-scrollbar{display:none}
+.clbar .eyebrow{flex:none;width:auto!important;margin:0 4px 0 0!important;font-size:12px}
+.clbar button{flex:none;white-space:nowrap;padding:9px 16px!important;border-radius:999px!important;background:#fff!important;border:1px solid rgba(90,54,224,.16)!important;box-shadow:0 2px 8px rgba(23,20,63,.05);font-size:14px!important;color:var(--ink,#17143F)!important}
+.clbar button[aria-pressed="true"]{background:linear-gradient(180deg,#2E2868,#15123F)!important;color:#fff!important;border-color:transparent!important}
+.clbar button i{width:9px;height:9px}
+@media (max-width:600px){
+ .clbar{display:grid!important;grid-template-columns:1fr 1fr;gap:8px;overflow:visible}
+ .clbar .eyebrow{grid-column:1/-1;margin:0 0 2px 2px!important}
+ .clbar button{justify-content:center;width:100%}
+}
+@media (max-width:600px){
+ .cp-kind .ctags{flex-wrap:wrap!important;overflow:visible!important}
+ .cp-kind .ctags span{padding:7px 13px;font-size:14px}
+ .cp-id b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .cp-photo{padding:7px 10px;font-size:12.5px}
+}
+@media (max-width:600px){.cp-add{display:none}.cp-photo{text-transform:capitalize}}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -1048,7 +1091,7 @@ let LIVE=false;
 /* who can see what: 0 visitor · 1 signed in (students and alumni) · 2 MSSW email · 3 placement team. The live server enforces the same rules. */
 const LV=()=>!ME?0:ME.team?3:ME.mssw?2:1;
 let RAW=null,TEAM=[];
-function applyAccess(){if(!RAW)return;const l=LV(),mssw=x=>x.access!=="MSSW"||l>=2;
+function applyAccess(){document.documentElement.classList.toggle("is-team",!!(ME&&ME.team));if(!RAW)return;const l=LV(),mssw=x=>x.access!=="MSSW"||l>=2;
   D={...RAW,drives:l>=2?RAW.drives:[],notices:l>=2?RAW.notices:[],events:RAW.events.filter(mssw),openings:RAW.openings.filter(mssw),
    journeys:l>=1?RAW.journeys:RAW.journeys.map(j=>({...j,questions:"",prep:"",advice:"",qa:[],locked:j.locked||!!(j.questions||j.prep||j.advice||(j.qa||[]).length)}))}}
 
@@ -1207,7 +1250,7 @@ function buildIsle(){const T=window.THREE,el=ISLE.el,cv=el.querySelector(".isle-
 
 function realData(){const t=new Date().toISOString();
  const J=(id,name,company,role,sector)=>({id,name,memberRole:"Student",status:"Placed",company,role,sector,location:"",ctc:"",route:"",programme:"MA Social Entrepreneurship",batch:"2026",rounds:[],questions:"",prep:"",advice:"",helpful:0,t,qa:[],team:true});
- const R={journeys:[J("RJ1","Muthyala Pooja","TVS CSR","Community Development Officer","CSR & ESG"),J("RJ2","Naga Ganesh","Mann Deshi Foundation","Business and Impact Assessment Manager","Research, data & M&E"),J("RJ3","Soma Lakshmi","PRADAN","Development Executive","Social impact & development")],
+ const R={journeys:[],
   openings:[
    {id:"RO1",company:"NavSahyog Foundation",roles:"Field Coordinator",type:"Job",sector:"Social impact & development",location:"Karnataka, Tamil Nadu",ctc:"As per experience",eligibility:"MSW with 1–2 years' experience, or any bachelor's with 2 years in the social sector. Exceptional freshers with strong field or internship experience are considered. Read, write and speak Tamil or Kannada. Two-wheeler with licence.",about:"Run NavSahyog's life-skills programme for village children (5–14 years) across villages: support area facilitators, train field staff, run impact surveys, hold community meetings and work with Panchayat and education officials. Regular village visits and stays.",process:[],deadline:"2026-10-23",link:"https://docs.google.com/forms/d/e/1FAIpQLScRF1wfqhGR0YxpjfivwKKF7MGbe-zAUX8dVaGcvfA1Yd-jFg/viewform",status:"Closed",helpful:0,t,qa:[],by:"Placement team"},
    {id:"RO2",company:"NavSahyog Foundation",roles:"Program Lead",type:"Job",sector:"Social impact & development",location:"Karnataka, Tamil Nadu",ctc:"As per experience",eligibility:"MSW with 1–2 years' experience, or any bachelor's with 2 years in the social sector. Exceptional freshers with strong field or internship experience are considered. Tamil and/or Kannada required. Two-wheeler with licence.",about:"Develop and monitor programmes, build training content for field teams and partners, design and analyse impact surveys, write process documents and support social media content. Regular village visits.",process:[],deadline:"2026-10-23",link:"https://docs.google.com/forms/d/e/1FAIpQLScRF1wfqhGR0YxpjfivwKKF7MGbe-zAUX8dVaGcvfA1Yd-jFg/viewform",status:"Closed",helpful:0,t,qa:[],by:"Placement team"},
@@ -1401,7 +1444,7 @@ function renderHome(){const op=openOpenings(),up=upcoming().filter(inCl),cos=com
     <div class="panel" style="padding:24px 12px"><div class="steps4">${[["1","Get ready","Documents, profiles and eligibility.","readiness","var(--c-ready)"],["2","Build skills","Trainings, practice and work samples.","events","var(--c-ev)"],["3","Apply & prepare","Drives, company insights, mock sessions.","drives","var(--c-open)"],["4","Get placed & give back","Share your journey for the next batch.","journeys","var(--c-jo)"]].map(([n,t,s,g,c])=>`<button class="s4" data-go="${g}" style="--c:${c}"><span class="n">${n}</span><b>${t}</b><small>${s}</small></button>`).join("")}</div></div></section>
 
    <section class="contrib"><div class="l">${illo("contrib")}<div><span class="eyebrow">Contribute</span><h2>This hub is built by MSSW students and alumni</h2><p>Every opening you share, every interview round you describe and every template you add makes the next placement season easier. Current students sign in with @${CONFIG.domain}; alumni can use any email.</p></div></div>
-    <div class="opts">${[["journey","Share my placement journey","jo"],["opening","Post an opening","open"],["resource","Add a resource","res"],["event","Add an event","ev"]].map(([f,t,k])=>`<button data-form="${f}">${sq(k,17)}${t}</button>`).join("")}</div></section>
+    <div class="opts">${[["journey","Share my placement journey","jo"],["opening",ME&&ME.team?"Post an opening":"Suggest an opening","open"],["resource","Add a resource","res"]].map(([f,t,k])=>`<button data-form="${f}">${sq(k,17)}${t}</button>`).join("")}${ME&&ME.team?`<button data-form="event">${sq("ev",17)}Add an event</button>`:`<button data-go="community">${sq("ev",17)}Post on the community wall</button>`}</div></section>
   </div>`;
   mountIsle($("#isleMount"));isleCounts({notices:LV()>=2?D.notices.length+" this season":"Students only",drives:LV()>=2?activeDrives().length+" active now":op.length+" open roles",readiness:rn+" of "+READY_ITEMS.length+" done",companies:cos.length+" organisations",journeys:D.journeys.length+" stories",events:up.length+" coming up",resources:D.resources.length+" guides"})}
 
@@ -1681,9 +1724,9 @@ function pickHtml(id,opts,sel,multi){return `<div class="pick" id="${id}" data-m
 function wirePick(body,id){const el=body.querySelector("#"+id);el.addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b))})}
 const picked=(body,id)=>[...body.querySelectorAll("#"+id+" [aria-pressed='true']")].map(b=>b.dataset.v);
 function orderPick(body,id){const order=[];body.querySelector("#"+id).addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;const v=b.dataset.v;const i=order.indexOf(v);if(i>-1)order.splice(i,1);else order.push(v);b.setAttribute("aria-pressed",i<0)});return order}
-function openForm(kind){if(!needMe(()=>openForm(kind)))return;({journey:formJourney,opening:formOpening,event:formEvent,resource:formResource}[kind]||formJourney)()}
-function contribute(){drawer("Contribute",`<h2>What would you like to add?</h2><p style="color:var(--body)">Everything you add helps the next batch, and it goes live straight away.</p>
-  <div class="cards" style="margin-top:14px">${[["journey","Share my placement journey","Rounds, questions, pay and advice. About four minutes.","jo"],["opening","Post an opening","A job, internship, fellowship or campus drive.","open"],["event","Add an event","A training, mock GD, mock interview or talk.","ev"],["resource","Add a resource","A template, guide, recording or sample.","res"]].map(([f,t,s,k])=>`<button class="card" data-form="${f}" style="flex-direction:row;gap:12px;align-items:center">${sq(k,20)}<span><b>${t}</b><small class="muted" style="display:block;font-size:.84rem">${s}</small></span></button>`).join("")}</div>`)}
+function openForm(kind){if(!needMe(()=>openForm(kind)))return;if(kind==="event"&&!(ME&&ME.team)){toast("Only the placement team can add events.");return}({journey:formJourney,opening:formOpening,event:formEvent,resource:formResource}[kind]||formJourney)()}
+function contribute(){drawer("Contribute",`<h2>What would you like to add?</h2><p style="color:var(--body)">Everything you add helps the next batch. ${ME&&ME.team?"As placement team, what you add goes live straight away.":"Openings are checked by the placement team before they go live."}</p>
+  <div class="cards" style="margin-top:14px">${[["journey","Share my placement journey","Rounds, questions, pay and advice. About four minutes.","jo"],["opening",ME&&ME.team?"Post an opening":"Suggest an opening",ME&&ME.team?"A job, internship, fellowship or campus drive.":"A job or internship you know of. The placement team checks it first.","open"],...(ME&&ME.team?[["event","Add an event","A training, mock GD, mock interview or talk.","ev"]]:[]),["resource","Add a resource","A template, guide, recording or sample.","res"]].map(([f,t,s,k])=>`<button class="card" data-form="${f}" style="flex-direction:row;gap:12px;align-items:center">${sq(k,20)}<span><b>${t}</b><small class="muted" style="display:block;font-size:.84rem">${s}</small></span></button>`).join("")}</div>`)}
 
 function formJourney(){let step=1;const st={status:"Placed",route:"Campus",sector:"",rounds:[]};
   const {body,close}=drawer("Share your journey",`<div class="encourage">${ic("heart",18)} Your story becomes someone's roadmap. Thank you for sharing.</div><div class="stepper"><span class="on">1 · The offer</span><span>2 · The process</span><span>3 · Advice</span></div><form id="jF"></form>`);
@@ -1727,7 +1770,7 @@ function formOpening(){const {body,close}=drawer("Post an opening",`<h2>Post an 
   wirePick(body,"oTy");const order=orderPick(body,"oPr");if(LV()===3){wirePick(body,"oW");wirePick(body,"oSt")}
   body.querySelector("#oF").addEventListener("submit",async e=>{e.preventDefault();const v=id=>body.querySelector(id).value.trim();
     try{const r=await api("opening",{type:picked(body,"oTy")[0],company:v("#oCo"),roles:v("#oRo"),sector:v("#oSe"),location:v("#oLo"),ctc:v("#oCt"),eligibility:v("#oEl"),about:v("#oAb"),process:order,deadline:v("#oDl"),link:v("#oLk"),...(LV()===3?{access:picked(body,"oW")[0]==="Everyone"?"Public":"MSSW",status:picked(body,"oSt")[0]}:{})});
-      close();toast(r&&r.held?"Thanks! It will appear after a quick check.":"Opening posted. Thank you!");await refresh();go("openings")}catch(x){body.querySelector("#oErr").textContent=x.message}})}
+      close();toast(r&&r.held?"Thanks! The placement team will check it before it goes live.":"Opening posted. Thank you!");await refresh();go("openings")}catch(x){body.querySelector("#oErr").textContent=x.message}})}
 function formEvent(){const {body,close}=drawer("Add an event",`<h2>Add an event</h2>
   <form id="eF"><label class="lab" for="eT">Title</label><input class="field" id="eT" maxlength="100" placeholder="e.g. Mock interview with HR alumni">
    <span class="lab">Kind</span>${pickHtml("eK",EVKINDS,"Training")}
@@ -2214,11 +2257,12 @@ function peopleCSV(){const rows=[["Name","Email","Role","Programme","Batch","Joi
 
 /* community wall */
 function renderCommunity(){const all=D.community||[];const tf=F.ctag||"all";const list=all.filter(p=>tf==="all"||p.tag===tf);
-  const me=ME?`<form class="cpose gl" id="cpF"><div style="display:flex;gap:12px;align-items:flex-start">${avH(ME.name,ME.photo,44)}<div style="flex:1;min-width:0">
+  const me=ME?`<form class="cpose gl" id="cpF">
+     <div class="cp-who">${avH(ME.name,ME.photo,46)}<div class="cp-id"><b>${esc(ME.name)}</b><small>${esc([ME.role,ME.programme,ME.batch?"Batch "+ME.batch:""].filter(Boolean).join(" · "))}</small></div>${ME.photo?"":`<button type="button" class="cp-photo" data-photo>${ic("plus",13)} <span class="cp-add">Add </span>photo</button>`}</div>
      <label class="sr" for="cpT">Your post</label><textarea class="field" id="cpT" maxlength="1500" rows="3" placeholder="Share a worry, a win, a tip or a question with MSSW students and alumni"></textarea>
-     <div class="ctags" role="radiogroup" aria-label="What kind of post">${Object.keys(CTAGS).map((t,i)=>`<label><input type="radio" name="cpTag" value="${t}" ${i===2?"checked":""}><span style="--b:${CTAGS[t][0]};--f:${CTAGS[t][1]}">${t}</span></label>`).join("")}</div>
-     <div class="row" style="justify-content:space-between;margin-top:10px"><small class="muted">Posts show your name${ME.photo?" and photo":""}. Be kind; the placement team can remove posts.</small><button class="btn coral">${ic("chat",15)} Post</button></div>
-     ${ME.photo?"":`<p style="margin:10px 0 0;font-size:13px"><button type="button" class="link" data-photo>Add your photo</button> so people know who they are talking to.</p>`}<p class="err" id="cpErr" role="alert"></p></div></div></form>`
+     <div class="cp-kind"><span class="cp-lab">This is a</span><div class="ctags" role="radiogroup" aria-label="What kind of post">${Object.keys(CTAGS).map((t,i)=>`<label><input type="radio" name="cpTag" value="${t}" ${i===2?"checked":""}><span style="--b:${CTAGS[t][0]};--f:${CTAGS[t][1]}">${t}</span></label>`).join("")}</div></div>
+     <div class="cp-foot"><small>Your name${ME.photo?" and photo show":" shows"} with your post. Be kind; the placement team can remove posts.</small><button class="btn coral">${ic("chat",15)} Post</button></div>
+     <p class="err" id="cpErr" role="alert"></p></form>`
    :`<div class="cpose gl" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">${orb("linear-gradient(180deg,#F1ECFF,#D7CBFF)","#5A36E0",ic("chat",20),46)}<span style="flex:1;min-width:200px"><b>Join the conversation</b><br><small class="muted">Sign in with your email to post, like and reply. Anyone can read.</small></span><button class="btn coral" data-signin>Sign in to post</button></div>`;
   $("#main").innerHTML=band("jo","Students and alumni","Community wall","Share what's on your mind: a worry before an interview, a win, something you learned in the field, or a question for seniors. Everyone posts with their name.")+
   `<div class="wrap"><div class="cgrid"><section style="min-width:0;display:flex;flex-direction:column;gap:14px">${me}
