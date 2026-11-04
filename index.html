@@ -1023,6 +1023,21 @@ html::-webkit-scrollbar-thumb:hover{background:rgba(90,54,224,.65);background-cl
 }
 /* readiness panels: fully closed border on all sides */
 .rsec{border:2px solid var(--rl)!important;border-radius:20px!important;box-shadow:0 10px 26px -18px rgba(23,20,63,.35)}
+/* hero: alumni invitation */
+.hx-alum{display:flex;align-items:center;gap:12px;margin-top:22px;padding:12px 16px 12px 12px;border-radius:18px;max-width:460px;text-align:left;color:#fff;cursor:pointer;
+ background:linear-gradient(135deg,rgba(255,155,122,.22),rgba(246,199,107,.14));border:1px solid rgba(255,200,170,.38);box-shadow:0 10px 30px -16px rgba(255,120,90,.55);transition:transform .2s,background .2s}
+.hx-alum:hover{transform:translateY(-2px);background:linear-gradient(135deg,rgba(255,155,122,.3),rgba(246,199,107,.2))}
+.hx-alum .ha-ic{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(180deg,#FF9B7A,#F2543D);flex:none}
+.hx-alum b{display:block;font-size:14.5px;line-height:1.3}.hx-alum small{display:block;font-size:12.5px;color:#F3E6FF;opacity:.9;line-height:1.4;margin-top:2px}
+.hx-alum .ha-go{margin-left:auto;opacity:.85;flex:none}
+@media (max-width:760px){.hx-alum{max-width:none;width:100%}}
+/* make room for the Alumni tab on laptop widths */
+@media (min-width:1151px) and (max-width:1420px){
+ .acts-top [data-contribute] span{display:none}
+ .acts-top [data-contribute]{padding:0!important;width:44px;height:44px;justify-content:center;border-radius:50%!important}
+ .brand small{display:none}
+}
+@media (min-width:1151px) and (max-width:1260px){.nav button{padding:9px 10px!important;font-size:14px!important}}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -1916,7 +1931,7 @@ const KIND={lead:["Hiring lead","#FFEDE7","#C2412A"],mentor:["Mentorship","#F1EC
 const KIND_ORDER=["lead","mentor","skill","cert","journey","opp","material"];
 const KIND_HINT={lead:"An opening at your organisation, or one you can refer students to.",mentor:"A short chat a month with one or two students in your field.",skill:"A guide or video on the tools and tasks your job really involves.",cert:"A course that helped you, what it cost and whether recruiters noticed.",journey:"Your rounds, the questions you were asked and one piece of advice.",opp:"Events and programmes worth a student's time, with dates and links.",material:"Notes, question banks, slides or templates for any prep track."};
 const OFFERS=["Mentorship","Hiring leads","Real-work skills","Certification tips","Conferences and internships","My placement story"];
-const GROUPS=[["home","Home",["home"]],["season","This season",["notices","drives","events"]],["prep","Prepare",["readiness","resources"]],["learn","Learn",["learn"]],["explore","Companies",["companies"]],["community","Community",["community","journeys","alumni"]]];
+const GROUPS=[["home","Home",["home"]],["season","This season",["notices","drives","events"]],["prep","Prepare",["readiness","resources"]],["learn","Learn",["learn"]],["explore","Companies",["companies"]],["community","Community",["community","journeys"]],["alumni","Alumni",["alumni"]]];
 const SUBL={notices:"Noticeboard",drives:"Drives",events:"Events",readiness:"Readiness",resources:"Resources",companies:"Companies",journeys:"Journeys",community:"Community wall",alumni:"Alumni corner"};
 const ALLV=["home","notices","drives","events","readiness","resources","learn","companies","journeys","alumni","community","drive","desk"];
 let DRIVE_ID=null,FLIPS=new Set();
@@ -1963,7 +1978,7 @@ function renderHome(){const op=openOpenings(),up=upcoming().filter(inCl),cos=com
     <div><span class="hx-tag dg"><i></i>Madras School of Social Work · since 1952</span>
      <h1>From learning to<br><span>meaningful careers</span></h1>
      <p>Campus drives, interview and GD prep, and alumni who have walked the path. One place to get placed, and to give back.</p>
-     <div class="row"><button class="btn coral" data-jump="start">Find my next step ${ic("arrow",15)}</button><button class="btn light" data-jump="isle">Explore the island</button></div></div>
+     <div class="row"><button class="btn coral" data-jump="start">Find my next step ${ic("arrow",15)}</button><button class="btn light" data-jump="isle">Explore the island</button></div><button class="hx-alum" data-go="alumni"><span class="ha-ic">${ic("users",16)}</span><span><b>${ME&&ME.role==="Alumni"?"Welcome back to the Alumni corner":"MSSW alumni? This is your corner too"}</b><small>${ME?"Mentor juniors, share a hiring lead or an opportunity.":"Mentor juniors, share hiring leads and give back. Sign in with any email."}</small></span><span class="ha-go">${ic("arrow",15)}</span></button></div>
     <div class="arches">${HERO.map(([n,img,bg,co],i)=>`<div class="arch" style="left:${[2,35,68][i]}%;width:30%;height:${[300,370,320][i]}px;background:${bg}"><img src="${img}" alt="${esc(n)}"><span class="arch-name"><b>${esc(n)}</b><small>${esc(co)}</small></span></div>`).join("")}
      </div>
    </div>
@@ -2109,7 +2124,7 @@ function renderAlumni(){const ps=postsV(),leads=ps.filter(p=>p.kind==="lead"),op
     <div class="tgrid">${KIND_ORDER.map((k,i)=>`<button class="tcard" data-compose="${k}" style="--c:${KIND[k][2]}">${orb(`linear-gradient(180deg,#fff,${KIND[k][1]})`,KIND[k][2],`<b>0${i+1}</b>`,52)}<b>${k==="journey"?"Share your journey":k==="mentor"?"Offer mentorship":k==="lead"?"Share a hiring lead":k==="skill"?"Teach a real-work skill":k==="cert"?"Suggest a certification":k==="opp"?"Post a conference, internship or fellowship":"Upload learning material"}</b><p>${KIND_HINT[k]}</p><em style="font-style:normal;font-weight:600;font-size:12.5px;color:${KIND[k][2]};margin-top:auto">Start →</em></button>`).join("")}</div></section>
    <section class="sec" id="mentors" style="scroll-margin-top:100px"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#5A36E0">For students</span><h2 style="margin-top:6px">Mentors open this month</h2></div></div>
      <div class="seg2 gl">${["all","HR","Social sector","Psychology","Other"].map(k=>`<button data-f="ms" data-v="${k}" aria-pressed="${(F.ms||"all")===k}">${k==="all"?"All sectors":k}</button>`).join("")}</div></div>
-    ${ms.length?`<div class="tgrid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">${ms.map((m,i)=>`<article class="mcard"><span class="rg" style="background:${RINGS[i%4][0]}"><span>${esc(initials(m.name))}</span></span><b style="font-size:15px">${esc(m.name)}</b><span class="muted" style="font-size:12.5px;line-height:1.5">${esc(m.role||"")}${m.org?" · "+esc(m.org):""}<br>${m.batch?"Batch "+esc(m.batch)+" · ":""}${esc(m.sector||"")}</span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${(m.tags||[]).slice(0,3).map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</span><b style="font-size:12px;color:${m.slots>0?"#0F6E68":"#9A97B5"}">${m.slots>0?m.slots+" slot"+(m.slots>1?"s":"")+" this month":"Full this month"}</b><button class="btn dark small" data-mentor="${esc(m.id)}" ${m.slots>0?"":"disabled"}>Request a chat</button></article>`).join("")}</div>`
+    ${ms.length?`<div class="tgrid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">${ms.map((m,i)=>`<article class="mcard"><span class="rg" style="background:${RINGS[i%4][0]}"><span>${esc(initials(m.name))}</span></span><b style="font-size:15px">${esc(m.name)}</b><span class="muted" style="font-size:12.5px;line-height:1.5">${esc(m.role||"")}${m.org?" · "+esc(m.org):""}<br>${m.batch?"Batch "+esc(m.batch)+(m.sector&&m.sector!=="Other"?" · ":""):""}${m.sector&&m.sector!=="Other"?esc(m.sector):""}</span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${(m.tags||[]).map(t=>String(t).trim()).filter(t=>/[A-Za-z0-9]{2}/.test(t)).slice(0,3).map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</span><button class="btn dark small" data-mentor="${esc(m.id)}" ${m.slots>0?"":"disabled"}>${m.slots>0?"Request a chat":"Not available this month"}</button></article>`).join("")}</div>`
      :`<div class="empty"><b>No mentors listed yet</b>Alumni who offer mentorship appear here with their field and free slots. <div style="margin-top:12px"><button class="btn primary small" data-compose="mentor">Offer mentorship</button></div></div>`}</section>
    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:18px;margin-top:40px;align-items:start">
     <section class="gl" style="padding:24px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="font-size:16px;margin:0">Hiring leads from alumni</h2><button class="link" data-compose="lead">${ic("plus",13)} Add</button></div>
