@@ -1052,6 +1052,8 @@ html::-webkit-scrollbar-thumb:hover{background:rgba(90,54,224,.65);background-cl
 @media (max-width:380px){.hx-in .ha-si svg{display:none}.hx-in .ha-si{font-size:10.5px}}
 .hx-in .ha-si .si-short{display:none}
 @media (max-width:480px){.hx-in .ha-si .si-long{display:none}.hx-in .ha-si .si-short{display:inline}}
+a.nlink{display:inline-flex;align-items:center;gap:4px;margin:0 2px;padding:2px 10px;border-radius:999px;background:#EEF2FF;color:#2F57C2;font-weight:700;font-size:.92em;text-decoration:none;white-space:nowrap}
+a.nlink:hover{background:#DDE6FF}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2030,7 +2032,8 @@ function noticeCard(n){const d=dOf(n.date),ty=ntype(n),x=NT[ty],past=ty==="Act"&
   return `<article class="gl nrow${past?" past":""}"><span class="d"><b>${d?d.getDate():""}</b><small>${d?MON[d.getMonth()]:""}</small></span><span style="min-width:0">
    <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ntag" style="background:${x[1]};color:${x[2]}">${x[0]}</span>${clChip(n.cluster)}${n.pinned?`<span class="ntag" style="background:#FFF2CC;color:#8A5800">Pinned</span>`:""}${past?`<small class="muted">Closed</small>`:n.date>=isoPlus(-3)?`<span class="ntag" style="background:linear-gradient(180deg,#FF8E72,#E8573A);color:#fff">New</span>`:""}
     <span style="margin-left:auto;display:flex;gap:6px">${LV()===3?`<button class="link" data-editnotice="${esc(n.id)}">Edit</button>`:""}${shareBtn("notice:"+n.id)}</span></span>
-   <h3>${esc(n.title)}</h3><p>${esc(n.body)}</p></span></article>`}
+   <h3>${esc(n.title)}</h3><p>${lnk(n.body)}</p></span></article>`}
+function lnk(t){return esc(t||"").replace(/https?:\/\/[^\s<]+/g,u=>{const v=u.replace(/[.,;:)\]]+$/,"");return `<a href="${v}" target="_blank" rel="noopener" class="nlink">Open link ↗</a>`+u.slice(v.length)})}
 function renderNotices(){if(LV()<2){$("#main").innerHTML=band("ev","Placement cell","Noticeboard","Announcements from the placement cell this season, newest first, by department.")+`<div class="wrap" style="padding-top:26px">${lockPanel("The noticeboard")}</div>`;return}
   const list=D.notices.filter(inCl).filter(n=>match(n,["title","body"])).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||b.date.localeCompare(a.date));
   const week=list.filter(n=>n.pinned||n.date>=isoPlus(-7)),older=list.filter(n=>!week.includes(n));
@@ -2245,7 +2248,7 @@ function openMentorReq(id){if(!needMe(()=>openMentorReq(id)))return;const m=(D.m
 
 /* ---------- WhatsApp share ---------- */
 function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"?(CLUSTERS[c]||[c])[0]+" students":"All departments";
-  if(k==="notice"){const n=D.notices.find(x=>x.id===id);if(!n)return null;return {title:n.title,parts:[["what",n.body],["for","For: "+cl(n.cluster)],["when","Posted: "+nice(n.date)]]}}
+  if(k==="notice"){const n=D.notices.find(x=>x.id===id);if(!n)return null;const urls=(n.body||"").match(/https?:\/\/[^\s]+/g)||[];const txt=(n.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").replace(/\s+([.,:;])/g,"$1").replace(/:\s*\./g,".").trim();return {title:n.title,parts:[["what",txt],["for","For: "+cl(n.cluster)],["when","Posted: "+nice(n.date)],["link",urls.length?"Link: "+urls[0].replace(/[.,;:)\]]+$/,""):""]]}}
   if(k==="drive"){const d=D.drives.find(x=>x.id===id);if(!d)return null;const st=d.stages||[],nx=st[doneCount(d)];
     return {title:d.company+" · "+d.role,parts:[["what",d.outcome?d.outcome+".":nx?"Next: "+nx[1]+(nx[2]?" ("+nx[2]+")":"")+".":"Status: "+d.status+"."],["for","For: "+cl(d.cluster)],["when",nx&&nx[0]?"Date: "+nice(nx[0]):"Status: "+d.status]]}}
   if(k==="event"){const e=D.events.find(x=>x.id===id);if(!e)return null;return {title:e.title,parts:[["what",(e.about||"").split(/\.\s/)[0]],["for","For: "+(e.audience||cl(e.cluster))],["when",(e.date?nice(e.date):"Date to be announced")+(e.time?", "+e.time:"")+(e.mode?" · "+e.mode:"")+(e.venue?" · "+e.venue:"")]]}}
