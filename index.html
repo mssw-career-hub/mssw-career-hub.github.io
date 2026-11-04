@@ -1038,6 +1038,8 @@ html::-webkit-scrollbar-thumb:hover{background:rgba(90,54,224,.65);background-cl
  .brand small{display:none}
 }
 @media (min-width:1151px) and (max-width:1260px){.nav button{padding:9px 10px!important;font-size:14px!important}}
+.hx-alum em.ha-hl{font-style:normal;font-weight:800;letter-spacing:.06em;padding:1px 8px;border-radius:7px;color:#1A1650;background:linear-gradient(90deg,#FFD08A,#FF9B7A);box-shadow:0 2px 10px -4px rgba(255,155,122,.8)}
+.hx-alum .ha-si{display:inline-flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;font-weight:700;color:#FFE2C2;background:rgba(255,255,255,.1);border:1px solid rgba(255,220,190,.35);padding:4px 10px;border-radius:999px}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -1978,7 +1980,7 @@ function renderHome(){const op=openOpenings(),up=upcoming().filter(inCl),cos=com
     <div><span class="hx-tag dg"><i></i>Madras School of Social Work · since 1952</span>
      <h1>From learning to<br><span>meaningful careers</span></h1>
      <p>Campus drives, interview and GD prep, and alumni who have walked the path. One place to get placed, and to give back.</p>
-     <div class="row"><button class="btn coral" data-jump="start">Find my next step ${ic("arrow",15)}</button><button class="btn light" data-jump="isle">Explore the island</button></div><button class="hx-alum" data-go="alumni"><span class="ha-ic">${ic("users",16)}</span><span><b>${ME&&ME.role==="Alumni"?"Welcome back to the Alumni corner":"MSSW alumni? This is your corner too"}</b><small>${ME?"Mentor juniors, share a hiring lead or an opportunity.":"Mentor juniors, share hiring leads and give back. Sign in with any email."}</small></span><span class="ha-go">${ic("arrow",15)}</span></button></div>
+     <div class="row"><button class="btn coral" data-jump="start">Find my next step ${ic("arrow",15)}</button><button class="btn light" data-jump="isle">Explore the island</button></div><button class="hx-alum" data-go="alumni"><span class="ha-ic">${ic("users",16)}</span><span>${ME&&ME.role==="Alumni"?`<b>Welcome back to the <em class="ha-hl">ALUMNI</em> corner</b><small>Mentor juniors, share a hiring lead or an opportunity.</small>`:`<b><em class="ha-hl">MSSW ALUMNI</em>? This is your corner too</b><small>Mentor juniors, share hiring leads and give back.</small><span class="ha-si">${ic("check",13)} Sign in with any email · no password needed</span>`}</span><span class="ha-go">${ic("arrow",15)}</span></button></div>
     <div class="arches">${HERO.map(([n,img,bg,co],i)=>`<div class="arch" style="left:${[2,35,68][i]}%;width:30%;height:${[300,370,320][i]}px;background:${bg}"><img src="${img}" alt="${esc(n)}"><span class="arch-name"><b>${esc(n)}</b><small>${esc(co)}</small></span></div>`).join("")}
      </div>
    </div>
