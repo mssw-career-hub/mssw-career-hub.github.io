@@ -1116,6 +1116,11 @@ a.nlink:hover{background:#DDE6FF}
 .invite .row{gap:10px}
 .inv-x{position:absolute;top:10px;right:12px;border:0;background:none;color:#CFCBEF;font-size:24px;cursor:pointer;line-height:1}
 .dock.show~.invite,.invite{}
+/* breathing room between each page's header band and the content below it */
+#main > .band-h + .wrap{padding-top:28px}
+
+.wa-cap #waP{word-break:normal;overflow-wrap:break-word}
+.wa-cap #waP a{word-break:break-all}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2370,10 +2375,12 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
 function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that item.");return}const kind=ref.split(":")[0];const K=SHARE_KIND[kind]||SHARE_KIND.notice;const on={what:1,for:1,when:1,link:1,hub:1};
   const hub=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
   const lp=(s.parts.find(([k,t])=>k==="link"&&t)||[])[1]||"";const lm=lp.match(/^(.*?):\s*(https?:\/\/\S+)/)||(lp.match(/^https?:\/\/\S+/)?["","Link",lp]:null);
-  const linkLine=lm?(lm[1]||"Link")+": "+lm[2]:"";
-  const caption=note=>[note,linkLine,"Details: "+hub].filter(Boolean).join("\n");
+  const lu=lm?lm[2]:"";const lab=!lu?"":/docs\.google\.com\/forms|forms\.gle/.test(lu)?"Fill the form":/spreadsheets/.test(lu)?"Fill the sheet":/docs\.google\.com\/document|drive\.google|\.pdf/.test(lu)?"Open the document":/meet\.google|zoom\.us|teams\./.test(lu)?"Join the meeting":lm[1]==="Read more"?"Read more":"Open the link";
+  const linkLine=lu?"*"+lab+" ↓*\n"+lu:"";
+  const join="*Join the MSSW Career Hub ↓*\n_Placement notices, alumni journeys and mentors in one place. Sign in with any email, no password._\n"+hub;
+  const caption=note=>[note,linkLine,join].filter(Boolean).join("\n\n");
   const fullText=note=>{const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?p[1]:""};const meta=[part("for"),part("when")].filter(Boolean).join(" · ");
-    return [note?note+"\n":"","*"+s.title+"*",part("what"),meta,"",linkLine,"Details: "+hub,"","MSSW Career Hub"].filter((v,i,a)=>v!==""||(a[i-1]&&a[i-1]!=="")).join("\n").trim()};
+    return [note?note+"\n":"","*"+s.title+"*",part("what"),meta,"",linkLine,"",join].filter((v,i,a)=>v!==""||(a[i-1]&&a[i-1]!=="")).join("\n").trim()};
   const {body}=drawer("Share on WhatsApp",`<span class="eyebrow" style="color:#137A41">Share</span><h2 style="margin:4px 0 14px">Send on WhatsApp</h2>
    <div class="wa-card"><img id="waImg" alt="Preview of the card you will share"></div>
    <div class="wa-cap"><span class="lab" style="margin:0 0 6px">Sent with the card</span><div id="waP"></div></div>
@@ -2382,7 +2389,7 @@ function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that 
    <p class="wa-more"><button class="link" id="waTx">Send as text only</button><span>·</span><button class="link" id="waCp">Copy caption</button></p>
    <p class="muted" style="font-size:12px;margin-top:8px">On a phone, pick WhatsApp and then your group. On a laptop, the card downloads and WhatsApp opens with the caption, so attach the card there.</p>`);
   let blob=null,seq=0;const note=()=>body.querySelector("#waN").value.trim();
-  const paintTx=()=>{body.querySelector("#waP").innerHTML=esc(caption(note())).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,"<br>")};
+  const paintTx=()=>{body.querySelector("#waP").innerHTML=esc(caption(note())).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\*([^*\n]+)\*/g,"<b>$1</b>").replace(/(^|\n)_([^_\n]+)_/g,"$1<i>$2</i>").replace(/\n/g,"<br>")};
   const paint=async()=>{paintTx();const my=++seq;const cv=await drawShareCard(kind,s,on,note());if(my!==seq)return;body.querySelector("#waImg").src=cv.toDataURL("image/png");cv.toBlob(b=>{if(my===seq)blob=b},"image/png")};
   let t;body.querySelector("#waN").addEventListener("input",()=>{paintTx();clearTimeout(t);t=setTimeout(paint,250)});
   const fname="mssw-"+kind+"-"+(s.title||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,40)+".png";
