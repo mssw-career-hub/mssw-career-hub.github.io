@@ -1098,6 +1098,24 @@ a.nlink:hover{background:#DDE6FF}
 .strip .marq{flex:1;min-width:0;margin-top:0}
 .strip:has(.marq) .eyebrow{flex:none}
 @media (max-width:720px){.strip:has(.marq){flex-direction:column;gap:10px}.strip .marq{width:100%}}
+/* share panel v3 */
+.wa-cap{margin-top:12px;background:#E9F7EC;border:1px solid #CDEBD5;border-radius:14px;padding:10px 14px}
+.wa-cap #waP{font-size:13px;line-height:1.55;color:#111B21;word-break:break-all}
+.wa-cap #waP a{color:#027EB5}
+.wa-acts .btn.wa{font-size:15px;padding:12px 22px}
+.wa-more{display:flex;gap:8px;align-items:center;margin:10px 0 0;font-size:13px}
+.wa-more span{opacity:.4}
+/* sign-in invitation for people arriving from a shared link */
+.invite{position:fixed;left:50%;bottom:22px;transform:translate(-50%,140%);z-index:300;width:min(460px,calc(100vw - 24px));padding:22px 22px 18px;border-radius:24px;color:#fff;
+ background:linear-gradient(150deg,#1A1650,#3B2A8F);box-shadow:0 30px 70px -20px rgba(10,8,40,.7),0 0 0 1px rgba(255,255,255,.12);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.invite.show{transform:translate(-50%,0)}
+.invite>b{display:block;font-size:20px;margin:6px 0 6px}
+.invite p{margin:0 0 12px;color:#DCD6FF;font-size:14px;line-height:1.5}
+.inv-how{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;font-size:13px;color:#E7E3FF}
+.inv-how b{color:#FFD9C2;margin-right:6px}
+.invite .row{gap:10px}
+.inv-x{position:absolute;top:10px;right:12px;border:0;background:none;color:#CFCBEF;font-size:24px;cursor:pointer;line-height:1}
+.dock.show~.invite,.invite{}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -1856,33 +1874,38 @@ function openForm(kind){if(!needMe(()=>openForm(kind)))return;if(kind==="event"&
 function contribute(){drawer("Contribute",`<h2>What would you like to add?</h2><p style="color:var(--body)">Everything you add helps the next batch. ${ME&&ME.team?"As placement team, what you add goes live straight away.":"Openings are checked by the placement team before they go live."}</p>
   <div class="cards" style="margin-top:14px">${[["journey","Share my placement journey","Rounds, questions, pay and advice. About four minutes.","jo"],["opening",ME&&ME.team?"Post an opening":"Suggest an opening",ME&&ME.team?"A job, internship, fellowship or campus drive.":"A job or internship you know of. The placement team checks it first.","open"],...(ME&&ME.team?[["event","Add an event","A training, mock GD, mock interview or talk.","ev"]]:[]),["resource","Add a resource","A template, guide, recording or sample.","res"]].map(([f,t,s,k])=>`<button class="card" data-form="${f}" style="flex-direction:row;gap:12px;align-items:center">${sq(k,20)}<span><b>${t}</b><small class="muted" style="display:block;font-size:.84rem">${s}</small></span></button>`).join("")}</div>`)}
 
+const J_STATUS=["Placed","Internship","Pre-placement offer","Fellowship","Started a venture","Higher studies","Other"];
+const HS_ROUNDS=["Application","Entrance test","SOP or essays","Recommendation letters","Interview","Scholarship"];
+function jLabels(st){const k=st.status;
+  if(k==="Started a venture")return {co:"Venture name",ro:"Your role",roPh:"Founder, Co-founder",lo:"Based in",route:false,rLab:"",r2:null,q:"What you wish you had known before starting",qPh:"e.g. How long registration takes, finding your first customers",p:"How it started",pPh:"The idea, your first steps, who helped you",step2:"2 · The story"};
+  if(k==="Higher studies")return {co:"University or institute",ro:"Programme",roPh:"e.g. MPhil, PhD, MSc Public Policy",lo:"City and country",route:false,rLab:"Selection steps you went through",r2:HS_ROUNDS,q:"What the selection asked of you",qPh:"e.g. Essay topics, interview questions, tests",p:"How you prepared",pPh:"Applications, tests, funding and scholarships",step2:"2 · Admission"};
+  if(k==="Other")return {co:"Organisation (if any)",ro:"What you're doing",roPh:"e.g. Freelance trainer, family business",lo:"Location",route:false,rLab:"Steps you went through (if any)",r2:ROUNDS,q:"Questions or challenges you faced",qPh:"",p:"How you prepared",pPh:"",step2:"2 · The process"};
+  return {co:"Organisation",ro:"Role",roPh:"",lo:"Location",route:true,rLab:"Which rounds did you face?",r2:ROUNDS,q:"Questions they asked",qPh:"e.g. Why this sector? Walk us through your fieldwork.",p:"How you prepared",pPh:"What you read, practised or built",step2:"2 · The process"}}
 function formJourney(){let step=1;const st={status:"Placed",route:"Campus",sector:"",rounds:[]};
-  const {body,close}=drawer("Share your journey",`<div class="encourage">${ic("heart",18)} Your story becomes someone's roadmap. Thank you for sharing.</div><div class="stepper"><span class="on">1 · The offer</span><span>2 · The process</span><span>3 · Advice</span></div><form id="jF"></form>`);
+  const {body,close}=drawer("Share your journey",`<div class="encourage">${ic("heart",18)} Your story becomes someone's roadmap. Thank you for sharing.</div><div class="stepper"><span class="on">1 · Where you are now</span><span id="jS2">2 · The process</span><span>3 · Advice</span></div><form id="jF"></form>`);
   const f=body.querySelector("#jF");
-  const paint=()=>{body.querySelectorAll(".stepper span").forEach((s,i)=>s.classList.toggle("on",i<step));
-    f.innerHTML=(step===1?`<span class="lab" style="margin-top:0">What did you get?</span>${pickHtml("jSt",["Placed","Internship","Pre-placement offer","Fellowship"],st.status)}
-     <div class="two"><div><label class="lab" for="jCo">Organisation</label><input class="field" id="jCo" maxlength="80" value="${esc(st.company||"")}"></div><div><label class="lab" for="jRo">Role</label><input class="field" id="jRo" maxlength="80" value="${esc(st.role||"")}"></div></div>
-     <label class="lab" for="jSe">Sector</label><select class="field" id="jSe"><option value="">Choose a sector</option>${SECTORS.map(s=>`<option ${st.sector===s[0]?"selected":""}>${esc(s[0])}</option>`).join("")}</select>
-     <div class="two"><div><label class="lab" for="jLo">Location</label><input class="field" id="jLo" maxlength="60" value="${esc(st.location||"")}"></div><div><label class="lab" for="jCt">CTC in LPA <small>(e.g. 4.8)</small></label><input class="field" id="jCt" inputmode="decimal" maxlength="6" value="${esc(st.ctc||"")}"></div></div>
-     <span class="lab">How did you get it?</span>${pickHtml("jRt",["Campus","Off-campus","Referral","Internship conversion"],st.route)}`
-    :step===2?`<span class="lab" style="margin-top:0">Which rounds did you face? <small>(tap in order)</small></span>${pickHtml("jRd",ROUNDS,st.rounds,true)}
-     <label class="lab" for="jQ">Questions they asked <small>(one per line)</small></label><textarea class="field" id="jQ" rows="4" maxlength="1500" placeholder="e.g. Why this sector? Walk us through your fieldwork.">${esc(st.questions||"")}</textarea>
-     <label class="lab" for="jP">How you prepared</label><textarea class="field" id="jP" rows="3" maxlength="1500" placeholder="What you read, practised or built">${esc(st.prep||"")}</textarea>`
+  const paint=()=>{const L=jLabels(st);body.querySelectorAll(".stepper span").forEach((s,i)=>s.classList.toggle("on",i<step));body.querySelector("#jS2").textContent=L.step2;
+    f.innerHTML=(step===1?`<span class="lab" style="margin-top:0">What are you doing now?</span>${pickHtml("jSt",J_STATUS,st.status)}
+     <div class="two"><div><label class="lab" for="jCo">${L.co}</label><input class="field" id="jCo" maxlength="80" value="${esc(st.company||"")}"></div><div><label class="lab" for="jRo">${L.ro}</label><input class="field" id="jRo" maxlength="80" placeholder="${esc(L.roPh)}" value="${esc(st.role||"")}"></div></div>
+     <div class="two"><div><label class="lab" for="jSe">Sector</label><select class="field" id="jSe"><option value="">Choose a sector</option>${SECTORS.map(s=>`<option ${st.sector===s[0]?"selected":""}>${esc(s[0])}</option>`).join("")}</select></div><div><label class="lab" for="jLo">${L.lo} <small>(optional)</small></label><input class="field" id="jLo" maxlength="60" value="${esc(st.location||"")}"></div></div>
+     ${L.route?`<span class="lab">How did you get it?</span>${pickHtml("jRt",["Campus","Off-campus","Referral","Internship conversion"],st.route)}`:""}`
+    :step===2?`${L.r2?`<span class="lab" style="margin-top:0">${L.rLab} <small>(tap in order)</small></span>${pickHtml("jRd",L.r2,st.rounds,true)}`:""}
+     <label class="lab" for="jP"${L.r2?"":` style="margin-top:0"`}>${L.p}</label><textarea class="field" id="jP" rows="3" maxlength="1500" placeholder="${esc(L.pPh)}">${esc(st.prep||"")}</textarea>
+     <label class="lab" for="jQ">${L.q} <small>(optional)</small></label><textarea class="field" id="jQ" rows="4" maxlength="1500" placeholder="${esc(L.qPh)}">${esc(st.questions||"")}</textarea>`
     :`<label class="lab" for="jA" style="margin-top:0">One piece of advice for juniors</label><textarea class="field" id="jA" rows="3" maxlength="600" placeholder="What would you tell yourself a year ago?">${esc(st.advice||"")}</textarea>
-     <div class="two"><div><label class="lab" for="jPg">Programme</label><input class="field" id="jPg" list="progList2" maxlength="60" value="${esc(st.programme||ME.programme||"")}"><datalist id="progList2">${PROGRAMMES.map(p=>`<option value="${p}">`).join("")}</datalist></div><div><label class="lab" for="jB">Batch</label><input class="field" id="jB" maxlength="4" inputmode="numeric" value="${esc(st.batch||ME.batch||"")}"></div></div>
-     <label class="check"><input type="checkbox" id="jSn" ${st.showName!==false?"checked":""}> Show my name with this story</label>
-     <label class="check"><input type="checkbox" id="jSc" ${st.showCtc!==false?"checked":""}> Show the CTC or stipend</label>`)+
+     <div class="two"><div><label class="lab" for="jPg">Your MSSW programme</label><input class="field" id="jPg" list="progList2" maxlength="60" value="${esc(st.programme||ME.programme||"")}"><datalist id="progList2">${PROGRAMMES.map(p=>`<option value="${p}">`).join("")}</datalist></div><div><label class="lab" for="jB">Batch</label><input class="field" id="jB" maxlength="4" inputmode="numeric" value="${esc(st.batch||ME.batch||"")}"></div></div>
+     <label class="check"><input type="checkbox" id="jSn" ${st.showName!==false?"checked":""}> Show my name with this story</label>`)+
      `<p class="err" id="jErr" role="alert"></p><div class="row">${step>1?`<button type="button" class="btn" id="jBack">Back</button>`:""}<button class="btn ${step<3?"primary":"coral"}">${step<3?"Next":"Share my journey"}</button></div>`;
-    if(step===1){wirePick(f,"jSt");wirePick(f,"jRt")}
-    if(step===2){f.querySelector("#jRd").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;const v=b.dataset.v;st.rounds=st.rounds.includes(v)?st.rounds.filter(x=>x!==v):[...st.rounds,v];b.setAttribute("aria-pressed",st.rounds.includes(v))})}
-    const bk=f.querySelector("#jBack");if(bk)bk.onclick=()=>{save();step--;paint()};const first=f.querySelector("input,textarea");first&&first.focus()};
+    if(step===1){f.querySelector("#jSt").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;save();st.status=b.dataset.v;if(st.status==="Started a venture"&&!st.role)st.role="Founder";if(st.status!=="Started a venture"&&st.role==="Founder")st.role="";st.rounds=[];paint()});if(L.route)wirePick(f,"jRt")}
+    if(step===2&&L.r2){f.querySelector("#jRd").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;const v=b.dataset.v;st.rounds=st.rounds.includes(v)?st.rounds.filter(x=>x!==v):[...st.rounds,v];b.setAttribute("aria-pressed",st.rounds.includes(v))})}
+    const bk=f.querySelector("#jBack");if(bk)bk.onclick=()=>{save();step--;paint()}};
   const v=id=>(f.querySelector(id)||{value:""}).value.trim();
-  const save=()=>{if(step===1)Object.assign(st,{status:picked(f,"jSt")[0],route:picked(f,"jRt")[0],company:v("#jCo"),role:v("#jRo"),sector:v("#jSe"),location:v("#jLo"),ctc:v("#jCt")});
-    if(step===2)Object.assign(st,{questions:v("#jQ"),prep:v("#jP")});if(step===3)Object.assign(st,{advice:v("#jA"),programme:v("#jPg"),batch:v("#jB"),showName:f.querySelector("#jSn").checked,showCtc:f.querySelector("#jSc").checked})};
-  f.addEventListener("submit",async e=>{e.preventDefault();save();const err=f.querySelector("#jErr");
-    if(step===1){if(st.company.length<2||st.role.length<2){err.textContent="Add the organisation and your role.";return}if(!st.sector){err.textContent="Choose a sector.";return}if(st.ctc&&isNaN(Number(st.ctc))){err.textContent="CTC should be a number, like 4.8";return}}
+  const save=()=>{if(step===1){const L=jLabels(st);Object.assign(st,{route:L.route?(picked(f,"jRt")[0]||st.route):"",company:v("#jCo"),role:v("#jRo"),sector:v("#jSe"),location:v("#jLo"),ctc:"",showCtc:false})}
+    if(step===2)Object.assign(st,{questions:v("#jQ"),prep:v("#jP")});if(step===3)Object.assign(st,{advice:v("#jA"),programme:v("#jPg"),batch:v("#jB"),showName:f.querySelector("#jSn").checked})};
+  f.addEventListener("submit",async e=>{e.preventDefault();save();const err=f.querySelector("#jErr");const L=jLabels(st);
+    if(step===1){if(st.company.length<2&&st.status!=="Other"){err.textContent="Add the "+L.co.toLowerCase()+".";return}if(st.role.length<2){err.textContent="Add "+(st.status==="Higher studies"?"your programme":st.status==="Other"?"what you're doing":"your role")+".";return}if(!st.sector){err.textContent="Choose a sector.";return}}
     if(step<3){step++;paint();return}
-    try{const r=await api("journey",st);close();toast(r&&r.held?"Thank you! It will appear after a quick check.":"Thank you! Your journey is live.");await refresh();go("journeys")}catch(x){err.textContent=x.message}});
+    try{const r=await api("journey",{...st,company:st.company||"Independent"});close();toast(r&&r.held?"Thank you! It will appear after a quick check.":"Thank you! Your journey is live.");await refresh();go("journeys")}catch(x){err.textContent=x.message}});
   paint()}
 function formOpening(){const {body,close}=drawer("Post an opening",`<h2>Post an opening</h2><p style="color:var(--body);margin:0">Seen a role that fits MSSW students? Share it. Please don't post anything that asks applicants to pay a fee.</p>
   <form id="oF"><span class="lab">Type</span>${pickHtml("oTy",["Job","Internship","Fellowship","Campus drive"],"Job")}
@@ -2313,50 +2336,62 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   const F='"Plus Jakarta Sans", Inter, system-ui, sans-serif';try{await Promise.all([document.fonts.load("800 60px "+F),document.fonts.load("500 30px "+F),document.fonts.load("700 24px "+F)])}catch(e){}
   const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,"#120F38");g.addColorStop(.55,"#2A1F78");g.addColorStop(1,"#4B2E9E");x.fillStyle=g;x.fillRect(0,0,W,H);
   const glow=(cx,cy,r,col)=>{const rg=x.createRadialGradient(cx,cy,0,cx,cy,r);rg.addColorStop(0,col);rg.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=rg;x.fillRect(0,0,W,H)};
-  glow(W*.95,H*.92,620,"rgba(255,112,82,.32)");glow(W*.05,H*.05,520,"rgba(140,110,255,.28)");
+  glow(W*.95,H*.92,620,"rgba(255,112,82,.30)");glow(W*.05,H*.05,520,"rgba(140,110,255,.26)");
   const rr=(X,Y,w,h,r)=>{x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()};
-  const sp=v=>{try{x.letterSpacing=v}catch(e){}};
-  const P=84;let y=96;const logo=document.querySelector("footer .f img");
-  if(logo&&logo.complete&&logo.naturalWidth){const h=76,w=h*logo.naturalWidth/logo.naturalHeight;x.drawImage(logo,P,y,w,h);x.fillStyle="#fff";x.font="800 30px "+F;sp("4px");x.fillText("MSSW CAREER HUB",P+w+22,y+36);sp("2px");x.fillStyle="rgba(231,227,255,.75)";x.font="600 20px "+F;x.fillText("MADRAS SCHOOL OF SOCIAL WORK",P+w+22,y+68)}
-  else{x.fillStyle="#fff";x.font="800 30px "+F;sp("4px");x.fillText("MSSW CAREER HUB",P,y+40)}
-  sp("0px");y+=150;
-  const K=SHARE_KIND[kind]||SHARE_KIND.notice;x.font="800 26px "+F;sp("3px");const kt=K[0].toUpperCase(),kw=x.measureText(kt).width+56;
-  const cg=x.createLinearGradient(P,y,P+kw,y);cg.addColorStop(0,"#FF8A65");cg.addColorStop(1,"#F2543D");x.fillStyle=cg;rr(P,y,kw,58,29);x.fill();x.fillStyle="#fff";x.fillText(kt,P+28,y+39);sp("0px");y+=110;
-  x.fillStyle="#fff";x.font="800 66px "+F;wrapLines(x,s.title,W-2*P,4).forEach(l=>{x.fillText(l,P,y+56);y+=80});y+=34;
-  x.fillStyle="rgba(255,255,255,.16)";x.fillRect(P,y,W-2*P,2);y+=46;
-  const parts=s.parts.filter(([k,t])=>t&&on[k]&&SHARE_LAB[k]);const hasLink=s.parts.some(([k,t])=>k==="link"&&t&&on.link);
-  x.font="600 30px "+F;const nl=note?wrapLines(x,note,W-2*P-64,2):[];const nh=nl.length?nl.length*42+48:0;const noteTop=nh?H-200-nh-26:H-176;
-  const chipTop=hasLink?noteTop-66:noteTop;const limit=chipTop-16;
-  for(const [k,t] of parts){const txt=String(t).replace(/^(For|Posted|Date|Status|Who can apply|Apply by): /,"");x.font="500 34px "+F;const free=Math.floor((limit-(y+44))/46);if(free<1)break;
-    const lines=wrapLines(x,txt,W-2*P,Math.min(k==="what"?3:2,free));x.fillStyle="#F6C76B";x.font="800 22px "+F;sp("3px");x.fillText((kind==="notice"&&k==="when"?"Posted on":SHARE_LAB[k]).toUpperCase(),P,y+20);sp("0px");y+=44;
-    x.fillStyle="#ECE9FF";x.font="500 34px "+F;lines.forEach(l=>{x.fillText(l,P,y+30);y+=46});y+=30}
-  if(hasLink){x.font="700 24px "+F;const lt="🔗 Link in the message below",lw=x.measureText(lt).width+40;x.fillStyle="rgba(255,255,255,.14)";rr(P,chipTop,lw,50,25);x.fill();x.fillStyle="#FFE2C2";x.fillText(lt,P+20,chipTop+33)}
+  const sp=v=>{try{x.letterSpacing=v}catch(e){}};const P=88;const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?String(p[1]):""};
+  /* header */
+  let y=92;const logo=document.querySelector("footer .f img");
+  if(logo&&logo.complete&&logo.naturalWidth){const h=72,w=h*logo.naturalWidth/logo.naturalHeight;x.drawImage(logo,P,y,w,h);x.fillStyle="#fff";x.font="800 29px "+F;sp("5px");x.fillText("MSSW CAREER HUB",P+w+22,y+34);sp("3px");x.fillStyle="rgba(231,227,255,.7)";x.font="600 19px "+F;x.fillText("MADRAS SCHOOL OF SOCIAL WORK",P+w+22,y+64)}
+  else{x.fillStyle="#fff";x.font="800 29px "+F;sp("5px");x.fillText("MSSW CAREER HUB",P,y+40)}
+  sp("0px");y+=156;
+  /* kind chip + date */
+  const K=SHARE_KIND[kind]||SHARE_KIND.notice;x.font="800 24px "+F;sp("3px");const kt=K[0].toUpperCase(),kw=x.measureText(kt).width+52;
+  const cg=x.createLinearGradient(P,y,P+kw,y);cg.addColorStop(0,"#FF8A65");cg.addColorStop(1,"#F2543D");x.fillStyle=cg;rr(P,y,kw,54,27);x.fill();x.fillStyle="#fff";x.fillText(kt,P+26,y+36);
+  const when=part("when").replace(/^(Posted|Date|Status|Apply by): /,"");if(when){x.font="700 24px "+F;sp("2px");x.fillStyle="rgba(231,227,255,.8)";const dt=when.toUpperCase();x.fillText(dt,W-P-x.measureText(dt).width,y+36)}
+  sp("0px");y+=118;
+  /* title */
+  x.fillStyle="#fff";let fs=70,tl=[];for(const z of [70,62,56,50]){fs=z;x.font="800 "+z+"px "+F;tl=wrapLines(x,s.title,W-2*P,9);if(tl.length<=4)break}tl=tl.slice(0,5);const lh=Math.round(fs*1.2);tl.forEach(l=>{x.fillText(l,P,y+fs*.83);y+=lh});y+=26;
+  x.fillStyle="rgba(255,255,255,.18)";x.fillRect(P,y,120,4);y+=48;
+  /* bottom furniture, measured first */
+  x.font="600 30px "+F;const nl=note?wrapLines(x,note,W-2*P-64,2):[];const nh=nl.length?nl.length*42+48:0;const noteTop=nh?H-206-nh-24:H-182;
+  const forT=part("for").replace(/^(For|Who can apply): /,"");const hasLink=!!part("link");const chipTop=noteTop-78;
+  /* what */
+  const what=part("what");if(what){x.font="500 36px "+F;const free=Math.floor((chipTop-24-y)/52);if(free>0){x.fillStyle="#E4E0FF";wrapLines(x,what,W-2*P,Math.min(4,free)).forEach(l=>{x.fillText(l,P,y+34);y+=52})}}
+  /* chips row: who it's for + link in caption */
+  let cx=P;x.font="700 25px "+F;
+  if(forT){const t="For "+forT.replace(/^./,m=>m.toLowerCase()),w=Math.min(x.measureText(t).width+44,W-2*P);x.fillStyle="rgba(255,255,255,.12)";rr(cx,chipTop,w,54,27);x.fill();x.fillStyle="#fff";x.fillText(wrapLines(x,t,w-44,1)[0],cx+22,chipTop+36);cx+=w+14}
+  if(hasLink){const t="Link in caption",w=x.measureText(t).width+44;if(cx+w>W-P){cx=P}x.fillStyle="rgba(255,190,150,.18)";rr(cx,chipTop,w,54,27);x.fill();x.fillStyle="#FFD9C2";x.fillText(t,cx+22,chipTop+36)}
   if(nh){x.font="600 30px "+F;x.fillStyle="rgba(255,255,255,.1)";rr(P,noteTop,W-2*P,nh,24);x.fill();x.fillStyle="#fff";nl.forEach((l,i)=>x.fillText(l,P+32,noteTop+52+i*42))}
-  x.fillStyle="#fff";rr(P,H-176,W-2*P,104,30);x.fill();x.fillStyle="#6B6790";x.font="700 22px "+F;sp("2px");x.fillText("FULL DETAILS",P+36,H-132);sp("0px");
+  /* footer */
+  x.fillStyle="#fff";rr(P,H-176,W-2*P,104,30);x.fill();x.fillStyle="#6B6790";x.font="700 21px "+F;sp("2px");x.fillText("SIGN IN FOR FULL DETAILS",P+36,H-132);sp("0px");
   x.fillStyle="#1A1650";x.font="800 32px "+F;x.fillText((CONFIG.site||"mssw-career-hub.github.io").replace(/^https?:\/\//,""),P+36,H-94);
   x.fillStyle="#F2543D";x.font="800 40px "+F;x.fillText("→",W-P-80,H-108);
   return c}
 function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that item.");return}const kind=ref.split(":")[0];const K=SHARE_KIND[kind]||SHARE_KIND.notice;const on={what:1,for:1,when:1,link:1,hub:1};
-  const url=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
-  const msg=note=>{const L=[K[1]+" *MSSW Career Hub · "+K[0]+"*","*"+s.title+"*",""];s.parts.filter(([k,t])=>t&&on[k]).forEach(x=>L.push(x[1]));if(note)L.push("","_"+note+"_");if(on.hub)L.push("","🔗 Full details: "+url);return L.join("\n").replace(/\n{3,}/g,"\n\n").trim()};
+  const hub=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
+  const lp=(s.parts.find(([k,t])=>k==="link"&&t)||[])[1]||"";const lm=lp.match(/^(.*?):\s*(https?:\/\/\S+)/)||(lp.match(/^https?:\/\/\S+/)?["","Link",lp]:null);
+  const linkLine=lm?(lm[1]||"Link")+": "+lm[2]:"";
+  const caption=note=>[note,linkLine,"Details: "+hub].filter(Boolean).join("\n");
+  const fullText=note=>{const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?p[1]:""};const meta=[part("for"),part("when")].filter(Boolean).join(" · ");
+    return [note?note+"\n":"","*"+s.title+"*",part("what"),meta,"",linkLine,"Details: "+hub,"","MSSW Career Hub"].filter((v,i,a)=>v!==""||(a[i-1]&&a[i-1]!=="")).join("\n").trim()};
   const {body}=drawer("Share on WhatsApp",`<span class="eyebrow" style="color:#137A41">Share</span><h2 style="margin:4px 0 14px">Send on WhatsApp</h2>
-   <span class="lab">Include</span>${[["what","What happened and what to do"],["for","Who it's for"],["when","Date, time and deadline"],["hub","Link to the hub"]].map(([k,l])=>`<label class="check"><input type="checkbox" data-on="${k}" checked> ${l}</label>`).join("")}
-   <label class="lab" for="waN">Add a note <small>(optional)</small></label><input class="field" id="waN" maxlength="120" placeholder="e.g. Please share in your department group">
-   <span class="lab">Your card</span><div class="wa-card"><img id="waImg" alt="Preview of the card you will share"></div>
-   <span class="lab">Message that goes with the card</span><div class="wa-prev"><div id="waP"></div></div>
-   <div class="wa-acts"><button class="btn wa" id="waGo">${ic("wa",16)} Share card</button><button class="btn" id="waTx">${ic("wa",15)} Send as text</button><button class="btn ghost" id="waCp">${ic("copy",15)} Copy text</button></div>
-   <p class="muted" style="font-size:12px;margin-top:10px">On your phone, "Share card" opens your share menu: pick WhatsApp, then your group. On a laptop, the card downloads and WhatsApp opens with the message, so attach the card there. Nothing is sent without you.</p>`);
+   <div class="wa-card"><img id="waImg" alt="Preview of the card you will share"></div>
+   <div class="wa-cap"><span class="lab" style="margin:0 0 6px">Sent with the card</span><div id="waP"></div></div>
+   <label class="lab" for="waN">Add a note <small>(optional)</small></label><input class="field" id="waN" maxlength="100" placeholder="e.g. Please share in your class group">
+   <div class="wa-acts"><button class="btn wa" id="waGo">${ic("wa",16)} Share on WhatsApp</button></div>
+   <p class="wa-more"><button class="link" id="waTx">Send as text only</button><span>·</span><button class="link" id="waCp">Copy caption</button></p>
+   <p class="muted" style="font-size:12px;margin-top:8px">On a phone, pick WhatsApp and then your group. On a laptop, the card downloads and WhatsApp opens with the caption, so attach the card there.</p>`);
   let blob=null,seq=0;const note=()=>body.querySelector("#waN").value.trim();
-  const paintTx=()=>{const t=msg(note());body.querySelector("#waP").innerHTML=esc(t).replace(/\*/g,"").replace(/_/g,"").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')};
+  const paintTx=()=>{body.querySelector("#waP").innerHTML=esc(caption(note())).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,"<br>")};
   const paint=async()=>{paintTx();const my=++seq;const cv=await drawShareCard(kind,s,on,note());if(my!==seq)return;body.querySelector("#waImg").src=cv.toDataURL("image/png");cv.toBlob(b=>{if(my===seq)blob=b},"image/png")};
-  let t;body.addEventListener("change",e=>{const k=e.target.dataset.on;if(k){on[k]=e.target.checked?1:0;paint()}});body.querySelector("#waN").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(paint,250)});
+  let t;body.querySelector("#waN").addEventListener("input",()=>{paintTx();clearTimeout(t);t=setTimeout(paint,250)});
   const fname="mssw-"+kind+"-"+(s.title||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,40)+".png";
-  body.querySelector("#waGo").onclick=async()=>{if(!blob){toast("One moment, the card is still being made.");return}const text=msg(note());const file=new File([blob],fname,{type:"image/png"});
+  body.querySelector("#waGo").onclick=async()=>{if(!blob){toast("One moment, the card is still being made.");return}const text=caption(note());const file=new File([blob],fname,{type:"image/png"});
     try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}}catch(e){if(e&&e.name==="AbortError")return}
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();a.remove();
     window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");toast("Card downloaded. Attach it in WhatsApp.")};
-  body.querySelector("#waTx").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(msg(note())),"_blank","noopener");
-  body.querySelector("#waCp").onclick=async()=>{try{await navigator.clipboard.writeText(msg(note()));toast("Message copied")}catch(e){toast("Couldn't copy.")}};paint()}
+  body.querySelector("#waTx").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(fullText(note())),"_blank","noopener");
+  body.querySelector("#waCp").onclick=async()=>{try{await navigator.clipboard.writeText(caption(note()));toast("Caption copied")}catch(e){toast("Couldn't copy.")}};paint()}
 
 /* ---------- preview-mode stand-ins for the new back-end actions ---------- */
 Object.assign(PAPI,{
@@ -2530,6 +2565,13 @@ document.addEventListener("mousedown",e=>{const b=e.target.closest("[data-mpick]
 document.addEventListener("keydown",e=>{if(!MB)return;const os=[...MB.querySelectorAll("[data-mpick]")];if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();MBi=(MBi+(e.key==="ArrowDown"?1:-1)+os.length)%os.length;os.forEach((o,i)=>o.setAttribute("aria-selected",i===MBi))}else if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();e.stopPropagation();pickMB(os[MBi].dataset.mpick)}else if(e.key==="Escape")closeMB()},true);
 window.addEventListener("scroll",()=>MB&&closeMB(),{passive:true});
 PAPI.prefs=b=>({me:{noEmail:!!b.noEmail}});
+
+/* ---------- arriving from a shared link or email: invite to sign in ---------- */
+setTimeout(()=>{try{if(ME||!/[?&]s=(wa|email|mention|mssw)/.test(location.search))return;if(sessionStorage.getItem("mch-invite"))return}catch(e){}
+  const v=document.createElement("div");v.className="invite";v.setAttribute("role","dialog");v.setAttribute("aria-label","Sign in to the MSSW Career Hub");
+  v.innerHTML=`<button class="inv-x" aria-label="Close" data-invx>×</button><span class="eyebrow" style="color:#E9C98B">Welcome to the MSSW Career Hub</span><b>Sign in to see the full details</b><p>Notices, campus drives, your placement checklist and alumni mentors, all in one place.</p><span class="inv-how"><span><b>Students and staff</b> One tap with your @mssw.in Google account</span><span><b>Alumni</b> Any email, no password needed</span></span><div class="row"><button class="btn coral" data-signin data-invx>Sign in</button><button class="btn light" data-invx>Not now</button></div>`;
+  document.body.appendChild(v);requestAnimationFrame(()=>v.classList.add("show"));
+  v.addEventListener("click",e=>{if(e.target.closest("[data-invx]")){try{sessionStorage.setItem("mch-invite","1")}catch(x){}v.classList.remove("show");setTimeout(()=>v.remove(),300)}})},1400);
 
 RAW=realData();applyAccess();
 if(PREVIEW){$("#pvAs").innerHTML=`<span>Preview as</span>${[["visitor","Visitor"],["alumni","Alumni"],["student","Student"],["team","Placement team"]].map(([k,l])=>`<button data-as="${k}">${l}</button>`).join("")}`}
