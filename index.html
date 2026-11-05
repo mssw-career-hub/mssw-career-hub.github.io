@@ -1069,6 +1069,35 @@ a.nlink:hover{background:#DDE6FF}
 .bfoot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid rgba(194,65,42,.12)}
 .bfoot small{color:#7a7695}
 .mailpref{margin-top:14px;font-size:13.5px;line-height:1.45}
+/* community: tag names as soft coloured pills */
+.cl .ctp{display:inline-block;font-weight:700;font-size:13px;padding:2px 10px;border-radius:999px;background:var(--b);color:var(--f);margin-right:4px}
+.cl li{margin-bottom:10px;line-height:1.5}
+/* main menu: active tab clearly highlighted, last tab never clipped */
+@media (min-width:1151px){.nav{overflow:visible!important}}
+.nav button[aria-current="page"]{color:#1A1650!important;background:#fff!important;font-weight:700!important;box-shadow:0 6px 18px -6px rgba(255,255,255,.55),0 0 0 2px rgba(255,155,122,.55)!important}
+.nav button:not([aria-current="page"]):hover{background:rgba(255,255,255,.1);color:#fff}
+.subnav button[aria-current="page"]{box-shadow:0 6px 16px -8px rgba(255,255,255,.7),0 0 0 2px rgba(255,155,122,.5)}
+/* alumni "ways to give back" cards: tinted by their own colour */
+.tcard.tint{background:linear-gradient(160deg,var(--t) 0%,#fff 72%)!important;border:1.5px solid color-mix(in srgb,var(--c) 22%,#fff)!important;transition:transform .2s,box-shadow .2s}
+.tcard.tint:hover{transform:translateY(-3px);box-shadow:0 18px 36px -18px color-mix(in srgb,var(--c) 55%,transparent)!important}
+.tcard.tint .tgo{font-style:normal;margin-top:auto;align-self:flex-start;font-weight:700;font-size:13px;color:#fff;background:var(--c);padding:7px 14px;border-radius:999px;box-shadow:0 8px 18px -10px var(--c)}
+/* how it works: one mild blue pill per tag, description on its own line */
+.cl .ctp{background:#EAF0FF!important;color:#2849A8!important;font-weight:700;font-size:13px;padding:3px 11px;border-radius:999px;display:inline-block;margin:0}
+.cl .ctd{display:block;margin-top:4px;color:var(--body,#4A4768);font-size:13.5px;line-height:1.45}
+.cl li{margin-bottom:14px}
+/* recently placed at: gliding ticker */
+.marq{position:relative;overflow:hidden;width:100%;margin-top:4px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marq-t{display:flex;width:max-content;animation:marq calc(var(--n,10) * 3.2s) linear infinite}
+.marq:hover .marq-t{animation-play-state:paused}
+.marq-g{display:flex;align-items:center;flex:none}
+.marq-g span{white-space:nowrap;padding:0 4px}
+.marq-g i{font-style:normal;opacity:.35;padding:0 14px}
+@keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.marq-t{animation:none;flex-wrap:wrap;width:auto;justify-content:center}.marq-g+.marq-g{display:none}.marq{-webkit-mask-image:none;mask-image:none}}
+.strip:has(.marq){flex-wrap:nowrap;justify-content:flex-start}
+.strip .marq{flex:1;min-width:0;margin-top:0}
+.strip:has(.marq) .eyebrow{flex:none}
+@media (max-width:720px){.strip:has(.marq){flex-direction:column;gap:10px}.strip .marq{width:100%}}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -1615,7 +1644,7 @@ function renderDesk(){if(LV()<3){go("home");return}
 
 function formNotice(n){n=n||{};const {body,close}=drawer(n.id?"Edit notice":"Post a notice",`<h2>${n.id?"Edit notice":"Post a notice"}</h2><p style="color:var(--body);margin:0">Shown on the notice board and the home page for MSSW students.</p>
   <form id="nF"><label class="lab" for="nT">Headline</label><input class="field" id="nT" maxlength="140" value="${esc(n.title||"")}" placeholder="e.g. Aptitude test moved to 4 Nov, 10 am">
-   <label class="lab" for="nB">Details</label><textarea class="field" id="nB" rows="5" maxlength="1500" placeholder="What students need to know and do, with times and deadlines.">${esc(n.body||"")}</textarea>
+   <label class="lab" for="nB">Details</label><textarea class="field" id="nB" rows="5" maxlength="1500" placeholder="What students need to know and do, with times and deadlines.">${esc(n.body||"")}</textarea><p class="hint" style="margin:6px 0 0">Paste any link (a form, sheet or JD) straight into the details. It shows as a clickable <b>Open link ↗</b> button, and goes into the WhatsApp message when you share.</p>
    <span class="lab">For</span>${pickHtml("nC",CL_OPTS.map(clLabel),clLabel(n.cluster||"All"))}
    <div class="two"><div><label class="lab" for="nD">Date</label><input class="field" id="nD" type="date" value="${esc(n.date||todayISO())}"></div><div><label class="check" style="margin-top:34px"><input type="checkbox" id="nP" ${n.pinned?"checked":""}> Pin to the top</label></div></div>
    <p class="err" id="nErr" role="alert"></p><button class="btn coral">${n.id?"Save changes":"Post notice"}</button></form>`);
@@ -2014,7 +2043,7 @@ function renderHome(){const op=openOpenings(),up=upcoming().filter(inCl),cos=com
     <div class="arches">${HERO.map(([n,img,bg,co],i)=>`<div class="arch" style="left:${[2,35,68][i]}%;width:30%;height:${[300,370,320][i]}px;background:${bg}"><img src="${img}" alt="${esc(n)}"><span class="arch-name"><b>${esc(n)}</b><small>${esc(co)}</small></span></div>`).join("")}
      </div>
    </div>
-   <div class="strip"><span class="eyebrow">Recently placed at</span><span style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">${recent.map(esc).join('<span style="opacity:.35">·</span>')}</span></div>
+   <div class="strip"><span class="eyebrow">Recently placed at</span><div class="marq" aria-label="${esc(recent.join(", "))}"><div class="marq-t" style="--n:${recent.length}" aria-hidden="true">${[0,1].map(()=>`<span class="marq-g">${recent.map(c=>`<span>${esc(c)}</span><i>·</i>`).join("")}</span>`).join("")}</div></div></div>
   </section>
   <div class="wrap">
    <section class="sec" id="start" style="margin-top:60px"><div style="text-align:center;margin-bottom:24px"><span class="eyebrow" style="color:var(--coral)">Start here</span><h2 style="font-size:22px;margin:8px 0 6px">Where are you in your journey?</h2><p class="muted" style="margin:0">Pick one. We'll take you straight to what you need.</p></div>
@@ -2155,7 +2184,7 @@ function renderAlumni(){const ps=postsV(),leads=ps.filter(p=>p.kind==="lead"),op
   `<div class="wrap"><div style="display:flex;align-items:center;justify-content:center;gap:0;margin:-6px 0 0;padding-top:30px">${faces.map((p,i)=>`<span style="width:96px;height:96px;border-radius:50%;padding:4px;background:${RINGS[i][0]};margin-left:${i?-20:0}px;position:relative;z-index:${5-i};box-shadow:var(--shadow)"><img src="${p.img}" alt="${esc(p.name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:50% 8%;background:rgba(255,255,255,.2)"></span>`).join("")}<span style="width:96px;height:96px;border-radius:50%;margin-left:-20px;display:grid;place-items:center;font-weight:700;color:#5A36E0;background:var(--glass);box-shadow:inset 0 0 0 2px #C9BDFF,var(--shadow)">+ You</span></div>
    <p class="muted" style="text-align:center;font-size:12.5px;margin:10px 0 0">Batch of 2026, now alumni. Every year adds to the circle.</p>
    <section class="sec" style="margin-top:40px"><div style="text-align:center;margin-bottom:22px"><span class="eyebrow" style="color:var(--coral)">For alumni</span><h2 style="font-size:22px;margin:8px 0 6px">What would you like to share?</h2><p class="muted" style="margin:0;font-size:14px">Pick one. It's a short form right here, and it goes live straight away.</p></div>
-    <div class="tgrid">${KIND_ORDER.map((k,i)=>`<button class="tcard" data-compose="${k}" style="--c:${KIND[k][2]}">${orb(`linear-gradient(180deg,#fff,${KIND[k][1]})`,KIND[k][2],`<b>0${i+1}</b>`,52)}<b>${k==="journey"?"Share your journey":k==="mentor"?"Offer mentorship":k==="lead"?"Share a hiring lead":k==="skill"?"Teach a real-work skill":k==="cert"?"Suggest a certification":k==="opp"?"Post a conference, internship or fellowship":"Upload learning material"}</b><p>${KIND_HINT[k]}</p><em style="font-style:normal;font-weight:600;font-size:12.5px;color:${KIND[k][2]};margin-top:auto">Start →</em></button>`).join("")}</div></section>
+    <div class="tgrid">${KIND_ORDER.map((k,i)=>`<button class="tcard tint" data-compose="${k}" style="--c:${KIND[k][2]};--t:${KIND[k][1]}">${orb(`linear-gradient(180deg,#fff,${KIND[k][1]})`,KIND[k][2],`<b>0${i+1}</b>`,52)}<b>${k==="journey"?"Share your journey":k==="mentor"?"Offer mentorship":k==="lead"?"Share a hiring lead":k==="skill"?"Teach a real-work skill":k==="cert"?"Suggest a certification":k==="opp"?"Post a conference, internship or fellowship":"Upload learning material"}</b><p>${KIND_HINT[k]}</p><em class="tgo">${ME?"Start":"Sign in to start"} →</em></button>`).join("")}</div></section>
    <section class="sec" id="mentors" style="scroll-margin-top:100px"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#5A36E0">For students</span><h2 style="margin-top:6px">Mentors open this month</h2></div></div>
      <div class="seg2 gl">${["all","HR","Social sector","Psychology","Other"].map(k=>`<button data-f="ms" data-v="${k}" aria-pressed="${(F.ms||"all")===k}">${k==="all"?"All sectors":k}</button>`).join("")}</div></div>
     ${ms.length?`<div class="tgrid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">${ms.map((m,i)=>`<article class="mcard"><span class="rg" style="background:${RINGS[i%4][0]}"><span>${esc(initials(m.name))}</span></span><b style="font-size:15px">${esc(m.name)}</b><span class="muted" style="font-size:12.5px;line-height:1.5">${esc(m.role||"")}${m.org?" · "+esc(m.org):""}<br>${m.batch?"Batch "+esc(m.batch)+(m.sector&&m.sector!=="Other"?" · ":""):""}${m.sector&&m.sector!=="Other"?esc(m.sector):""}</span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${(m.tags||[]).map(t=>String(t).trim()).filter(t=>/[A-Za-z0-9]{2}/.test(t)).slice(0,3).map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</span><button class="btn dark small" data-mentor="${esc(m.id)}" ${m.slots>0?"":"disabled"}>${m.slots>0?"Request a chat":"Not available this month"}</button></article>`).join("")}</div>`
@@ -2295,10 +2324,14 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   const cg=x.createLinearGradient(P,y,P+kw,y);cg.addColorStop(0,"#FF8A65");cg.addColorStop(1,"#F2543D");x.fillStyle=cg;rr(P,y,kw,58,29);x.fill();x.fillStyle="#fff";x.fillText(kt,P+28,y+39);sp("0px");y+=110;
   x.fillStyle="#fff";x.font="800 66px "+F;wrapLines(x,s.title,W-2*P,4).forEach(l=>{x.fillText(l,P,y+56);y+=80});y+=34;
   x.fillStyle="rgba(255,255,255,.16)";x.fillRect(P,y,W-2*P,2);y+=46;
-  const parts=s.parts.filter(([k,t])=>t&&on[k]&&SHARE_LAB[k]);const room=H-y-(note?330:230);const per=parts.length?Math.max(2,Math.min(5,Math.floor((room/parts.length-74)/46))):0;
-  for(const [k,t] of parts){x.fillStyle="#F6C76B";x.font="800 22px "+F;sp("3px");x.fillText((kind==="notice"&&k==="when"?"Posted on":SHARE_LAB[k]).toUpperCase(),P,y+20);sp("0px");y+=44;
-    x.fillStyle="#ECE9FF";x.font="500 34px "+F;wrapLines(x,String(t).replace(/^(For|Posted|Date|Status|Who can apply|Apply by): /,""),W-2*P,per).forEach(l=>{x.fillText(l,P,y+30);y+=46});y+=30}
-  if(note){x.font="600 30px "+F;const nl=wrapLines(x,note,W-2*P-64,2);const nh=nl.length*42+48,ny=H-200-nh-26;x.fillStyle="rgba(255,255,255,.1)";rr(P,ny,W-2*P,nh,24);x.fill();x.fillStyle="#fff";nl.forEach((l,i)=>x.fillText(l,P+32,ny+52+i*42))}
+  const parts=s.parts.filter(([k,t])=>t&&on[k]&&SHARE_LAB[k]);const hasLink=s.parts.some(([k,t])=>k==="link"&&t&&on.link);
+  x.font="600 30px "+F;const nl=note?wrapLines(x,note,W-2*P-64,2):[];const nh=nl.length?nl.length*42+48:0;const noteTop=nh?H-200-nh-26:H-176;
+  const chipTop=hasLink?noteTop-66:noteTop;const limit=chipTop-16;
+  for(const [k,t] of parts){const txt=String(t).replace(/^(For|Posted|Date|Status|Who can apply|Apply by): /,"");x.font="500 34px "+F;const free=Math.floor((limit-(y+44))/46);if(free<1)break;
+    const lines=wrapLines(x,txt,W-2*P,Math.min(k==="what"?3:2,free));x.fillStyle="#F6C76B";x.font="800 22px "+F;sp("3px");x.fillText((kind==="notice"&&k==="when"?"Posted on":SHARE_LAB[k]).toUpperCase(),P,y+20);sp("0px");y+=44;
+    x.fillStyle="#ECE9FF";x.font="500 34px "+F;lines.forEach(l=>{x.fillText(l,P,y+30);y+=46});y+=30}
+  if(hasLink){x.font="700 24px "+F;const lt="🔗 Link in the message below",lw=x.measureText(lt).width+40;x.fillStyle="rgba(255,255,255,.14)";rr(P,chipTop,lw,50,25);x.fill();x.fillStyle="#FFE2C2";x.fillText(lt,P+20,chipTop+33)}
+  if(nh){x.font="600 30px "+F;x.fillStyle="rgba(255,255,255,.1)";rr(P,noteTop,W-2*P,nh,24);x.fill();x.fillStyle="#fff";nl.forEach((l,i)=>x.fillText(l,P+32,noteTop+52+i*42))}
   x.fillStyle="#fff";rr(P,H-176,W-2*P,104,30);x.fill();x.fillStyle="#6B6790";x.font="700 22px "+F;sp("2px");x.fillText("FULL DETAILS",P+36,H-132);sp("0px");
   x.fillStyle="#1A1650";x.font="800 32px "+F;x.fillText((CONFIG.site||"mssw-career-hub.github.io").replace(/^https?:\/\//,""),P+36,H-94);
   x.fillStyle="#F2543D";x.font="800 40px "+F;x.fillText("→",W-P-80,H-108);
@@ -2310,10 +2343,12 @@ function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that 
    <span class="lab">Include</span>${[["what","What happened and what to do"],["for","Who it's for"],["when","Date, time and deadline"],["hub","Link to the hub"]].map(([k,l])=>`<label class="check"><input type="checkbox" data-on="${k}" checked> ${l}</label>`).join("")}
    <label class="lab" for="waN">Add a note <small>(optional)</small></label><input class="field" id="waN" maxlength="120" placeholder="e.g. Please share in your department group">
    <span class="lab">Your card</span><div class="wa-card"><img id="waImg" alt="Preview of the card you will share"></div>
+   <span class="lab">Message that goes with the card</span><div class="wa-prev"><div id="waP"></div></div>
    <div class="wa-acts"><button class="btn wa" id="waGo">${ic("wa",16)} Share card</button><button class="btn" id="waTx">${ic("wa",15)} Send as text</button><button class="btn ghost" id="waCp">${ic("copy",15)} Copy text</button></div>
    <p class="muted" style="font-size:12px;margin-top:10px">On your phone, "Share card" opens your share menu: pick WhatsApp, then your group. On a laptop, the card downloads and WhatsApp opens with the message, so attach the card there. Nothing is sent without you.</p>`);
   let blob=null,seq=0;const note=()=>body.querySelector("#waN").value.trim();
-  const paint=async()=>{const my=++seq;const cv=await drawShareCard(kind,s,on,note());if(my!==seq)return;body.querySelector("#waImg").src=cv.toDataURL("image/png");cv.toBlob(b=>{if(my===seq)blob=b},"image/png")};
+  const paintTx=()=>{const t=msg(note());body.querySelector("#waP").innerHTML=esc(t).replace(/\*/g,"").replace(/_/g,"").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')};
+  const paint=async()=>{paintTx();const my=++seq;const cv=await drawShareCard(kind,s,on,note());if(my!==seq)return;body.querySelector("#waImg").src=cv.toDataURL("image/png");cv.toBlob(b=>{if(my===seq)blob=b},"image/png")};
   let t;body.addEventListener("change",e=>{const k=e.target.dataset.on;if(k){on[k]=e.target.checked?1:0;paint()}});body.querySelector("#waN").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(paint,250)});
   const fname="mssw-"+kind+"-"+(s.title||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,40)+".png";
   body.querySelector("#waGo").onclick=async()=>{if(!blob){toast("One moment, the card is still being made.");return}const text=msg(note());const file=new File([blob],fname,{type:"image/png"});
@@ -2362,7 +2397,8 @@ document.addEventListener("click",e=>{const t=e.target;let b;
 })();
 
 /* ---------- community wall, profile photos and participation ---------- */
-const CTAGS={Concern:["#FFE3D9","#B5381F"],Motivation:["#FFF0C2","#7A5200"],Insight:["#E3EBFF","#2849A8"],Win:["#D8F3E6","#11683D"],Question:["#EEE7FF","#5132C9"]};
+const CTAGS={Question:["#EEE7FF","#5132C9"],Concern:["#FFE3D9","#B5381F"],Insight:["#E3EBFF","#2849A8"],Win:["#D8F3E6","#11683D"],Thanks:["#FFE9F3","#A3245F"],Other:["#EFEFF5","#4A4768"],Motivation:["#FFF0C2","#7A5200"]};
+const CTAG_LIST=["Question","Concern","Insight","Win","Thanks","Other"];
 const COPEN=new Set();
 const avH=(name,photo,s=40)=>photo?`<span class="av" style="width:${s}px;height:${s}px"><img src="${esc(photo)}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>`:`<span class="av" style="width:${s}px;height:${s}px;--c:${tone(name||"?")};font-size:${Math.round(s*.36)}px">${esc(initials(name||"?"))}</span>`;
 const byAv=p=>p.byPhoto?`<span class="ini" style="padding:0;overflow:hidden;background:none"><img src="${esc(p.byPhoto)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover"></span>`:`<span class="ini">${esc(initials(p.by||"MSSW"))}</span>`;
@@ -2401,15 +2437,15 @@ function renderCommunity(){const all=D.community||[];const tf=F.ctag||"all";cons
   const me=ME?`<form class="cpose gl" id="cpF">
      <div class="cp-who">${avH(ME.name,ME.photo,46)}<div class="cp-id"><b>${esc(ME.name)}</b><small>${esc([ME.role,ME.programme,ME.batch?"Batch "+ME.batch:""].filter(Boolean).join(" · "))}</small></div>${ME.photo?"":`<button type="button" class="cp-photo" data-photo>${ic("plus",13)} <span class="cp-add">Add </span>photo</button>`}</div>
      <label class="sr" for="cpT">Your post</label><textarea class="field" id="cpT" data-mention maxlength="1500" rows="3" placeholder="Share a worry, a win, a tip or a question with MSSW students and alumni"></textarea>
-     <div class="cp-kind"><span class="cp-lab">This is a</span><div class="ctags" role="radiogroup" aria-label="What kind of post">${Object.keys(CTAGS).map((t,i)=>`<label><input type="radio" name="cpTag" value="${t}" ${i===2?"checked":""}><span style="--b:${CTAGS[t][0]};--f:${CTAGS[t][1]}">${t}</span></label>`).join("")}</div></div>
+     <div class="cp-kind"><span class="cp-lab">This is a</span><div class="ctags" role="radiogroup" aria-label="What kind of post">${CTAG_LIST.map((t,i)=>`<label><input type="radio" name="cpTag" value="${t}" ${i===2?"checked":""}><span style="--b:${CTAGS[t][0]};--f:${CTAGS[t][1]}">${t}</span></label>`).join("")}</div></div>
      <div class="cp-foot"><small>Type <b>@</b> to mention someone; they'll get an email. Your name${ME.photo?" and photo show":" shows"} with your post. Be kind; the placement team can remove posts.</small><button class="btn coral">${ic("chat",15)} Post</button></div>
      <p class="err" id="cpErr" role="alert"></p></form>`
    :`<div class="cpose gl" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">${orb("linear-gradient(180deg,#F1ECFF,#D7CBFF)","#5A36E0",ic("chat",20),46)}<span style="flex:1;min-width:200px"><b>Join the conversation</b><br><small class="muted">Sign in with your email to post, like and reply. Anyone can read.</small></span><button class="btn coral" data-signin>Sign in to post</button></div>`;
   $("#main").innerHTML=band("jo","Students and alumni","Community wall","Share what's on your mind: a worry before an interview, a win, something you learned in the field, or a question for seniors. Everyone posts with their name.")+
   `<div class="wrap"><div class="cgrid"><section style="min-width:0;display:flex;flex-direction:column;gap:14px">${me}
-     <div class="row ctf">${[["all","All"],...Object.keys(CTAGS).map(t=>[t,t])].map(([k,l])=>`<button class="pill" data-f="ctag" data-v="${k}" aria-pressed="${tf===k}">${l}${k!=="all"?` · ${all.filter(p=>p.tag===k).length}`:""}</button>`).join("")}</div>
+     <div class="row ctf">${[["all","All"],...CTAG_LIST.map(t=>[t,t])].map(([k,l])=>`<button class="pill" data-f="ctag" data-v="${k}" aria-pressed="${tf===k}">${l}${k!=="all"?` · ${all.filter(p=>p.tag===k).length}`:""}</button>`).join("")}</div>
      ${list.map(cpostCard).join("")||`<div class="empty gl" style="padding:28px;text-align:center"><b>${all.length?"Nothing with this tag yet":"No posts yet"}</b><br>${all.length?"Try another tag.":"Start the first conversation. A question for seniors is a great place to begin."}</div>`}</section>
-   <aside class="cside"><div class="gl" style="padding:18px"><span class="eyebrow" style="color:#5A36E0">How it works</span><ul class="cl"><li><b>Concern</b> Something worrying you about placements</li><li><b>Motivation</b> Encouragement for others</li><li><b>Insight</b> Something you learned</li><li><b>Win</b> Good news, big or small</li><li><b>Question</b> Ask students and alumni</li></ul></div>
+   <aside class="cside"><div class="gl" style="padding:18px"><span class="eyebrow" style="color:#5A36E0">How it works</span><ul class="cl">${[["Question","Ask students and alumni"],["Concern","Something worrying you about placements"],["Insight","Something you learned"],["Win","Good news, big or small"],["Thanks","Appreciate someone who helped"],["Other","Anything else"]].map(([t,d])=>`<li><span class="ctp">${t}</span><span class="ctd">${d}</span></li>`).join("")}</ul></div>
     <div class="gl" style="padding:18px"><span class="eyebrow" style="color:#C2412A">Keep it kind</span><p style="font-size:13.5px;margin:8px 0 0;color:var(--body)">No phone numbers or personal details. Posts that mention a fee, a scam or a safety concern are held for the placement team to check first. If something feels wrong, use Report.</p></div>
     <button class="gl" data-go="journeys" style="display:flex;gap:12px;align-items:center;padding:16px;text-align:left">${orb("linear-gradient(180deg,#F1ECFF,#D7CBFF)","#5A36E0",ic("route",18),40)}<span><b>Placement journeys</b><br><small class="muted">Read how seniors got placed, and ask them questions.</small></span></button></aside></div></div>`}
 function cpostCard(p){const open=COPEN.has(p.id);const n=(p.qa||[]).length;
