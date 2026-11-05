@@ -1054,6 +1054,21 @@ html::-webkit-scrollbar-thumb:hover{background:rgba(90,54,224,.65);background-cl
 @media (max-width:480px){.hx-in .ha-si .si-long{display:none}.hx-in .ha-si .si-short{display:inline}}
 a.nlink{display:inline-flex;align-items:center;gap:4px;margin:0 2px;padding:2px 10px;border-radius:999px;background:#EEF2FF;color:#2F57C2;font-weight:700;font-size:.92em;text-decoration:none;white-space:nowrap}
 a.nlink:hover{background:#DDE6FF}
+/* @mentions */
+.mention{color:#5A36E0;font-weight:700;background:#F1ECFF;border-radius:6px;padding:0 4px}
+.mbox{position:fixed;z-index:400;width:260px;max-width:calc(100vw - 16px);background:#fff;border-radius:16px;box-shadow:0 18px 44px -14px rgba(23,20,63,.45);border:1px solid rgba(90,54,224,.14);padding:6px;display:flex;flex-direction:column}
+.mbox button{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:11px;border:0;background:none;text-align:left;font-size:14px;color:#17143F;cursor:pointer}
+.mbox button[aria-selected="true"],.mbox button:hover{background:#F1ECFF}
+.mbox small{padding:6px 10px 4px;color:#7a7695;font-size:11.5px}
+/* career bites */
+.bites{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.bite{padding:18px 20px;border-radius:20px;display:flex;flex-direction:column;gap:8px;border:1.5px solid #F6D2BF!important;background:linear-gradient(180deg,#FFF6EF,#fff 60%)!important}
+.bite h3{margin:2px 0 0;font-size:17px;line-height:1.35;color:#17143F}
+.bite p{margin:0;font-size:14px;line-height:1.6;color:#4A4768}
+.bchip{align-self:flex-start;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:#C2412A;background:#FFE6DA;border-radius:999px;padding:3px 10px}
+.bfoot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid rgba(194,65,42,.12)}
+.bfoot small{color:#7a7695}
+.mailpref{margin-top:14px;font-size:13.5px;line-height:1.45}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -1944,6 +1959,7 @@ const TRACKS=[
 const TOPIC_TRACK={"Resume":"resume","LinkedIn":"resume","Interview prep":"interview","Aptitude":"aptitude","Group discussion":"gd"};
 const trackOfRes=r=>r.kind==="Course"?"cert":TOPIC_TRACK[r.topic]||"skills";
 const KIND={lead:["Hiring lead","#FFEDE7","#C2412A"],mentor:["Mentorship","#F1ECFF","#5A36E0"],skill:["Real-work skill","#FFF6DD","#8A5800"],cert:["Certification","#FFEDF7","#9E2F7B"],journey:["My journey","#E6F8F1","#0F6E68"],opp:["Conference, internship or fellowship","#EAF2FF","#2849A8"],material:["Learning material","#F4F2FB","#4A4670"]};
+KIND.bite=["Career bite","#FFF1E6","#C2412A"];
 const KIND_ORDER=["lead","mentor","skill","cert","journey","opp","material"];
 const KIND_HINT={lead:"An opening at your organisation, or one you can refer students to.",mentor:"A short chat a month with one or two students in your field.",skill:"A guide or video on the tools and tasks your job really involves.",cert:"A course that helped you, what it cost and whether recruiters noticed.",journey:"Your rounds, the questions you were asked and one piece of advice.",opp:"Events and programmes worth a student's time, with dates and links.",material:"Notes, question banks, slides or templates for any prep track."};
 const OFFERS=["Mentorship","Hiring leads","Real-work skills","Certification tips","Conferences and internships","My placement story"];
@@ -2012,6 +2028,7 @@ function renderHome(){const op=openOpenings(),up=upcoming().filter(inCl),cos=com
      <div class="seg2 gl">${[["all","All"],["sw","Social Work (Aided)"],["se","Social Entrepreneurship"]].map(([k,l])=>`<button data-f="pw" data-v="${k}" aria-pressed="${(F.pw||"all")===k}">${l}</button>`).join("")}</div></div>
     <div class="gl wall">${wall.map((p,i)=>{const j=jFor(p.name);return `<button class="person" ${j?`data-open="journey:${esc(j.id)}"`:""}><span class="ringp" style="background:${RINGS[i%4][0]}"><img src="${p.img}" alt="${esc(p.name)}" loading="lazy"></span><b>${esc(p.name)}</b><span class="co" style="color:${RINGS[i%4][1]}">${esc(p.co)}</span><small>${esc(p.dept)}</small></button>`}).join("")}</div>
     <p class="muted" style="font-size:12.5px;margin:12px 4px 0">Placed this year? <button class="link" data-form="journey" style="margin-left:6px">Share your journey</button></p></section>
+   ${bitesSec()}
    ${partStrip()}
    <section class="sec"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#5A36E0">Learn</span><h2 style="margin-top:6px">Practise for every round</h2></div></div><button class="btn primary small" data-go="learn">All learning materials</button></div>
     <div class="gl tracks">${TRACKS.map(([k,n,,bg,fg],i)=>`<button data-track="${k}">${orb(bg,fg,`<b style="font-size:14px">0${i+1}</b>`,56)}${n}</button>`).join("")}</div></section>
@@ -2253,9 +2270,10 @@ function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"
     return {title:d.company+" · "+d.role,parts:[["what",d.outcome?d.outcome+".":nx?"Next: "+nx[1]+(nx[2]?" ("+nx[2]+")":"")+".":"Status: "+d.status+"."],["for","For: "+cl(d.cluster)],["when",nx&&nx[0]?"Date: "+nice(nx[0]):"Status: "+d.status]]}}
   if(k==="event"){const e=D.events.find(x=>x.id===id);if(!e)return null;return {title:e.title,parts:[["what",(e.about||"").split(/\.\s/)[0]],["for","For: "+(e.audience||cl(e.cluster))],["when",(e.date?nice(e.date):"Date to be announced")+(e.time?", "+e.time:"")+(e.mode?" · "+e.mode:"")+(e.venue?" · "+e.venue:"")]]}}
   if(k==="opening"){const o=D.openings.find(x=>x.id===id);if(!o)return null;return {title:o.company+" · "+o.roles,parts:[["what",[o.type,o.location,o.ctc].filter(Boolean).join(" · ")],["for",o.eligibility?"Who can apply: "+o.eligibility:""],["when",o.deadline?"Apply by: "+nice(o.deadline):""],["link",o.link?"Apply: "+o.link:""]]}}
+  if(k==="bite"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const urls=(p.body||"").match(/https?:\/\/[^\s]+/g)||[];return {title:p.title,parts:[["what",(p.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").trim()],["for","For: "+cl(p.cluster)],["when","Posted: "+nice((p.t||"").slice(0,10))],["link",p.link?"Read more: "+p.link:urls.length?"Link: "+urls[0]:""]]}}
   if(k==="post"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;return {title:p.title,parts:[["what",(KIND[p.kind]||KIND.material)[0]+" shared by "+(p.by||"MSSW alumni")+(p.byOrg?", "+p.byOrg:"")],["for",p.cluster&&p.cluster!=="All"?"For: "+cl(p.cluster):""],["when",p.deadline?"Apply by: "+nice(p.deadline):""],["link",p.link||""]]}}
   return null}
-const SHARE_KIND={notice:["Notice","📢","notices"],drive:["Campus drive","💼","drives"],event:["Event","📅","events"],opening:["Opening","🧭","openings"],post:["From alumni","🤝","alumni"]};
+const SHARE_KIND={bite:["Career bite","💡","home"],notice:["Notice","📢","notices"],drive:["Campus drive","💼","drives"],event:["Event","📅","events"],opening:["Opening","🧭","openings"],post:["From alumni","🤝","alumni"]};
 const SHARE_LAB={what:"What's happening",for:"Who it's for",when:"When"};
 function wrapLines(ctx,text,maxW,maxLines){const words=String(text||"").replace(/\s+/g," ").trim().split(" ");const out=[];let line="",cut=false;
   for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width<=maxW||!line)line=t;else{out.push(line);line=w;if(out.length===maxLines){cut=true;break}}}
@@ -2349,7 +2367,7 @@ const COPEN=new Set();
 const avH=(name,photo,s=40)=>photo?`<span class="av" style="width:${s}px;height:${s}px"><img src="${esc(photo)}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>`:`<span class="av" style="width:${s}px;height:${s}px;--c:${tone(name||"?")};font-size:${Math.round(s*.36)}px">${esc(initials(name||"?"))}</span>`;
 const byAv=p=>p.byPhoto?`<span class="ini" style="padding:0;overflow:hidden;background:none"><img src="${esc(p.byPhoto)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover"></span>`:`<span class="ini">${esc(initials(p.by||"MSSW"))}</span>`;
 const ctag=t=>{const c=CTAGS[t]||CTAGS.Insight;return `<span class="ntag" style="background:${c[0]};color:${c[1]}">${esc(t||"Insight")}</span>`};
-const ctext=t=>esc(t||"").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,"<br>");
+const ctext=t=>esc(t||"").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/(^|[\s(>])@([A-Z][A-Za-z.'-]*(?: [A-Z][A-Za-z.'-]*){0,3})/g,'$1<span class="mention">@$2</span>').replace(/\n/g,"<br>");
 function paintMe(){$("#meSlot").innerHTML=ME?`<button class="avatar" data-mine aria-label="Your profile" style="--c:${tone(ME.name)};${ME.photo?"padding:0;overflow:hidden":""}">${ME.photo?`<img src="${esc(ME.photo)}" alt="" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:esc(initials(ME.name))}</button>`:`<button class="btn small" data-signin>Sign in</button>`}
 function journeyCard(j){const nm=j.name||"MSSW "+(j.memberRole==="Student"?"student":"alum");
   return `<article class="card jc"><button class="open" data-open="journey:${esc(j.id)}" aria-label="Open ${esc(nm)}'s journey"></button>
@@ -2382,9 +2400,9 @@ function peopleCSV(){const rows=[["Name","Email","Role","Programme","Batch","Joi
 function renderCommunity(){const all=D.community||[];const tf=F.ctag||"all";const list=all.filter(p=>tf==="all"||p.tag===tf);
   const me=ME?`<form class="cpose gl" id="cpF">
      <div class="cp-who">${avH(ME.name,ME.photo,46)}<div class="cp-id"><b>${esc(ME.name)}</b><small>${esc([ME.role,ME.programme,ME.batch?"Batch "+ME.batch:""].filter(Boolean).join(" · "))}</small></div>${ME.photo?"":`<button type="button" class="cp-photo" data-photo>${ic("plus",13)} <span class="cp-add">Add </span>photo</button>`}</div>
-     <label class="sr" for="cpT">Your post</label><textarea class="field" id="cpT" maxlength="1500" rows="3" placeholder="Share a worry, a win, a tip or a question with MSSW students and alumni"></textarea>
+     <label class="sr" for="cpT">Your post</label><textarea class="field" id="cpT" data-mention maxlength="1500" rows="3" placeholder="Share a worry, a win, a tip or a question with MSSW students and alumni"></textarea>
      <div class="cp-kind"><span class="cp-lab">This is a</span><div class="ctags" role="radiogroup" aria-label="What kind of post">${Object.keys(CTAGS).map((t,i)=>`<label><input type="radio" name="cpTag" value="${t}" ${i===2?"checked":""}><span style="--b:${CTAGS[t][0]};--f:${CTAGS[t][1]}">${t}</span></label>`).join("")}</div></div>
-     <div class="cp-foot"><small>Your name${ME.photo?" and photo show":" shows"} with your post. Be kind; the placement team can remove posts.</small><button class="btn coral">${ic("chat",15)} Post</button></div>
+     <div class="cp-foot"><small>Type <b>@</b> to mention someone; they'll get an email. Your name${ME.photo?" and photo show":" shows"} with your post. Be kind; the placement team can remove posts.</small><button class="btn coral">${ic("chat",15)} Post</button></div>
      <p class="err" id="cpErr" role="alert"></p></form>`
    :`<div class="cpose gl" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">${orb("linear-gradient(180deg,#F1ECFF,#D7CBFF)","#5A36E0",ic("chat",20),46)}<span style="flex:1;min-width:200px"><b>Join the conversation</b><br><small class="muted">Sign in with your email to post, like and reply. Anyone can read.</small></span><button class="btn coral" data-signin>Sign in to post</button></div>`;
   $("#main").innerHTML=band("jo","Students and alumni","Community wall","Share what's on your mind: a worry before an interview, a win, something you learned in the field, or a question for seniors. Everyone posts with their name.")+
@@ -2400,7 +2418,7 @@ function cpostCard(p){const open=COPEN.has(p.id);const n=(p.qa||[]).length;
    <div class="cfoot"><button class="cbtn${p.mineLike?" on":""}" data-clike="${esc(p.id)}" aria-pressed="${!!p.mineLike}">${ic("heart",15)} ${p.likes||0}</button><button class="cbtn" data-copen="${esc(p.id)}" aria-expanded="${open}">${ic("chat",15)} ${n?n+(n===1?" reply":" replies"):"Reply"}</button>
     <span style="margin-left:auto;display:flex;gap:6px">${p.mine||LV()===3?`<button class="cbtn" data-chide="${esc(p.id)}">${p.mine?"Delete":"Remove"}</button>`:ME?`<button class="cbtn" data-creport="${esc(p.id)}">Report</button>`:""}</span></div>
    ${open?`<div class="creps">${(p.qa||[]).map(q=>`<div class="crep">${avH(q.name,q.photo,30)}<span><b>${esc(q.name)}</b> <small class="muted">${ago(q.t)}</small><br>${ctext(q.text)}</span></div>`).join("")}
-    ${ME?`<form class="row" data-creply="${esc(p.id)}">${avH(ME.name,ME.photo,30)}<input class="field" maxlength="600" placeholder="Write a reply" style="flex:1" aria-label="Your reply"><button class="btn primary small">Reply</button></form>`:`<button class="link" data-signin>Sign in to reply</button>`}</div>`:""}</article>`}
+    ${ME?`<form class="row" data-creply="${esc(p.id)}">${avH(ME.name,ME.photo,30)}<input class="field" data-mention maxlength="600" placeholder="Write a reply (type @ to mention someone)" style="flex:1" aria-label="Your reply"><button class="btn primary small">Reply</button></form>`:`<button class="link" data-signin>Sign in to reply</button>`}</div>`:""}</article>`}
 
 /* profile photo */
 function pickPhoto(){const inp=document.createElement("input");inp.type="file";inp.accept="image/*";inp.onchange=async()=>{const f=inp.files[0];if(!f)return;
@@ -2414,6 +2432,7 @@ function openMine(){const mine=k=>(D[k]||[]).filter(x=>x.mine);
   drawer("Your profile",`<div class="org" style="align-items:center">${avH(ME.name,ME.photo,64)}<span><b style="font-size:1.1rem">${esc(ME.name)}</b><small>${ME.team?"Placement team · ":""}${esc(ME.role||"")}${ME.programme?" · "+esc(ME.programme):""}${ME.batch?" · "+esc(ME.batch):""}</small>
     <span class="row" style="margin-top:8px"><button class="btn small primary" data-photo>${ME.photo?"Change photo":"Add your photo"}</button>${ME.photo?`<button class="btn small ghost" data-unphoto>Remove</button>`:""}</span></span></div>
    <p class="muted" style="font-size:13px;margin:10px 0 0">Your photo appears small next to your journeys, posts and replies.</p>
+   <label class="check mailpref"><input type="checkbox" data-noemail ${ME.noEmail?"":"checked"}> Email me about new career bites, placement journeys, and when someone @mentions me</label>
    <dl class="facts"><dt>Readiness</dt><dd>${readyN()} of ${READY_ITEMS.length} done</dd><dt>Journeys shared</dt><dd>${mine("journeys").length}</dd><dt>Community posts</dt><dd>${mine("community").length}</dd><dt>Openings posted</dt><dd>${mine("openings").length}</dd><dt>Resources added</dt><dd>${mine("resources").length}</dd><dt>Registered for</dt><dd>${D.events.filter(e=>e.going).map(e=>esc(e.title)).join(", ")||"–"}</dd></dl>
    <div class="row" style="margin-top:16px">${LV()===3?`<button class="btn primary" data-go="desk">Open the placement desk</button>`:""}<button class="btn coral" data-form="journey">Share a journey</button><button class="btn light" data-go="community">Community wall</button><button class="btn ghost" data-signout>Sign out on this device</button></div>`)}
 
@@ -2441,6 +2460,40 @@ document.addEventListener("submit",async e=>{const f=e.target;
     try{if(PREVIEW){const p=RAW.community.find(x=>x.id===id);p.qa.push({id:"C"+Date.now(),t:new Date().toISOString(),name:ME.name,photo:ME.photo||"",text});applyAccess()}else{const r=await api("ask",{id,text});await refresh();if(r&&r.held)toast("Thanks! It will appear after a quick check.")}
      COPEN.add(id);const y=window.scrollY;render();window.scrollTo({top:y})}catch(x){toast(x.message)}}
 },true);
+
+/* ---------- career bites ---------- */
+function bitesSec(){const bs=(D.posts||[]).filter(p=>p.kind==="bite").sort((a,b)=>(b.t||"").localeCompare(a.t||"")).slice(0,3);if(!bs.length&&LV()<3)return "";
+  return `<section class="sec" id="bites"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#C2412A">From the placement team</span><h2 style="margin-top:6px">Career bites</h2><p>Short reads on jobs, skills and sectors. New bites are emailed to everyone who has signed in.</p></div></div>${LV()>=3?`<button class="btn primary small" data-bitenew>${ic("plus",14)} Post a career bite</button>`:""}</div>
+   <div class="bites">${bs.length?bs.map(b=>`<article class="bite gl"><span class="bchip">${esc(b.cluster&&b.cluster!=="All"?clLabel(b.cluster):"For everyone")}</span><h3>${esc(b.title)}</h3><p>${lnk(b.body)}</p>${b.link?`<a class="nlink" href="${esc(b.link)}" target="_blank" rel="noopener">Read more ↗</a>`:""}<div class="bfoot"><small>${ago(b.t)}</small><span style="display:flex;gap:6px">${LV()>=3?`<button class="cbtn" data-hide="posts:${esc(b.id)}">Remove</button>`:""}<button class="cbtn" data-share="bite:${esc(b.id)}">${ic("wa",14)} Share</button></span></div></article>`).join(""):`<div class="empty" style="grid-column:1/-1"><b>No career bites yet</b>Post a short read on a sector, a skill or a job trend. It goes to everyone who has signed in.</div>`}</div></section>`}
+function openBite(){const {body,close}=drawer("Career bite",`<span class="eyebrow" style="color:#C2412A">Career bite</span><h2 style="margin:4px 0 6px">Post a career bite</h2><p class="muted" style="margin:0 0 12px;font-size:13.5px">Keep it short: one idea, three or four lines. It appears on the home page and is emailed to everyone who has signed in.</p>
+   <form id="bF"><label class="lab" for="bT">Headline</label><input class="field" id="bT" maxlength="120" placeholder="e.g. CSR teams are hiring impact analysts">
+   <label class="lab" for="bB">The bite</label><textarea class="field" id="bB" rows="5" maxlength="1200" placeholder="What is happening, why it matters for MSSW students, and one thing to do about it."></textarea>
+   <span class="lab">For</span><div class="pick" id="bC">${[["All","Everyone"],["HR","HR"],["Social sector","Social sector"],["Psychology","Psychology"]].map(([k,l],i)=>`<button type="button" data-v="${k}" aria-pressed="${i===0}">${l}</button>`).join("")}</div>
+   <label class="lab" for="bL">Link <small>(optional)</small></label><input class="field" id="bL" maxlength="400" placeholder="https://">
+   <p class="err" id="bE" role="alert"></p><button class="btn coral" id="bGo">Post and email it</button></form>`);
+  let cl="All";const pk=body.querySelector("#bC");pk.addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;cl=b.dataset.v;pk.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  body.querySelector("#bF").addEventListener("submit",async e=>{e.preventDefault();const er=body.querySelector("#bE");er.textContent="";const g=body.querySelector("#bGo");g.disabled=true;
+    try{const title=body.querySelector("#bT").value.trim(),text=body.querySelector("#bB").value.trim(),link=body.querySelector("#bL").value.trim();if(title.length<4)throw new Error("Add a short headline.");if(text.length<10)throw new Error("Write a few lines.");
+      await api("post",{kind:"bite",title,body:text,cluster:cl,link,access:"Everyone"});close();toast("Career bite posted and on its way to everyone's inbox");await refresh();go("home");setTimeout(()=>{const el=document.getElementById("bites");el&&el.scrollIntoView({block:"start"})},120)}
+    catch(x){er.textContent=x.message}finally{g.disabled=false}})}
+document.addEventListener("click",e=>{if(e.target.closest("[data-bitenew]")){if(LV()<3){toast("Only the placement team can post career bites.");return}openBite()}});
+/* email preference */
+document.addEventListener("change",async e=>{const c=e.target.closest("[data-noemail]");if(!c)return;try{const r=await api("prefs",{noEmail:!c.checked});ME={...ME,...(r&&r.me||{}),noEmail:!c.checked};store.set("mch-me",ME);toast(c.checked?"You'll get email updates":"Email updates switched off")}catch(x){c.checked=!c.checked;toast(x.message)}});
+/* ---------- @mention suggestions ---------- */
+function mentionPool(){const s=new Set();(D.community||[]).forEach(p=>{p.name&&s.add(p.name);(p.qa||[]).forEach(q=>q.name&&s.add(q.name))});(D.journeys||[]).forEach(j=>{j.name&&!/^An MSSW/.test(j.name)&&s.add(j.name)});(D.mentors||[]).forEach(m=>m.name&&s.add(m.name));(D.people||[]).forEach(p=>p.name&&s.add(p.name));if(ME)s.delete(ME.name);return [...s].sort((a,b)=>a.localeCompare(b))}
+let MB=null,MBi=0,MBf=null,MBq=null;
+function closeMB(){if(MB)MB.remove();MB=null}
+function pickMB(name){const f=MBf;if(!f||MBq==null)return closeMB();const pos=f.selectionStart;const before=f.value.slice(0,pos),after=f.value.slice(pos);const nb=before.slice(0,before.length-MBq.length-1)+"@"+name+" ";f.value=nb+after;closeMB();f.focus();f.setSelectionRange(nb.length,nb.length)}
+document.addEventListener("input",e=>{const f=e.target;if(!f.matches||!f.matches("[data-mention]"))return;
+  const before=f.value.slice(0,f.selectionStart);const m=before.match(/(?:^|\s)@([^@\n]{0,30})$/);if(!m){closeMB();return}
+  const q=m[1].toLowerCase();const list=mentionPool().filter(n=>{const l=n.toLowerCase();return l.startsWith(q)||l.split(" ").some(w=>w.startsWith(q))}).slice(0,6);if(!list.length){closeMB();return}
+  closeMB();MBf=f;MBq=m[1];MBi=0;MB=document.createElement("div");MB.className="mbox";MB.setAttribute("role","listbox");
+  MB.innerHTML=list.map((n,i)=>`<button type="button" role="option" data-mpick="${esc(n)}" aria-selected="${i===0}">${avH(n,"",26)}<span>${esc(n)}</span></button>`).join("")+`<small>They'll get an email with your post</small>`;
+  const r=f.getBoundingClientRect();MB.style.left=Math.max(8,Math.min(r.left,innerWidth-268))+"px";MB.style.top=(r.bottom+6)+"px";document.body.appendChild(MB)});
+document.addEventListener("mousedown",e=>{const b=e.target.closest("[data-mpick]");if(b){e.preventDefault();pickMB(b.dataset.mpick);return}if(MB&&!e.target.closest(".mbox"))closeMB()});
+document.addEventListener("keydown",e=>{if(!MB)return;const os=[...MB.querySelectorAll("[data-mpick]")];if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();MBi=(MBi+(e.key==="ArrowDown"?1:-1)+os.length)%os.length;os.forEach((o,i)=>o.setAttribute("aria-selected",i===MBi))}else if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();e.stopPropagation();pickMB(os[MBi].dataset.mpick)}else if(e.key==="Escape")closeMB()},true);
+window.addEventListener("scroll",()=>MB&&closeMB(),{passive:true});
+PAPI.prefs=b=>({me:{noEmail:!!b.noEmail}});
 
 RAW=realData();applyAccess();
 if(PREVIEW){$("#pvAs").innerHTML=`<span>Preview as</span>${[["visitor","Visitor"],["alumni","Alumni"],["student","Student"],["team","Placement team"]].map(([k,l])=>`<button data-as="${k}">${l}</button>`).join("")}`}
