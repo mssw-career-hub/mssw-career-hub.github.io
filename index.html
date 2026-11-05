@@ -2377,7 +2377,7 @@ function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that 
   const lp=(s.parts.find(([k,t])=>k==="link"&&t)||[])[1]||"";const lm=lp.match(/^(.*?):\s*(https?:\/\/\S+)/)||(lp.match(/^https?:\/\/\S+/)?["","Link",lp]:null);
   const lu=lm?lm[2]:"";const lab=!lu?"":/docs\.google\.com\/forms|forms\.gle/.test(lu)?"Fill the form":/spreadsheets/.test(lu)?"Fill the sheet":/docs\.google\.com\/document|drive\.google|\.pdf/.test(lu)?"Open the document":/meet\.google|zoom\.us|teams\./.test(lu)?"Join the meeting":lm[1]==="Read more"?"Read more":"Open the link";
   const linkLine=lu?"*"+lab+" ↓*\n"+lu:"";
-  const join="*Join the MSSW Career Hub ↓*\n_Placement notices, alumni journeys and mentors in one place. Sign in with any email, no password._\n"+hub;
+  const join="*Join the MSSW Career Hub ↓*\n_Placement notices, alumni journeys and mentors in one place._\n_Students: sign in with your MSSW ID. Alumni: any email, no password._\n"+hub;
   const caption=note=>[note,linkLine,join].filter(Boolean).join("\n\n");
   const fullText=note=>{const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?p[1]:""};const meta=[part("for"),part("when")].filter(Boolean).join(" · ");
     return [note?note+"\n":"","*"+s.title+"*",part("what"),meta,"",linkLine,"",join].filter((v,i,a)=>v!==""||(a[i-1]&&a[i-1]!=="")).join("\n").trim()};
