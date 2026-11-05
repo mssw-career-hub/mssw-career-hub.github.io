@@ -1177,6 +1177,26 @@ a.nlink:hover{background:#DDE6FF}
 @media (max-width:600px){.drawer{border-radius:22px 22px 0 0;border-left:0;scrollbar-width:none}.drawer::-webkit-scrollbar{display:none}}
 .drawer .btn.light{background:#fff;color:#2A2770;border:1px solid #D9DCF2;box-shadow:none}
 .drawer .btn.light:hover{background:#F4F5FF}
+/* notice cards: actions top-right on laptops, a tidy row at the bottom on phones */
+.nrow{position:relative}
+.nrow .nacts{position:absolute;top:14px;right:16px;display:flex;gap:6px;align-items:center}
+.nrow .ntags{padding-right:190px}
+@media (max-width:600px){
+ .nrow{grid-template-columns:1fr;gap:10px;padding:16px}
+ .nrow .d{display:inline-flex;align-items:baseline;gap:6px;justify-self:start;padding:5px 12px;border-radius:999px;background:#F1F2FA;text-align:left}
+ .nrow .d b{display:inline;font-size:16px}
+ .nrow .d small{font-size:11px}
+ .nrow .ntags{padding-right:0}
+ .nrow .nacts{position:static;margin-top:14px;padding-top:12px;border-top:1px solid #EEF0F7;justify-content:flex-start}
+}
+#main aside{min-width:0;max-width:100%}
+.watch,.watch .wcard{min-width:0;max-width:100%}
+.watch .wtop{flex-wrap:wrap}
+/* community posts: a full, even border all round in the tag's colour */
+.cpost::before{display:none}
+.cpost{border:1.5px solid color-mix(in srgb,var(--tf) 28%,#fff)}
+.cpost.is-team{border-color:color-mix(in srgb,var(--tf) 28%,#fff)}
+@media (max-width:600px){.seg2{max-width:100%;flex-wrap:wrap;height:auto;border-radius:18px}}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2162,9 +2182,8 @@ function ntype(n){if(n.type&&NT[n.type])return n.type;const t=(n.title+" "+n.bod
   if(/due|datasheet|upload|register|apply|interest sheet|submit|invite|be there|carry/.test(t))return "Act";return "Info"}
 function noticeCard(n){const d=dOf(n.date),ty=ntype(n),x=NT[ty],past=ty==="Act"&&n.date<isoPlus(-1);
   return `<article class="gl nrow${past?" past":""}"><span class="d"><b>${d?d.getDate():""}</b><small>${d?MON[d.getMonth()]:""}</small></span><span style="min-width:0">
-   <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ntag" style="background:${x[1]};color:${x[2]}">${x[0]}</span>${clChip(n.cluster)}${n.pinned?`<span class="ntag" style="background:#FFF2CC;color:#8A5800">Pinned</span>`:""}${past?`<small class="muted">Closed</small>`:n.date>=isoPlus(-3)?`<span class="ntag" style="background:linear-gradient(180deg,#FF8E72,#E8573A);color:#fff">New</span>`:""}
-    <span style="margin-left:auto;display:flex;gap:6px">${LV()===3?`<button class="link" data-editnotice="${esc(n.id)}">Edit</button>`:""}${shareBtn("notice:"+n.id)}</span></span>
-   <h3>${esc(n.title)}</h3><p>${lnk(n.body)}</p></span></article>`}
+   <span class="ntags" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ntag" style="background:${x[1]};color:${x[2]}">${x[0]}</span>${clChip(n.cluster)}${n.pinned?`<span class="ntag" style="background:#FFF2CC;color:#8A5800">Pinned</span>`:""}${past?`<small class="muted">Closed</small>`:n.date>=isoPlus(-3)?`<span class="ntag" style="background:linear-gradient(180deg,#FF8E72,#E8573A);color:#fff">New</span>`:""}</span>
+   <h3>${esc(n.title)}</h3><p>${lnk(n.body)}</p><span class="nacts">${LV()===3?`<button class="link" data-editnotice="${esc(n.id)}">Edit</button>`:""}${shareBtn("notice:"+n.id)}</span></span></article>`}
 function lnk(t){return esc(t||"").replace(/https?:\/\/[^\s<]+/g,u=>{const v=u.replace(/[.,;:)\]]+$/,"");return `<a href="${v}" target="_blank" rel="noopener" class="nlink">Open link ↗</a>`+u.slice(v.length)})}
 function renderNotices(){if(LV()<2){$("#main").innerHTML=band("ev","Placement cell","Noticeboard","Announcements from the placement cell this season, newest first, by department.")+`<div class="wrap" style="padding-top:26px">${lockPanel("The noticeboard")}</div>`;return}
   const list=D.notices.filter(inCl).filter(n=>match(n,["title","body"])).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||b.date.localeCompare(a.date));
