@@ -1141,6 +1141,24 @@ a.nlink:hover{background:#DDE6FF}
 @media (max-width:420px){#deskSlot:empty{display:none}header.top .wrap{gap:6px}.top .brand{gap:8px}.top .brand img{width:32px;height:32px}.top .brand b{font-size:12px;letter-spacing:.08em}}
 @media (max-width:365px){.top .brand b{font-size:11px;letter-spacing:.05em}}
 
+/* community posts: each one its own card, tinted by its tag */
+.cpost{position:relative;background:#fff;border:1px solid #E6E8F3;border-radius:20px;padding:0;gap:0;overflow:hidden;box-shadow:0 1px 2px rgba(30,28,78,.04),0 12px 32px -14px rgba(30,28,78,.18)}
+.cpost+.cpost{margin-top:18px}
+.cpost::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--tf);opacity:.8}
+.cpost .chead{padding:16px 20px 14px 22px;gap:12px;background:linear-gradient(100deg,var(--tb) 0%,rgba(255,255,255,0) 78%);border-bottom:1px solid #EEF0F7}
+.cpost .chead .av{flex:none;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--tf)}
+.cpost .cwho{flex:1;min-width:0}
+.cpost .cwho b{font-size:15.5px;color:#1E1C4E;letter-spacing:.005em}
+.cpost .cwho small{margin-top:2px}
+.cteam{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:999px;background:#1E1C4E;color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;vertical-align:2px;font-style:normal}
+.cpost .ctext{padding:16px 22px 12px;font-size:15px;line-height:1.72;color:#34335C}
+.cpost .cfoot{margin:0 16px;padding:8px 0 10px;border-top:1px solid #F0F1F7}
+.cpost .creps{margin:0 16px 16px;background:#F6F7FC}
+.cpost.is-team{border-color:#D9DCF2}
+@media (max-width:600px){.cpost .chead{padding:14px 14px 12px 18px}.cpost .ctext{padding:14px 18px 10px;font-size:14.5px}.cpost .cfoot{margin:0 10px}.cpost .creps{margin:0 10px 12px}}
+@media (max-width:600px){.cpost .chead{flex-wrap:wrap;row-gap:8px}.cpost .chead>.ntag{order:3;margin-left:58px}.cpost .cwho b{font-size:15px}}
+@media (max-width:600px){.cpost .cwho{flex:1 1 calc(100% - 62px)}}
+
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
 
@@ -2509,12 +2527,15 @@ function renderCommunity(){const all=D.community||[];const tf=F.ctag||"all";cons
    <aside class="cside"><div class="gl" style="padding:18px"><span class="eyebrow" style="color:#5A36E0">How it works</span><ul class="cl">${[["Question","Ask students and alumni"],["Concern","Something worrying you about placements"],["Insight","Something you learned"],["Win","Good news, big or small"],["Thanks","Appreciate someone who helped"],["Other","Anything else"]].map(([t,d])=>`<li><span class="ctp">${t}</span><span class="ctd">${d}</span></li>`).join("")}</ul></div>
     <div class="gl" style="padding:18px"><span class="eyebrow" style="color:#C2412A">Keep it kind</span><p style="font-size:13.5px;margin:8px 0 0;color:var(--body)">No phone numbers or personal details. Posts that mention a fee, a scam or a safety concern are held for the placement team to check first. If something feels wrong, use Report.</p></div>
     <button class="gl" data-go="journeys" style="display:flex;gap:12px;align-items:center;padding:16px;text-align:left">${orb("linear-gradient(180deg,#F1ECFF,#D7CBFF)","#5A36E0",ic("route",18),40)}<span><b>Placement journeys</b><br><small class="muted">Read how seniors got placed, and ask them questions.</small></span></button></aside></div></div>`}
+/* show ALL-CAPS Google names as "Uma Maheshwari" */
+const nmc=s=>{s=String(s||"");return s.length>3&&s===s.toUpperCase()&&/[A-Z]/.test(s)?s.toLowerCase().replace(/(^|[\s.'-])([a-z])/g,(m,a,b)=>a+b.toUpperCase()):s};
 function cpostCard(p){const open=COPEN.has(p.id);const n=(p.qa||[]).length;
-  return `<article class="cpost gl" id="cp-${esc(p.id)}"><div class="chead">${avH(p.name,p.photo,44)}<span style="flex:1;min-width:0"><b>${esc(p.name)}</b><small>${esc([p.role,p.programme,p.batch&&"batch "+p.batch].filter(Boolean).join(" · "))}${p.role?" · ":""}${ago(p.t)}</small></span>${ctag(p.tag)}</div>
+  const tc=CTAGS[p.tag]||CTAGS.Insight;
+  return `<article class="cpost${p.team?" is-team":""}" id="cp-${esc(p.id)}" style="--tb:${tc[0]};--tf:${tc[1]}"><div class="chead">${avH(p.name,p.photo,46)}<span class="cwho"><b>${esc(nmc(p.name))}</b>${p.team?'<span class="cteam">Placement team</span>':""}<small>${esc([p.role,p.programme,p.batch&&"batch "+p.batch].filter(Boolean).join(" · "))}${p.role?" · ":""}${ago(p.t)}</small></span>${ctag(p.tag)}</div>
    <div class="ctext">${ctext(p.text)}</div>
    <div class="cfoot"><button class="cbtn${p.mineLike?" on":""}" data-clike="${esc(p.id)}" aria-pressed="${!!p.mineLike}">${ic("heart",15)} ${p.likes||0}</button><button class="cbtn" data-copen="${esc(p.id)}" aria-expanded="${open}">${ic("chat",15)} ${n?n+(n===1?" reply":" replies"):"Reply"}</button>
     <span style="margin-left:auto;display:flex;gap:6px">${p.mine||LV()===3?`<button class="cbtn" data-chide="${esc(p.id)}">${p.mine?"Delete":"Remove"}</button>`:ME?`<button class="cbtn" data-creport="${esc(p.id)}">Report</button>`:""}</span></div>
-   ${open?`<div class="creps">${(p.qa||[]).map(q=>`<div class="crep">${avH(q.name,q.photo,30)}<span><b>${esc(q.name)}</b> <small class="muted">${ago(q.t)}</small><br>${ctext(q.text)}</span></div>`).join("")}
+   ${open?`<div class="creps">${(p.qa||[]).map(q=>`<div class="crep">${avH(q.name,q.photo,30)}<span><b>${esc(nmc(q.name))}</b>${q.team?' <span class="cteam">Team</span>':""} <small class="muted">${ago(q.t)}</small><br>${ctext(q.text)}</span></div>`).join("")}
     ${ME?`<form class="row" data-creply="${esc(p.id)}">${avH(ME.name,ME.photo,30)}<input class="field" data-mention maxlength="600" placeholder="Write a reply (type @ to mention someone)" style="flex:1" aria-label="Your reply"><button class="btn primary small">Reply</button></form>`:`<button class="link" data-signin>Sign in to reply</button>`}</div>`:""}</article>`}
 
 /* profile photo */
