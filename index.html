@@ -1159,6 +1159,18 @@ a.nlink:hover{background:#DDE6FF}
 @media (max-width:600px){.cpost .chead{flex-wrap:wrap;row-gap:8px}.cpost .chead>.ntag{order:3;margin-left:58px}.cpost .cwho b{font-size:15px}}
 @media (max-width:600px){.cpost .cwho{flex:1 1 calc(100% - 62px)}}
 
+/* loading state */
+.empty.is-loading{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.empty.is-loading b{font-size:15px;color:#1E1C4E}
+.empty.is-loading span:last-child{font-size:13px;color:#7A7D99}
+.sk{display:flex;flex-direction:column;gap:9px;width:min(420px,90%);margin-bottom:6px}
+.sk i{display:block;height:12px;border-radius:8px;background:linear-gradient(90deg,#ECEEF7 0%,#F7F8FD 40%,#ECEEF7 80%);background-size:200% 100%;animation:skm 1.2s linear infinite}
+.sk i:nth-child(1){width:55%}.sk i:nth-child(2){width:92%}.sk i:nth-child(3){width:74%}
+@keyframes skm{from{background-position:200% 0}to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.sk i{animation:none}}
+.ctime{white-space:nowrap}
+@media (max-width:600px){.cpost .chead{align-items:flex-start}.cpost .cwho b{display:block;line-height:1.3}.cpost .cteam{display:inline-block;margin:6px 0 4px;vertical-align:0}.cpost .cwho small{line-height:1.45}.cpost .chead>.ntag{margin-left:58px;margin-top:-2px}}
+
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
 
@@ -1278,7 +1290,7 @@ let DONE=new Set(store.get("mch-ready",[]));
 let LIVE=false;
 /* who can see what: 0 visitor · 1 signed in (students and alumni) · 2 MSSW email · 3 placement team. The live server enforces the same rules. */
 const LV=()=>!ME?0:ME.team?3:ME.mssw?2:1;
-let RAW=null,TEAM=[];
+let RAW=null,TEAM=[],BOOTED=PREVIEW;
 function applyAccess(){document.documentElement.classList.toggle("is-team",!!(ME&&ME.team));if(!RAW)return;const l=LV(),mssw=x=>x.access!=="MSSW"||l>=2;
   D={...RAW,drives:l>=2?RAW.drives:[],notices:l>=2?RAW.notices:[],events:RAW.events.filter(mssw),openings:RAW.openings.filter(mssw),
    journeys:l>=1?RAW.journeys:RAW.journeys.map(j=>({...j,questions:"",prep:"",advice:"",qa:[],locked:j.locked||!!(j.questions||j.prep||j.advice||(j.qa||[]).length)}))}}
@@ -1458,7 +1470,7 @@ async function load(){
   const r=await fetch(CONFIG.api+"?me="+encodeURIComponent(ME?ME.id:"")+"&k="+encodeURIComponent(ME?ME.key:"")+"&t="+Date.now(),{cache:"no-store"});
   const j=await r.json();if(!j.ok)throw new Error(j.error||"Could not load");
   if(ME&&j.me){ME={...ME,...j.me};store.set("mch-me",ME)}else if(ME&&!j.me){ME=null;store.set("mch-me",null);toast("Please sign in again on this device.")}
-  RAW={journeys:j.journeys||[],openings:j.openings||[],events:j.events||[],resources:j.resources||[],drives:j.drives||[],notices:j.notices||[],posts:j.posts||[],mentors:j.mentors||[],community:j.community||[],people:j.people||[],stats:j.stats||{}};TEAM=j.team||[];applyAccess();LIVE=true;
+  RAW={journeys:j.journeys||[],openings:j.openings||[],events:j.events||[],resources:j.resources||[],drives:j.drives||[],notices:j.notices||[],posts:j.posts||[],mentors:j.mentors||[],community:j.community||[],people:j.people||[],stats:j.stats||{}};TEAM=j.team||[];applyAccess();LIVE=true;store.set("mch-cache",{v:1,me:ME?ME.id:"",at:Date.now(),raw:RAW,team:TEAM});
   if(ME&&Array.isArray(j.readiness)){DONE=new Set(j.readiness);store.set("mch-ready",[...DONE])}}
 let PSEQ=0;
 function previewApi(a,b){const id="L"+(++PSEQ);const now=new Date().toISOString();
@@ -1992,7 +2004,7 @@ function formResource(){const {body,close}=drawer("Add a resource",`<h2>Add a re
     try{const r=await api("resource",{title:v("#rT"),kind:picked(body,"rK")[0],topic:v("#rTo"),link:v("#rL"),about:v("#rA")});close();toast(r&&r.held?"Thanks! It will appear after a quick check.":"Resource added. Thank you!");await refresh();go("resources")}catch(x){body.querySelector("#rErr").textContent=x.message}})}
 
 /* ---------- events ---------- */
-async function refresh(){if(!PREVIEW){try{await load()}catch(e){toast("Couldn't reach the hub right now. Please try again.")}}else applyAccess();if(view==="desk"&&LV()<3)view="home";render();
+async function refresh(){if(!PREVIEW){try{await load()}catch(e){toast("Couldn't reach the hub right now. Please try again.")}BOOTED=true}else applyAccess();if(view==="desk"&&LV()<3)view="home";render();
   const l=$("#live");l.classList.toggle("on",LIVE);l.lastElementChild.textContent=LIVE?"Live":"Preview"}
 let qT;
 document.addEventListener("input",e=>{if(e.target.id==="q"){F.q=e.target.value;clearTimeout(qT);qT=setTimeout(()=>{const pos=e.target.selectionStart;render();const q=$("#q");if(q){q.focus();q.setSelectionRange(pos,pos)}},180)}});
@@ -2531,7 +2543,7 @@ function renderCommunity(){const all=D.community||[];const tf=F.ctag||"all";cons
 const nmc=s=>{s=String(s||"");return s.length>3&&s===s.toUpperCase()&&/[A-Z]/.test(s)?s.toLowerCase().replace(/(^|[\s.'-])([a-z])/g,(m,a,b)=>a+b.toUpperCase()):s};
 function cpostCard(p){const open=COPEN.has(p.id);const n=(p.qa||[]).length;
   const tc=CTAGS[p.tag]||CTAGS.Insight;
-  return `<article class="cpost${p.team?" is-team":""}" id="cp-${esc(p.id)}" style="--tb:${tc[0]};--tf:${tc[1]}"><div class="chead">${avH(p.name,p.photo,46)}<span class="cwho"><b>${esc(nmc(p.name))}</b>${p.team?'<span class="cteam">Placement team</span>':""}<small>${esc([p.role,p.programme,p.batch&&"batch "+p.batch].filter(Boolean).join(" · "))}${p.role?" · ":""}${ago(p.t)}</small></span>${ctag(p.tag)}</div>
+  return `<article class="cpost${p.team?" is-team":""}" id="cp-${esc(p.id)}" style="--tb:${tc[0]};--tf:${tc[1]}"><div class="chead">${avH(p.name,p.photo,46)}<span class="cwho"><b>${esc(nmc(p.name))}</b>${p.team?'<span class="cteam">Placement team</span>':""}<small>${esc([p.role,p.programme,p.batch&&"batch "+p.batch].filter(Boolean).join(" · "))}${p.role?" · ":""}<span class="ctime">${ago(p.t)}</span></small></span>${ctag(p.tag)}</div>
    <div class="ctext">${ctext(p.text)}</div>
    <div class="cfoot"><button class="cbtn${p.mineLike?" on":""}" data-clike="${esc(p.id)}" aria-pressed="${!!p.mineLike}">${ic("heart",15)} ${p.likes||0}</button><button class="cbtn" data-copen="${esc(p.id)}" aria-expanded="${open}">${ic("chat",15)} ${n?n+(n===1?" reply":" replies"):"Reply"}</button>
     <span style="margin-left:auto;display:flex;gap:6px">${p.mine||LV()===3?`<button class="cbtn" data-chide="${esc(p.id)}">${p.mine?"Delete":"Remove"}</button>`:ME?`<button class="cbtn" data-creport="${esc(p.id)}">Report</button>`:""}</span></div>
@@ -2649,8 +2661,13 @@ function openBell(){const seen=new Date(bellSeen()),list=bellItems();
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-bell]");if(b){e.preventDefault();e.stopPropagation();openBell()}},true);
 {const _pm=paintMe;paintMe=function(){_pm.apply(this,arguments);paintBell()};const _aa=applyAccess;applyAccess=function(){const r=_aa.apply(this,arguments);try{paintBell()}catch(e){}return r}}
 if(/chtest/.test(location.search))window.__chBell=paintBell;
+/* first visit on a device: show a loading shimmer instead of "nothing here" until the hub's data arrives */
+function markLoading(){document.querySelectorAll("#main .empty").forEach(e=>{if(e.dataset.ld)return;e.dataset.ld=1;e.classList.add("is-loading");e.innerHTML=`<span class="sk"><i></i><i></i><i></i></span><b>Loading the latest…</b><span>This takes a few seconds the first time.</span>`})}
+{const _r=render;render=function(){const out=_r.apply(this,arguments);if(!BOOTED)markLoading();return out}}
 
 RAW=realData();applyAccess();
+/* show what this device saw last time straight away; fresh data replaces it a moment later */
+if(!PREVIEW){const C=store.get("mch-cache",null);if(C&&C.v===1&&C.raw&&C.me===(ME?ME.id:"")&&Date.now()-C.at<14*864e5){RAW=C.raw;TEAM=C.team||[];applyAccess();BOOTED=true}}
 if(PREVIEW){$("#pvAs").innerHTML=`<span>Preview as</span>${[["visitor","Visitor"],["alumni","Alumni"],["student","Student"],["team","Placement team"]].map(([k,l])=>`<button data-as="${k}">${l}</button>`).join("")}`}
 const start=(location.hash||"").slice(1);nav();go(VIEWS.some(v=>v[0]===start)?start:"home");
 if(!PREVIEW)refresh();
