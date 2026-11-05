@@ -2414,6 +2414,10 @@ function wrapLines(ctx,text,maxW,maxLines){const words=String(text||"").replace(
   if(!cut&&line)out.push(line);
   if(cut){let l=out[maxLines-1];while(l&&ctx.measureText(l+"…").width>maxW)l=l.slice(0,-1);out[maxLines-1]=l.replace(/[\s,.;:]+$/,"")+"…"}
   return out}
+/* card description: show only whole sentences that fit, so it never stops mid-sentence */
+function fitSentences(ctx,text,maxW,maxLines){const t=String(text||"").replace(/\s+/g," ").trim();const parts=t.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g)||[t];let best=null,acc="";
+  for(const p of parts){const next=(acc+" "+p).trim();const ls=wrapLines(ctx,next,maxW,99);if(ls.length<=maxLines){acc=next;best=ls}else break}
+  return best||wrapLines(ctx,t,maxW,maxLines)}
 async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
   const F='"Plus Jakarta Sans", Inter, system-ui, sans-serif';try{await Promise.all([document.fonts.load("800 60px "+F),document.fonts.load("500 30px "+F),document.fonts.load("700 24px "+F)])}catch(e){}
   const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,"#120F38");g.addColorStop(.55,"#2A1F78");g.addColorStop(1,"#4B2E9E");x.fillStyle=g;x.fillRect(0,0,W,H);
@@ -2438,7 +2442,7 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   x.font="600 30px "+F;const nl=note?wrapLines(x,note,W-2*P-64,2):[];const nh=nl.length?nl.length*42+48:0;const noteTop=nh?H-206-nh-24:H-182;
   const forT=part("for").replace(/^(For|Who can apply): /,"");const hasLink=!!part("link");const chipTop=noteTop-78;
   /* what */
-  const what=part("what");if(what){x.font="500 36px "+F;const free=Math.floor((chipTop-24-y)/52);if(free>0){x.fillStyle="#E4E0FF";wrapLines(x,what,W-2*P,Math.min(4,free)).forEach(l=>{x.fillText(l,P,y+34);y+=52})}}
+  const what=part("what");if(what){x.font="500 36px "+F;const free=Math.floor((chipTop-24-y)/52);if(free>0){x.fillStyle="#E4E0FF";fitSentences(x,what,W-2*P,Math.min(4,free)).forEach(l=>{x.fillText(l,P,y+34);y+=52})}}
   /* chips row: who it's for + link in caption */
   let cx=P;x.font="700 25px "+F;
   if(forT){const t="For "+forT.replace(/^./,m=>m.toLowerCase()),w=Math.min(x.measureText(t).width+44,W-2*P);x.fillStyle="rgba(255,255,255,.12)";rr(cx,chipTop,w,54,27);x.fill();x.fillStyle="#fff";x.fillText(wrapLines(x,t,w-44,1)[0],cx+22,chipTop+36);cx+=w+14}
@@ -2447,14 +2451,14 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   /* footer */
   x.fillStyle="#fff";rr(P,H-176,W-2*P,104,30);x.fill();x.fillStyle="#6B6790";x.font="700 21px "+F;sp("2px");x.fillText("SIGN IN FOR FULL DETAILS",P+36,H-132);sp("0px");
   x.fillStyle="#1A1650";x.font="800 32px "+F;x.fillText((CONFIG.site||"mssw-career-hub.github.io").replace(/^https?:\/\//,""),P+36,H-94);
-  x.fillStyle="#F2543D";x.font="800 40px "+F;x.fillText("→",W-P-80,H-108);
+  
   return c}
 function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that item.");return}const kind=ref.split(":")[0];const K=SHARE_KIND[kind]||SHARE_KIND.notice;const on={what:1,for:1,when:1,link:1,hub:1};
   const hub=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
   const lp=(s.parts.find(([k,t])=>k==="link"&&t)||[])[1]||"";const lm=lp.match(/^(.*?):\s*(https?:\/\/\S+)/)||(lp.match(/^https?:\/\/\S+/)?["","Link",lp]:null);
   const lu=lm?lm[2]:"";const lab=!lu?"":/docs\.google\.com\/forms|forms\.gle/.test(lu)?"Fill the form":/spreadsheets/.test(lu)?"Fill the sheet":/docs\.google\.com\/document|drive\.google|\.pdf/.test(lu)?"Open the document":/meet\.google|zoom\.us|teams\./.test(lu)?"Join the meeting":lm[1]==="Read more"?"Read more":"Open the link";
-  const linkLine=lu?"*"+lab+" ↓*\n"+lu:"";
-  const join="*Join the MSSW Career Hub ↓*\n_Placement notices, alumni journeys and mentors in one place._\n_Students: sign in with your MSSW ID. Alumni: any email, no password._\n"+hub;
+  const linkLine=lu?"*"+lab+"*\n"+lu:"";
+  const join="*Join the MSSW Career Hub*\n_Placement notices, alumni journeys and mentors in one place._\n*Students:* sign in with your MSSW ID\n*Alumni:* sign in with any email, no password\n"+hub;
   const caption=note=>[note,linkLine,join].filter(Boolean).join("\n\n");
   const fullText=note=>{const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?p[1]:""};const meta=[part("for"),part("when")].filter(Boolean).join(" · ");
     return [note?note+"\n":"","*"+s.title+"*",part("what"),meta,"",linkLine,"",join].filter((v,i,a)=>v!==""||(a[i-1]&&a[i-1]!=="")).join("\n").trim()};
