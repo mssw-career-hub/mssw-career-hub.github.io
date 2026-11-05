@@ -1170,6 +1170,13 @@ a.nlink:hover{background:#DDE6FF}
 @media (prefers-reduced-motion:reduce){.sk i{animation:none}}
 .ctime{white-space:nowrap}
 @media (max-width:600px){.cpost .chead{align-items:flex-start}.cpost .cwho b{display:block;line-height:1.3}.cpost .cteam{display:inline-block;margin:6px 0 4px;vertical-align:0}.cpost .cwho small{line-height:1.45}.cpost .chead>.ntag{margin-left:58px;margin-top:-2px}}
+/* phone header: give the menu button full size; brand stacks onto two lines if space is short */
+@media (max-width:480px){.menu-btn{flex:none;width:42px!important;height:42px!important}.acts-top>*{flex:none}.top .brand{flex:0 1 auto;min-width:0}.top .brand b{white-space:normal;max-width:84px;line-height:1.15}header.top .wrap{padding-left:14px;padding-right:14px}}
+/* side panels on phones: full width, rounded only at the top, no scrollbar line */
+.drawer{scrollbar-width:thin}
+@media (max-width:600px){.drawer{border-radius:22px 22px 0 0;border-left:0;scrollbar-width:none}.drawer::-webkit-scrollbar{display:none}}
+.drawer .btn.light{background:#fff;color:#2A2770;border:1px solid #D9DCF2;box-shadow:none}
+.drawer .btn.light:hover{background:#F4F5FF}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2040,6 +2047,8 @@ document.addEventListener("submit",async e=>{const f=e.target.closest("[data-ask
     if(it){const k=D.journeys.includes(it)?openJourney:D.openings.includes(it)?openOpening:openEvent;k(id)}}catch(x){toast(x.message)}});
 $("#menuBtn").addEventListener("click",()=>{const n=$("#nav");n.classList.toggle("open");$("#menuBtn").setAttribute("aria-expanded",n.classList.contains("open"))});
 
+/* show ALL-CAPS Google names as "Uma Maheshwari" */
+const nmc=s=>{s=String(s||"");return s.length>3&&s===s.toUpperCase()&&/[A-Z]/.test(s)?s.toLowerCase().replace(/(^|[\s.'-])([a-z])/g,(m,a,b)=>a+b.toUpperCase()):s};
 /* ===== Premium layer: new navigation, pages, alumni sharing and WhatsApp (Nov 2026 redesign) ===== */
 P.wa='<path d="M20 12a8 8 0 0 1-11.7 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/>';
 P.upload='<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>';
@@ -2526,7 +2535,7 @@ function peopleCSV(){const rows=[["Name","Email","Role","Programme","Batch","Joi
 /* community wall */
 function renderCommunity(){const all=D.community||[];const tf=F.ctag||"all";const list=all.filter(p=>tf==="all"||p.tag===tf);
   const me=ME?`<form class="cpose gl" id="cpF">
-     <div class="cp-who">${avH(ME.name,ME.photo,46)}<div class="cp-id"><b>${esc(ME.name)}</b><small>${esc([ME.role,ME.programme,ME.batch?"Batch "+ME.batch:""].filter(Boolean).join(" · "))}</small></div>${ME.photo?"":`<button type="button" class="cp-photo" data-photo>${ic("plus",13)} <span class="cp-add">Add </span>photo</button>`}</div>
+     <div class="cp-who">${avH(ME.name,ME.photo,46)}<div class="cp-id"><b>${esc(nmc(ME.name))}</b><small>${esc([ME.role,ME.programme,ME.batch?"Batch "+ME.batch:""].filter(Boolean).join(" · "))}</small></div>${ME.photo?"":`<button type="button" class="cp-photo" data-photo>${ic("plus",13)} <span class="cp-add">Add </span>photo</button>`}</div>
      <label class="sr" for="cpT">Your post</label><textarea class="field" id="cpT" data-mention maxlength="1500" rows="3" placeholder="Share a worry, a win, a tip or a question with MSSW students and alumni"></textarea>
      <div class="cp-kind"><span class="cp-lab">This is a</span><div class="ctags" role="radiogroup" aria-label="What kind of post">${CTAG_LIST.map((t,i)=>`<label><input type="radio" name="cpTag" value="${t}" ${i===2?"checked":""}><span style="--b:${CTAGS[t][0]};--f:${CTAGS[t][1]}">${t}</span></label>`).join("")}</div></div>
      <div class="cp-foot"><small>Type <b>@</b> to mention someone; they'll get an email. Your name${ME.photo?" and photo show":" shows"} with your post. Be kind; the placement team can remove posts.</small><button class="btn coral">${ic("chat",15)} Post</button></div>
@@ -2539,8 +2548,6 @@ function renderCommunity(){const all=D.community||[];const tf=F.ctag||"all";cons
    <aside class="cside"><div class="gl" style="padding:18px"><span class="eyebrow" style="color:#5A36E0">How it works</span><ul class="cl">${[["Question","Ask students and alumni"],["Concern","Something worrying you about placements"],["Insight","Something you learned"],["Win","Good news, big or small"],["Thanks","Appreciate someone who helped"],["Other","Anything else"]].map(([t,d])=>`<li><span class="ctp">${t}</span><span class="ctd">${d}</span></li>`).join("")}</ul></div>
     <div class="gl" style="padding:18px"><span class="eyebrow" style="color:#C2412A">Keep it kind</span><p style="font-size:13.5px;margin:8px 0 0;color:var(--body)">No phone numbers or personal details. Posts that mention a fee, a scam or a safety concern are held for the placement team to check first. If something feels wrong, use Report.</p></div>
     <button class="gl" data-go="journeys" style="display:flex;gap:12px;align-items:center;padding:16px;text-align:left">${orb("linear-gradient(180deg,#F1ECFF,#D7CBFF)","#5A36E0",ic("route",18),40)}<span><b>Placement journeys</b><br><small class="muted">Read how seniors got placed, and ask them questions.</small></span></button></aside></div></div>`}
-/* show ALL-CAPS Google names as "Uma Maheshwari" */
-const nmc=s=>{s=String(s||"");return s.length>3&&s===s.toUpperCase()&&/[A-Z]/.test(s)?s.toLowerCase().replace(/(^|[\s.'-])([a-z])/g,(m,a,b)=>a+b.toUpperCase()):s};
 function cpostCard(p){const open=COPEN.has(p.id);const n=(p.qa||[]).length;
   const tc=CTAGS[p.tag]||CTAGS.Insight;
   return `<article class="cpost${p.team?" is-team":""}" id="cp-${esc(p.id)}" style="--tb:${tc[0]};--tf:${tc[1]}"><div class="chead">${avH(p.name,p.photo,46)}<span class="cwho"><b>${esc(nmc(p.name))}</b>${p.team?'<span class="cteam">Placement team</span>':""}<small>${esc([p.role,p.programme,p.batch&&"batch "+p.batch].filter(Boolean).join(" · "))}${p.role?" · ":""}<span class="ctime">${ago(p.t)}</span></small></span>${ctag(p.tag)}</div>
@@ -2559,7 +2566,7 @@ function pickPhoto(){const inp=document.createElement("input");inp.type="file";i
    toast("Uploading your photo…");const r=await api("photo",{data,type:"image/jpeg"});if(r&&r.me){ME={...ME,...r.me};store.set("mch-me",ME)}
    if(!PREVIEW)await refresh();else render();toast("Photo updated");document.querySelectorAll(".scrim").forEach(s=>s.remove())}catch(x){toast(x.message||"That photo could not be used.")}};inp.click()}
 function openMine(){const mine=k=>(D[k]||[]).filter(x=>x.mine);
-  drawer("Your profile",`<div class="org" style="align-items:center">${avH(ME.name,ME.photo,64)}<span><b style="font-size:1.1rem">${esc(ME.name)}</b><small>${ME.team?"Placement team · ":""}${esc(ME.role||"")}${ME.programme?" · "+esc(ME.programme):""}${ME.batch?" · "+esc(ME.batch):""}</small>
+  drawer("Your profile",`<div class="org" style="align-items:center">${avH(ME.name,ME.photo,64)}<span><b style="font-size:1.1rem">${esc(nmc(ME.name))}</b><small>${ME.team?"Placement team · ":""}${esc(ME.role||"")}${ME.programme?" · "+esc(ME.programme):""}${ME.batch?" · "+esc(ME.batch):""}</small>
     <span class="row" style="margin-top:8px"><button class="btn small primary" data-photo>${ME.photo?"Change photo":"Add your photo"}</button>${ME.photo?`<button class="btn small ghost" data-unphoto>Remove</button>`:""}</span></span></div>
    <p class="muted" style="font-size:13px;margin:10px 0 0">Your photo appears small next to your journeys, posts and replies.</p>
    <label class="check mailpref"><input type="checkbox" data-noemail ${ME.noEmail?"":"checked"}> Email me about new career bites, placement journeys, and when someone @mentions me</label>
