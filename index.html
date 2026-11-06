@@ -1497,7 +1497,7 @@ async function load(){
   const r=await fetch(CONFIG.api+"?me="+encodeURIComponent(ME?ME.id:"")+"&k="+encodeURIComponent(ME?ME.key:"")+"&t="+Date.now(),{cache:"no-store"});
   const j=await r.json();if(!j.ok)throw new Error(j.error||"Could not load");
   if(ME&&j.me){ME={...ME,...j.me};store.set("mch-me",ME)}else if(ME&&!j.me){ME=null;store.set("mch-me",null);toast("Please sign in again on this device.")}
-  RAW={journeys:j.journeys||[],openings:j.openings||[],events:j.events||[],resources:j.resources||[],drives:j.drives||[],notices:j.notices||[],posts:j.posts||[],mentors:j.mentors||[],community:j.community||[],people:j.people||[],stats:j.stats||{}};TEAM=j.team||[];applyAccess();LIVE=true;store.set("mch-cache",{v:1,me:ME?ME.id:"",at:Date.now(),raw:RAW,team:TEAM});
+  RAW={journeys:j.journeys||[],openings:j.openings||[],events:j.events||[],resources:j.resources||[],drives:j.drives||[],notices:j.notices||[],posts:j.posts||[],mentors:j.mentors||[],community:j.community||[],people:j.people||[],names:j.names||[],stats:j.stats||{}};TEAM=j.team||[];applyAccess();LIVE=true;store.set("mch-cache",{v:1,me:ME?ME.id:"",at:Date.now(),raw:RAW,team:TEAM});
   if(ME&&Array.isArray(j.readiness)){DONE=new Set(j.readiness);store.set("mch-ready",[...DONE])}}
 let PSEQ=0;
 function previewApi(a,b){const id="L"+(++PSEQ);const now=new Date().toISOString();
@@ -2641,7 +2641,7 @@ document.addEventListener("click",e=>{if(e.target.closest("[data-bitenew]")){if(
 /* email preference */
 document.addEventListener("change",async e=>{const c=e.target.closest("[data-noemail]");if(!c)return;try{const r=await api("prefs",{noEmail:!c.checked});ME={...ME,...(r&&r.me||{}),noEmail:!c.checked};store.set("mch-me",ME);toast(c.checked?"You'll get email updates":"Email updates switched off")}catch(x){c.checked=!c.checked;toast(x.message)}});
 /* ---------- @mention suggestions ---------- */
-function mentionPool(){const s=new Set();(D.community||[]).forEach(p=>{p.name&&s.add(p.name);(p.qa||[]).forEach(q=>q.name&&s.add(q.name))});(D.journeys||[]).forEach(j=>{j.name&&!/^An MSSW/.test(j.name)&&s.add(j.name)});(D.mentors||[]).forEach(m=>m.name&&s.add(m.name));(D.people||[]).forEach(p=>p.name&&s.add(p.name));if(ME)s.delete(ME.name);return [...s].sort((a,b)=>a.localeCompare(b))}
+function mentionPool(){const s=new Set();(D.community||[]).forEach(p=>{p.name&&s.add(p.name);(p.qa||[]).forEach(q=>q.name&&s.add(q.name))});(D.journeys||[]).forEach(j=>{j.name&&!/^An MSSW/.test(j.name)&&s.add(j.name)});(D.mentors||[]).forEach(m=>m.name&&s.add(m.name));(D.people||[]).forEach(p=>p.name&&s.add(p.name));(D.names||[]).forEach(n=>n&&s.add(n));if(ME)s.delete(ME.name);const seen=new Set();return [...s].filter(n=>{const k=n.toLowerCase().trim();if(seen.has(k))return false;seen.add(k);return true}).sort((a,b)=>a.localeCompare(b))}
 let MB=null,MBi=0,MBf=null,MBq=null;
 function closeMB(){if(MB)MB.remove();MB=null}
 function pickMB(name){const f=MBf;if(!f||MBq==null)return closeMB();const pos=f.selectionStart;const before=f.value.slice(0,pos),after=f.value.slice(pos);const nb=before.slice(0,before.length-MBq.length-1)+"@"+name+" ";f.value=nb+after;closeMB();f.focus();f.setSelectionRange(nb.length,nb.length)}
@@ -2649,7 +2649,7 @@ document.addEventListener("input",e=>{const f=e.target;if(!f.matches||!f.matches
   const before=f.value.slice(0,f.selectionStart);const m=before.match(/(?:^|\s)@([^@\n]{0,30})$/);if(!m){closeMB();return}
   const q=m[1].toLowerCase();const list=mentionPool().filter(n=>{const l=n.toLowerCase();return l.startsWith(q)||l.split(" ").some(w=>w.startsWith(q))}).slice(0,6);if(!list.length){closeMB();return}
   closeMB();MBf=f;MBq=m[1];MBi=0;MB=document.createElement("div");MB.className="mbox";MB.setAttribute("role","listbox");
-  MB.innerHTML=list.map((n,i)=>`<button type="button" role="option" data-mpick="${esc(n)}" aria-selected="${i===0}">${avH(n,"",26)}<span>${esc(n)}</span></button>`).join("")+`<small>They'll get an email with your post</small>`;
+  MB.innerHTML=list.map((n,i)=>`<button type="button" role="option" data-mpick="${esc(nmc(n))}" aria-selected="${i===0}">${avH(n,"",26)}<span>${esc(nmc(n))}</span></button>`).join("")+`<small>They'll get an email with your post</small>`;
   const r=f.getBoundingClientRect();MB.style.left=Math.max(8,Math.min(r.left,innerWidth-268))+"px";MB.style.top=(r.bottom+6)+"px";document.body.appendChild(MB)});
 document.addEventListener("mousedown",e=>{const b=e.target.closest("[data-mpick]");if(b){e.preventDefault();pickMB(b.dataset.mpick);return}if(MB&&!e.target.closest(".mbox"))closeMB()});
 document.addEventListener("keydown",e=>{if(!MB)return;const os=[...MB.querySelectorAll("[data-mpick]")];if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();MBi=(MBi+(e.key==="ArrowDown"?1:-1)+os.length)%os.length;os.forEach((o,i)=>o.setAttribute("aria-selected",i===MBi))}else if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();e.stopPropagation();pickMB(os[MBi].dataset.mpick)}else if(e.key==="Escape")closeMB()},true);
