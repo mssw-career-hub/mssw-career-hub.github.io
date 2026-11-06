@@ -2307,24 +2307,24 @@ function openPost(id){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return;cons
   drawer(KIND[p.kind]?KIND[p.kind][0]:"Post",`${kindTag(p.kind)}<h2 style="margin:12px 0 6px;text-transform:none;letter-spacing:0;font-size:20px">${esc(p.title)}</h2>
    <div class="by" style="border:0;padding:0 0 12px">${byAv(p)}<span>${esc(p.by||"MSSW alumni")}${p.byBatch?" · batch "+esc(p.byBatch):""}${p.byOrg?" · "+esc(p.byOrg):""}<br>${ago(p.t)}</span></span>
    ${[m.org&&["Organisation",m.org],m.location&&["Location",m.location],p.deadline&&["Apply by",nice(p.deadline)],m.subtype&&["Type",m.subtype],m.date&&["Date",nice(m.date)],m.provider&&["Offered by",m.provider],m.cost&&["Cost",m.cost]].filter(Boolean).length?`<dl class="facts">${[m.org&&["Organisation",m.org],m.location&&["Location",m.location],p.deadline&&["Apply by",nice(p.deadline)],m.subtype&&["Type",m.subtype],m.date&&["Date",nice(m.date)],m.provider&&["Offered by",m.provider],m.cost&&["Cost",m.cost]].filter(Boolean).map(([a,b])=>`<dt>${a}</dt><dd>${esc(b)}</dd>`).join("")}</dl>`:""}
-   <div class="prose2">${md(p.body)}</div>
+   <div class="prose2">${md(p.body).replace(/(^|[\s(>])@([A-Z][A-Za-z.'-]*(?: [A-Z][A-Za-z.'-]*){0,3})/g,'$1<span class="mention">@$2</span>')}</div>
    ${files.length?`<h3>Files</h3><div class="files">${files.map(f=>{const e=(f.name.split(".").pop()||"").toUpperCase().slice(0,4);return `<a class="file" href="${esc(f.url)}" target="_blank" rel="noopener"><span class="ext" style="background:#F1ECFF;color:#5A36E0">${esc(e)}</span><span style="flex:1;min-width:0"><b style="display:block;font-size:13px">${esc(f.name)}</b><small class="muted">${f.size?(f.size/1048576).toFixed(1)+" MB":""}</small></span>↗</a>`}).join("")}</div>`:""}
-   <div class="row" style="margin-top:18px">${p.link?`<a class="btn coral" href="${esc(p.link)}" target="_blank" rel="noopener">${p.kind==="lead"?"Apply":"Open link"} ↗</a>`:""}${shareBtn("post:"+p.id)}${p.mine||LV()===3?`<button class="btn ghost" data-hide="posts:${esc(p.id)}">Remove</button>`:""}</div>`)}
+   <div class="row" style="margin-top:18px">${p.link?`<a class="btn coral" href="${esc(p.link)}" target="_blank" rel="noopener">${p.kind==="lead"?"Apply":"Open link"} ↗</a>`:""}${shareBtn("post:"+p.id)}${p.mine||LV()===3?`<button class="btn ghost" data-editpost="${esc(p.id)}">Edit</button><button class="btn ghost" data-hide="posts:${esc(p.id)}">Remove</button>`:""}</div>`)}
 
 /* ---------- composer: alumni share on the site ---------- */
 const DRAFT=k=>"mch-draft-"+k;
-function openComposer(kind,trackPre){if(!needMe(()=>openComposer(kind,trackPre)))return;
+function openComposer(kind,trackPre,E){if(!needMe(()=>openComposer(kind,trackPre,E)))return;
   if(kind==="journey"){formJourney();return}if(kind==="mentor"){openProfile(true);return}
-  let K=kind||"skill";const st={files:[],cluster:"All",access:"Signed-in",track:trackPre||""};
+  let K=kind||"skill";const st=E?{files:(E.files||[]).map(f=>({...f,key:Math.random().toString(36).slice(2)})),cluster:E.cluster||"All",access:E.access||"Signed-in",track:E.track||""}:{files:[],cluster:"All",access:"Signed-in",track:trackPre||""};
   const {body,close,sc}=drawer("Share with students",`<div class="comp"><aside><span class="eyebrow" style="color:var(--coral);padding:0 2px 4px">What are you sharing?</span>${KIND_ORDER.map((k,i)=>`<button type="button" class="ty" data-k="${k}" aria-pressed="${k===K}">${orb(`linear-gradient(180deg,#fff,${KIND[k][1]})`,KIND[k][2],`<b style="font-size:11px">0${i+1}</b>`,28)}${esc(KIND[k][0])}</button>`).join("")}
      <p style="margin-top:auto;padding:12px;border-radius:14px;background:linear-gradient(160deg,#F3EFFF,#FFF1EC);font-size:12px;color:var(--body)">Drafts save as you type. You can remove anything you post from your profile.</p></aside>
     <section id="cpF"></section><aside id="cpR"></aside></div>`);
   sc.querySelector(".drawer").classList.add("wide");
   const F2=body.querySelector("#cpF"),R=body.querySelector("#cpR");
-  const fields=()=>({title:"",body:"",link:"",org:"",location:"",deadline:"",subtype:"Internship",date:"",provider:"",cost:"",...(store.get(DRAFT(K),{}))});
+  const fields=()=>E?{title:E.title||"",body:E.body||"",link:E.link||"",deadline:E.deadline||"",org:"",location:"",subtype:"Internship",date:"",provider:"",cost:"",...(E.meta||{})}:({title:"",body:"",link:"",org:"",location:"",deadline:"",subtype:"Internship",date:"",provider:"",cost:"",...(store.get(DRAFT(K),{}))});
   let v=fields();
   const val=id=>(F2.querySelector("#"+id)||{value:""}).value.trim();
-  const save=()=>{v={title:val("cTitle"),body:(F2.querySelector("#cBody")||{value:""}).value,link:val("cLink"),org:val("cOrg"),location:val("cLoc"),deadline:val("cDl"),subtype:(F2.querySelector("#cSub [aria-pressed=true]")||{dataset:{v:v.subtype}}).dataset.v,date:val("cDate"),provider:val("cProv"),cost:val("cCost")};store.set(DRAFT(K),v);preview()};
+  const save=()=>{v={title:val("cTitle"),body:(F2.querySelector("#cBody")||{value:""}).value,link:val("cLink"),org:val("cOrg"),location:val("cLoc"),deadline:val("cDl"),subtype:(F2.querySelector("#cSub [aria-pressed=true]")||{dataset:{v:v.subtype}}).dataset.v,date:val("cDate"),provider:val("cProv"),cost:val("cCost")};if(!E)store.set(DRAFT(K),v);preview()};
   const fileRow=f=>`<div class="file"><span class="ext" style="background:${f.err?"#FFE4DC":"#F1ECFF"};color:${f.err?"#B4432A":"#5A36E0"}">${esc((f.name.split(".").pop()||"").toUpperCase().slice(0,4))}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px"><b style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</b>${f.err?`<small style="color:#B4432A">${esc(f.err)}</small>`:f.url?`<small style="color:#22714A">Uploaded · ${(f.size/1048576).toFixed(1)} MB</small>`:`<span class="bar"><i style="width:60%;animation:upl 1.2s ease-in-out infinite alternate"></i></span>`}</span><button type="button" class="x" data-rmf="${esc(f.key)}" aria-label="Remove ${esc(f.name)}">✕</button></div>`;
   const paintFiles=()=>{const b=F2.querySelector("#cFiles");if(b)b.innerHTML=st.files.map(fileRow).join("")};
   const paint=()=>{const lead=K==="lead",opp=K==="opp",cert=K==="cert";
@@ -2334,7 +2334,7 @@ function openComposer(kind,trackPre){if(!needMe(()=>openComposer(kind,trackPre))
      ${opp?`<span class="lab">Type</span>${pickHtml("cSub",["Conference","Internship","Fellowship","Workshop","Competition"],v.subtype)}<div class="two"><div><label class="lab" for="cDate">Date or start</label><input class="field" id="cDate" type="date" value="${esc(v.date)}"></div><div><label class="lab" for="cDl">Apply by</label><input class="field" id="cDl" type="date" value="${esc(v.deadline)}"></div></div>`:""}
      ${cert?`<div class="two"><div><label class="lab" for="cProv">Offered by</label><input class="field" id="cProv" maxlength="80" value="${esc(v.provider)}"></div><div><label class="lab" for="cCost">Cost and duration</label><input class="field" id="cCost" maxlength="60" value="${esc(v.cost)}" placeholder="e.g. Free · 6 weeks"></div></div>`:""}
      <label class="lab" for="cBody">${lead?"About the role and who should apply":cert?"Why it helped you":"Write it here"}</label>
-     <div class="gl" style="border-radius:12px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)!important"><div class="tb">${[["**","Bold","B"],["_","Italic","I"],["# ","Heading","H"],["- ","Bulleted list","•"],["1. ","Numbered list","1."]].map(([m,l,s])=>`<button type="button" data-md="${esc(m)}" aria-label="${l}">${s}</button>`).join("")}</div><textarea class="field" id="cBody" rows="7" maxlength="6000" style="border:0;border-radius:0;box-shadow:none;resize:vertical">${esc(v.body)}</textarea></div>
+     <div class="gl" style="border-radius:12px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)!important"><div class="tb">${[["**","Bold","B"],["_","Italic","I"],["# ","Heading","H"],["- ","Bulleted list","•"],["1. ","Numbered list","1."]].map(([m,l,s])=>`<button type="button" data-md="${esc(m)}" aria-label="${l}">${s}</button>`).join("")}</div><textarea class="field" id="cBody" data-mention rows="7" maxlength="6000" placeholder="Type @ to mention someone; they'll get an email." style="border:0;border-radius:0;box-shadow:none;resize:vertical">${esc(v.body)}</textarea></div>
      <span class="lab">Attach files <small>(PDF, Word, PowerPoint, Excel or images, up to 10 MB each)</small></span>
      <label class="drop" id="cDrop">${orb("linear-gradient(180deg,#9A82FF,#6446EE)","#fff",ic("upload",18),42)}<span style="flex:1;font-size:13px;color:var(--body)"><b style="color:var(--ink)">Drag files here or browse</b><br>They're stored in the hub's folder and linked to your post.</span><input type="file" id="cFile" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.png,.jpg,.jpeg,.webp" class="sr"></label>
      <div class="files" id="cFiles" style="margin-top:10px"></div>
@@ -2345,9 +2345,9 @@ function openComposer(kind,trackPre){if(!needMe(()=>openComposer(kind,trackPre))
      ${["skill","material","cert"].includes(K)?`<div><span class="lab">Show it under</span>${pickHtml("cTr",TRACKS.map(t=>t[1]),(TRACKS.find(t=>t[0]===(st.track||(K==="cert"?"cert":K==="skill"?"skills":"interview")))||TRACKS[0])[1])}</div>`:""}
      <div><span class="lab">Who can see it</span>${pickHtml("cAc",["Signed-in students and alumni","Everyone"],st.access==="Everyone"?"Everyone":"Signed-in students and alumni")}</div>
      <div><span class="lab">Preview</span><div id="cPrev"></div></div>
-     <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px"><button type="button" class="btn coral" id="cGo">Publish to the hub</button><button type="button" class="btn" id="cDraft">Save draft</button><small class="muted" style="text-align:center;font-size:11.5px">Goes live straight away. The placement team is told if anything is reported.</small></div>`;
+     <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px"><button type="button" class="btn coral" id="cGo">${E?"Save changes":"Publish to the hub"}</button>${E?"":`<button type="button" class="btn" id="cDraft">Save draft</button>`}<small class="muted" style="text-align:center;font-size:11.5px">Goes live straight away. The placement team is told if anything is reported.</small></div>`;
     ["cCl","cTr","cAc"].forEach(id=>{const el=R.querySelector("#"+id);if(!el)return;wirePick(R,id);el.addEventListener("click",()=>setTimeout(()=>{const p=picked(R,id)[0];if(id==="cCl")st.cluster=p==="Everyone"?"All":p;if(id==="cTr")st.track=(TRACKS.find(t=>t[1]===p)||[""])[0];if(id==="cAc")st.access=p==="Everyone"?"Everyone":"Signed-in";preview()},0))});
-    R.querySelector("#cGo").onclick=publish;R.querySelector("#cDraft").onclick=()=>{save();toast("Draft saved on this device")};
+    R.querySelector("#cGo").onclick=publish;if(!E)R.querySelector("#cDraft").onclick=()=>{save();toast("Draft saved on this device")};
     preview()};
   const preview=()=>{const p=R.querySelector("#cPrev");if(!p)return;p.innerHTML=postCard({id:"_",kind:K,title:v.title||"[Your title]",body:v.body,files:st.files.filter(f=>f.url),cluster:st.cluster,deadline:v.deadline,by:ME.name,byBatch:ME.batch,byOrg:(ME.profile&&ME.profile.org)||""}).replace(/<button[^>]*data-post[^>]*>.*?<\/button>/,"").replace(/<button class="share"[^]*?<\/button>/,"")};
   const upload=file=>{const key=Math.random().toString(36).slice(2);const f={key,name:file.name,size:file.size};st.files.push(f);
@@ -2356,9 +2356,9 @@ function openComposer(kind,trackPre){if(!needMe(()=>openComposer(kind,trackPre))
   async function publish(){save();const err=F2.querySelector("#cErr");err.textContent="";
     if(v.title.length<4){err.textContent="Add a clear title.";return}if(st.files.some(f=>!f.url&&!f.err)){err.textContent="Wait for the files to finish uploading.";return}
     const b=R.querySelector("#cGo");b.disabled=true;
-    try{await api("post",{kind:K,title:v.title,body:v.body,link:v.link,cluster:st.cluster,access:st.access,track:["skill","material","cert"].includes(K)?(st.track||(K==="cert"?"cert":K==="skill"?"skills":"interview")):"",deadline:v.deadline,
+    try{await api("post",{id:E?E.id:undefined,kind:K,title:v.title,body:v.body,link:v.link,cluster:st.cluster,access:st.access,track:["skill","material","cert"].includes(K)?(st.track||(K==="cert"?"cert":K==="skill"?"skills":"interview")):"",deadline:v.deadline,
         files:st.files.filter(f=>f.url).map(f=>({name:f.name,url:f.url,id:f.id,size:f.size})),meta:{org:v.org,location:v.location,subtype:K==="opp"?v.subtype:"",date:v.date,provider:v.provider,cost:v.cost}});
-      store.set(DRAFT(K),null);close();toast("Published. Thank you for sharing!");await refresh();go(["lead","opp"].includes(K)?"alumni":"learn")}
+      if(!E)store.set(DRAFT(K),null);close();toast(E?"Changes saved.":"Published. Thank you for sharing!");await refresh();go(["lead","opp"].includes(K)?"alumni":"learn")}
     catch(x){err.textContent=x.message;b.disabled=false}}
   body.addEventListener("click",e=>{const t=e.target;let b;
     if((b=t.closest("[data-k]"))){save();K=b.dataset.k;if(K==="journey"||K==="mentor"){close();openComposer(K);return}body.querySelectorAll("[data-k]").forEach(x=>x.setAttribute("aria-pressed",x===b));v=fields();paint();return}
@@ -2493,6 +2493,7 @@ document.addEventListener("click",e=>{const t=e.target;let b;
   if((b=t.closest("[data-share]"))){e.stopPropagation();openShare(b.dataset.share);return}
   if((b=t.closest("[data-drive]"))){go("drive",b.dataset.drive);return}
   if((b=t.closest("[data-compose]"))){openComposer(b.dataset.compose,b.dataset.trackPre);return}
+  if((b=t.closest("[data-editpost]"))){const p=(D.posts||[]).find(x=>x.id===b.dataset.editpost);document.querySelectorAll(".scrim").forEach(x=>x.remove());if(p)openComposer(p.kind,p.track,p);return}
   if((b=t.closest("[data-track]"))){openTrack(b.dataset.track);return}
   if((b=t.closest("[data-post]"))){openPost(b.dataset.post);return}
   if((b=t.closest("[data-mentor]"))){openMentorReq(b.dataset.mentor);return}
