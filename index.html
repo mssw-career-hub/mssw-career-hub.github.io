@@ -2405,7 +2405,12 @@ function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"
   if(k==="event"){const e=D.events.find(x=>x.id===id);if(!e)return null;return {title:e.title,parts:[["what",(e.about||"").split(/\.\s/)[0]],["for","For: "+(e.audience||cl(e.cluster))],["when",(e.date?nice(e.date):"Date to be announced")+(e.time?", "+e.time:"")+(e.mode?" · "+e.mode:"")+(e.venue?" · "+e.venue:"")]]}}
   if(k==="opening"){const o=D.openings.find(x=>x.id===id);if(!o)return null;return {title:o.company+" · "+o.roles,parts:[["what",[o.type,o.location,o.ctc].filter(Boolean).join(" · ")],["for",o.eligibility?"Who can apply: "+o.eligibility:""],["when",o.deadline?"Apply by: "+nice(o.deadline):""],["link",o.link?"Apply: "+o.link:""]]}}
   if(k==="bite"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const urls=(p.body||"").match(/https?:\/\/[^\s]+/g)||[];return {title:p.title,parts:[["what",(p.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").trim()],["for","For: "+cl(p.cluster)],["when","Posted: "+nice((p.t||"").slice(0,10))],["link",p.link?"Read more: "+p.link:urls.length?"Link: "+urls[0]:""]]}}
-  if(k==="post"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;return {title:p.title,parts:[["what",(KIND[p.kind]||KIND.material)[0]+" shared by "+(p.by||"MSSW alumni")+(p.byOrg?", "+p.byOrg:"")],["for",p.cluster&&p.cluster!=="All"?"For: "+cl(p.cluster):""],["when",p.deadline?"Apply by: "+nice(p.deadline):""],["link",p.link||""]]}}
+  if(k==="post"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const m=p.meta||{};
+    const sum=String(p.body||"").replace(/https?:\/\/\S+/g,"").replace(/[*_#>`]/g,"").replace(/^\s*[-\d.]+\s+/gm,"").replace(/\s+/g," ").trim();
+    const by="Shared by "+nmc(p.by||"MSSW alumni")+(p.byOrg?", "+p.byOrg:"");
+    const urls=(p.body||"").match(/https?:\/\/[^\s)]+/g)||[];
+    return {title:p.title,tag:m.subtype||(KIND[p.kind]||KIND.material)[0],parts:[["what",sum?sum+" "+by+".":(KIND[p.kind]||KIND.material)[0]+" s"+by.slice(1)],["for",p.cluster&&p.cluster!=="All"?"For: "+cl(p.cluster):""],
+      ["when",[m.date&&"On: "+nice(m.date),p.deadline&&"Apply by: "+nice(p.deadline)].filter(Boolean).join(" · ")],["link",p.link?"Details: "+p.link:urls.length?"Details: "+urls[0]:""]]}}
   return null}
 const SHARE_KIND={bite:["Career bite","💡","home"],notice:["Notice","📢","notices"],drive:["Campus drive","💼","drives"],event:["Event","📅","events"],opening:["Opening","🧭","openings"],post:["From alumni","🤝","alumni"]};
 const SHARE_LAB={what:"What's happening",for:"Who it's for",when:"When"};
@@ -2431,9 +2436,9 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   else{x.fillStyle="#fff";x.font="800 29px "+F;sp("5px");x.fillText("MSSW CAREER HUB",P,y+40)}
   sp("0px");y+=156;
   /* kind chip + date */
-  const K=SHARE_KIND[kind]||SHARE_KIND.notice;x.font="800 24px "+F;sp("3px");const kt=K[0].toUpperCase(),kw=x.measureText(kt).width+52;
+  const K=SHARE_KIND[kind]||SHARE_KIND.notice;x.font="800 24px "+F;sp("3px");const kt=(s.tag||K[0]).toUpperCase(),kw=x.measureText(kt).width+52;
   const cg=x.createLinearGradient(P,y,P+kw,y);cg.addColorStop(0,"#FF8A65");cg.addColorStop(1,"#F2543D");x.fillStyle=cg;rr(P,y,kw,54,27);x.fill();x.fillStyle="#fff";x.fillText(kt,P+26,y+36);
-  const when=part("when").replace(/^(Posted|Date|Status|Apply by): /,"");if(when){x.font="700 24px "+F;sp("2px");x.fillStyle="rgba(231,227,255,.8)";const dt=when.toUpperCase();x.fillText(dt,W-P-x.measureText(dt).width,y+36)}
+  const when=part("when").replace(/^(Posted|Date|Status|Apply by|On): /,"");if(when){x.font="700 24px "+F;sp("2px");x.fillStyle="rgba(231,227,255,.8)";const dt=when.toUpperCase();x.fillText(dt,W-P-x.measureText(dt).width,y+36)}
   sp("0px");y+=118;
   /* title */
   x.fillStyle="#fff";let fs=70,tl=[];for(const z of [70,62,56,50]){fs=z;x.font="800 "+z+"px "+F;tl=wrapLines(x,s.title,W-2*P,9);if(tl.length<=4)break}tl=tl.slice(0,5);const lh=Math.round(fs*1.2);tl.forEach(l=>{x.fillText(l,P,y+fs*.83);y+=lh});y+=26;
