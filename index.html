@@ -1303,6 +1303,73 @@ html.gated .invite{display:none!important}
 .bite p{max-width:880px}
 .bite .bfoot{margin-top:6px}
 .gate-card .gate-note{font-size:.8rem;color:#8A88A6;margin:-6px 0 14px}
+/* ---------- the shutter: new visitors see the hub through a rolled-down shop shutter ---------- */
+#gate{background:none!important;display:grid;place-items:center}
+#gate .shutter{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(74,66,150,.93) 0,rgba(112,104,196,.93) 9px,rgba(84,76,166,.94) 16px,rgba(44,38,108,.96) 21px,rgba(18,14,52,.28) 21px,rgba(18,14,52,.28) 25px);
+  box-shadow:inset 0 0 120px rgba(10,8,40,.55);transition:transform 1.25s cubic-bezier(.65,0,.25,1)}
+#gate .shutter::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.07),transparent 18%,transparent 82%,rgba(255,255,255,.07));pointer-events:none}
+.sh-box{position:absolute;left:0;right:0;top:0;height:46px;background:linear-gradient(180deg,#2A2468,#17133F);border-bottom:3px solid #0E0B2E;box-shadow:0 6px 18px rgba(0,0,0,.35);display:flex;justify-content:space-between;align-items:center;padding:0 22px}
+.sh-bolt{width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#C9C4F2,#6E67A8)}
+.sh-sign{position:absolute;left:50%;top:62px;transform:translateX(-50%);white-space:nowrap;padding:8px 18px;border-radius:10px;background:#120F38;border:2px solid rgba(255,155,122,.55);color:#fff;font-weight:800;letter-spacing:.22em;font-size:12px;display:flex;gap:10px;align-items:center;box-shadow:0 0 22px rgba(255,112,82,.35),inset 0 0 12px rgba(255,112,82,.15)}
+.sh-sign b{color:#FF9B7A;text-shadow:0 0 10px rgba(255,112,82,.7)}
+.sh-dot{width:6px;height:6px;border-radius:50%;background:#F6C76B;box-shadow:0 0 8px #F6C76B;animation:shBlink 2.4s infinite}
+.sh-dot:last-child{animation-delay:1.2s}
+@keyframes shBlink{50%{opacity:.35}}
+.sh-bar{position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(180deg,#5C54B4,#2E2878);border-top:2px solid rgba(255,255,255,.18);display:grid;place-items:center}
+.sh-handle{width:120px;height:12px;border-radius:8px;background:linear-gradient(180deg,#D9D5F7,#8F88C9);box-shadow:0 2px 0 #241F62}
+#gate .gate-card{position:relative;z-index:1;margin:110px 0 50px;transition:opacity .35s,transform .35s;border:3px solid #fff;outline:1px solid rgba(20,16,60,.12)}
+#gate .gate-card::before,#gate .gate-card::after{content:"";position:absolute;top:-12px;width:64px;height:22px;background:rgba(255,236,190,.82);transform:rotate(-6deg);left:26px;box-shadow:0 2px 4px rgba(0,0,0,.12)}
+#gate .gate-card::after{left:auto;right:26px;transform:rotate(6deg)}
+.gate-pull{display:block;margin-top:12px;font-size:.78rem;font-weight:700;letter-spacing:.06em;color:#5A36E0;animation:pullHint 1.8s ease-in-out infinite}
+@keyframes pullHint{50%{transform:translateY(-3px)}}
+/* opening: the poster drops, the shutter jolts, then rolls up */
+#gate.open .gate-card{opacity:0;transform:translateY(30px) rotate(-3deg)}
+#gate.open .shutter{animation:shUp 1.35s .25s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes shUp{0%{transform:translateY(0)}12%{transform:translateY(14px)}100%{transform:translateY(-105%)}}
+html:not(.gated) #gate{background:none}
+@media (max-width:520px){.sh-sign{font-size:10.5px;letter-spacing:.16em;top:58px}#gate .gate-card{margin-top:100px}}
+/* ---------- member pass ---------- */
+.pass-wrap{position:fixed;inset:0;z-index:520;display:grid;place-items:center;align-content:center;gap:16px;padding:18px;background:rgba(18,15,56,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow-y:auto;animation:fade .25s}
+.pass{position:relative;width:min(380px,100%);background:#fff;border-radius:26px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4);animation:passIn .6s cubic-bezier(.2,1.3,.4,1)}
+@keyframes passIn{from{transform:translateY(40px) scale(.92);opacity:0}}
+.pass-top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:linear-gradient(90deg,#2A1F78,#4B2E9E);color:#fff;font-size:.78rem;font-weight:800;letter-spacing:.14em}.pass-top b{color:#FF9B7A}.pass-top span:last-child{opacity:.8}
+.pass-main{padding:22px 22px 18px;text-align:center}
+.pass-av{width:84px;height:84px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#9A82FF,#5A36E0);color:#fff;font-weight:800;font-size:30px;overflow:hidden;border:4px solid #F1EEFF}.pass-av img{width:100%;height:100%;object-fit:cover}
+.pass-nm{font-size:1.5rem;font-weight:800;color:#1E1C4E;line-height:1.2}.pass-ln{color:#6B6890;font-size:.9rem;margin-top:4px}
+.pass-row{display:grid;grid-template-columns:1fr 1fr;margin-top:16px;padding-top:14px;border-top:1px solid #E8E6F2}.pass-row small{display:block;font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#8A88A6}.pass-row b{font-size:1.35rem;color:#1E1C4E}.pass-row div:first-child b{font-size:1.9rem;color:#5A36E0}
+.pass-cut{position:relative;border-top:2px dashed #D7D3EA;margin:0 18px}.pass-cut::before,.pass-cut::after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:#2E2770}.pass-cut::before{left:-32px}.pass-cut::after{right:-32px}
+.pass-stub{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 22px 18px;font-size:.78rem;color:#6B6890;font-weight:600}
+.pass-code{width:110px;height:30px;background:repeating-linear-gradient(90deg,#1E1C4E 0 3px,transparent 3px 6px,#1E1C4E 6px 8px,transparent 8px 12px,#1E1C4E 12px 16px,transparent 16px 19px)}
+.pass-stamp{position:absolute;right:18px;top:78px;padding:6px 12px;border:3px solid rgba(242,84,61,.9);border-radius:12px;color:rgba(242,84,61,.95);font-weight:800;font-size:.95rem;line-height:1.05;text-align:center;letter-spacing:.06em;transform:rotate(-14deg);animation:stamp .5s .55s cubic-bezier(.3,1.6,.5,1) both;background:rgba(255,255,255,.6)}
+@keyframes stamp{from{transform:rotate(-14deg) scale(2.4);opacity:0}}
+.pass-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pass-hint{margin:0;color:#DCD6FF;font-size:.85rem;text-align:center;max-width:360px}
+@media (prefers-reduced-motion:reduce){.pass,.pass-stamp,.gate-pull,.sh-dot{animation:none!important}}
+/* realistic Indian rolling shutter: painted red corrugated steel, worn paint, padlocks at the bottom */
+#gate .shutter{background:
+  linear-gradient(90deg,rgba(0,0,0,.28),rgba(0,0,0,0) 6%,rgba(255,255,255,.04) 30%,rgba(0,0,0,0) 50%,rgba(255,255,255,.05) 72%,rgba(0,0,0,.3)),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .1  0 0 0 0 .05  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .08' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .35  0 0 0 0 .22  0 0 0 0 .14  0 0 0 1.6 -.95'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E"),
+  repeating-linear-gradient(180deg,#6A140F 0,#B8322A 3px,#D2493E 6px,#BE3A30 11px,#9E271F 16px,#7A1A13 19px,#4A0C08 21px,#5A100B 22px)!important;
+  box-shadow:inset 0 0 160px rgba(30,4,2,.55)!important}
+#gate .shutter::after{background:linear-gradient(180deg,rgba(0,0,0,.25),transparent 12%,transparent 80%,rgba(0,0,0,.35))!important}
+.sh-box{height:52px!important;background:linear-gradient(180deg,#3B3B40,#1F1F24)!important;border-bottom:4px solid #111!important}
+.sh-bolt{background:radial-gradient(circle at 35% 35%,#d8d8de,#5b5b63)!important}
+/* hand-painted style shop board */
+.sh-sign{top:66px!important;background:linear-gradient(180deg,#FFF6E0,#F2E3BF)!important;color:#1E1C4E!important;border:3px solid #1E1C4E!important;border-radius:6px!important;box-shadow:0 6px 0 rgba(0,0,0,.25),0 10px 24px rgba(0,0,0,.35)!important;letter-spacing:.2em!important;font-size:13px!important;padding:9px 18px!important}
+.sh-sign b{color:#C2271B!important;text-shadow:none!important}
+.sh-dot{background:#C2271B!important;box-shadow:none!important;animation:none!important}
+/* bottom angle bar with handle and two padlocks */
+.sh-bar{height:46px!important;background:linear-gradient(180deg,#8E1E17,#5E100B 55%,#3A0806)!important;border-top:3px solid #2A0504!important;display:flex!important;justify-content:center;align-items:center;gap:28%}
+.sh-handle{width:90px!important;height:14px!important;border-radius:3px!important;background:linear-gradient(180deg,#d9d9de,#7b7b84)!important;box-shadow:0 3px 0 #2a0504!important}
+.sh-lock{position:relative;width:30px;height:24px;margin-top:18px;border-radius:5px;background:linear-gradient(180deg,#E8C25A,#B8862A);box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),0 3px 6px rgba(0,0,0,.45)}
+.sh-lock::after{content:"";position:absolute;left:50%;top:9px;width:5px;height:8px;margin-left:-2.5px;border-radius:2px;background:#4A3410}
+.sh-lock i{position:absolute;left:5px;top:-15px;width:20px;height:20px;border:4px solid #B9B9C0;border-bottom:0;border-radius:12px 12px 0 0;transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+/* opening: locks spring open, then the shutter jolts and rolls up */
+#gate.open .sh-lock i{transform:translateY(-8px) rotate(-18deg)}
+#gate.open .shutter{animation:shUp 1.4s .45s cubic-bezier(.6,0,.2,1) forwards!important}
+.sh-lock{margin-top:10px!important}.sh-bar{height:52px!important}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2913,9 +2980,59 @@ document.addEventListener("keydown",e=>{if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/
 /* New visitors see the hub blurred behind a sign-in invite; signing in unlocks it */
 const GATE_PITCH=`<div class="gate-pitch"><b>New here? This is your sign-up</b><p>Enter your name and email and we'll send a 6-digit code. That creates your account. No password needed.</p></div>`;
 function gateSignIn(then){if(document.querySelector(".scrim"))return;openSignIn(then);setTimeout(()=>{const d=[...document.querySelectorAll(".drawer")].pop();if(d&&!d.querySelector(".gate-pitch")){const h=d.querySelector("h2");if(h)h.insertAdjacentHTML("beforebegin",GATE_PITCH)}},0)}
-function paintGate(){const on=!ME;document.documentElement.classList.toggle("gated",on);let g=document.getElementById("gate");
-  if(on&&!g){document.body.insertAdjacentHTML("beforeend",`<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT"><div class="gate-card"><div class="gate-brand">MSSW <span>CAREER HUB</span></div><h2 id="gateT">They made it<br><em>You're next!</em></h2><p>A Student-run partnership between MSSW Students and Alumni. We share what we've learnt, lift each other up and grow together, batch after batch.</p><p class="gate-note">An unofficial initiative. Official updates come from the placement cell.</p><ul><li><b>Students:</b> Sign Up with your MSSW ID</li><li><b>Alumni:</b> Sign Up with any email, no password</li></ul><button class="btn coral" data-gate>SIGN UP FREE</button><small>Already joined? <a href="#" data-gate>SIGN IN</a> with the same email.</small></div></div>`)}
-  if(!on&&g)g.remove()}
+function paintGate(){const on=!ME;let g=document.getElementById("gate");
+  if(on){document.documentElement.classList.add("gated");
+    if(!g){document.body.insertAdjacentHTML("beforeend",`<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT"><div class="shutter" aria-hidden="true"><div class="sh-box"><span class="sh-bolt"></span><span class="sh-bolt"></span></div><div class="sh-sign"><span class="sh-dot"></span>MSSW <b>CAREER HUB</b><span class="sh-dot"></span></div><div class="sh-bar"><span class="sh-lock l"><i></i></span><span class="sh-handle"></span><span class="sh-lock r"><i></i></span></div></div>
+      <div class="gate-card"><div class="gate-brand">MSSW <span>CAREER HUB</span></div><h2 id="gateT">They made it<br><em>You're next!</em></h2><p>A Student-run partnership between MSSW Students and Alumni. We share what we've learnt, lift each other up and grow together, batch after batch.</p><p class="gate-note">An unofficial initiative. Official updates come from the placement cell.</p><ul><li><b>Students:</b> Sign Up with your MSSW ID</li><li><b>Alumni:</b> Sign Up with any email, no password</li></ul><button class="btn coral" data-gate>SIGN UP FREE</button><small>Already joined? <a href="#" data-gate>SIGN IN</a> with the same email.</small><span class="gate-pull">Sign up to pull the shutter up ↑</span></div></div>`)}
+    return}
+  if(!g){document.documentElement.classList.remove("gated");return}
+  if(g.dataset.opening)return;g.dataset.opening="1";
+  /* signed in: wait for the sign-in panel to close, then roll the shutter up and hand over the member pass */
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;let waited=0;
+  const go=()=>{if(document.querySelector(".scrim")&&waited<2500){waited+=60;setTimeout(go,60);return}
+    document.documentElement.classList.remove("gated");if(reduce){g.remove();showPass();return}
+    g.classList.add("open");setTimeout(()=>{g.remove();showPass()},1500)};go()}
+/* member number: from 100 up, fixed for each person */
+const memberNo=id=>{let h=0;for(const ch of String(id||"x"))h=(h*31+ch.charCodeAt(0))>>>0;return 100+h%900};
+function passInfo(){const r=ME.team?"Placement team":ME.role||(ME.mssw?"Student":"Member");return {name:nmc(ME.name||"MSSW member"),no:memberNo(ME.id),line:[r,ME.programme,ME.batch?"Batch "+ME.batch:""].filter(Boolean).join(" · "),date:new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}),ini:initials(ME.name)}}
+function showPass(force){if(!ME)return;const k="mch-pass:"+ME.id;try{if(!force&&localStorage.getItem(k))return;localStorage.setItem(k,"1")}catch(e){}
+  const P=passInfo();document.querySelectorAll(".pass-wrap").forEach(x=>x.remove());
+  document.body.insertAdjacentHTML("beforeend",`<div class="pass-wrap" role="dialog" aria-modal="true" aria-label="Your Career Hub pass"><div class="pass">
+    <div class="pass-top"><span>MSSW <b>CAREER HUB</b></span><span>MEMBER PASS</span></div>
+    <div class="pass-main"><div class="pass-av">${ME.photo?`<img src="${esc(ME.photo)}" alt="">`:esc(P.ini)}</div><div class="pass-nm">${esc(P.name)}</div><div class="pass-ln">${esc(P.line)}</div>
+      <div class="pass-row"><div><small>MEMBER NO.</small><b>#${P.no}</b></div><div><small>JOINED</small><b>${esc(P.date)}</b></div></div></div>
+    <div class="pass-cut"></div><div class="pass-stub"><span class="pass-code"></span><span>Prepare · Share · Grow together</span></div>
+    <div class="pass-stamp">WELCOME<br>IN!</div></div>
+    <div class="pass-acts"><button class="btn wa" data-passshare>${ic("wa",16)} Share your pass</button><button class="btn light" data-passclose>Enter the hub</button></div>
+    <p class="pass-hint">Invite your batchmates. Every pass shared brings the hub closer to everyone.</p></div>`)}
+async function drawPass(){const P=passInfo(),W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");const F='"Plus Jakarta Sans", Inter, system-ui, sans-serif';
+  try{await Promise.all([document.fonts.load("800 60px "+F),document.fonts.load("600 30px "+F)])}catch(e){}
+  let g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,"#120F38");g.addColorStop(.55,"#2A1F78");g.addColorStop(1,"#4B2E9E");x.fillStyle=g;x.fillRect(0,0,W,H);
+  const glow=(cx,cy,r,col)=>{const q=x.createRadialGradient(cx,cy,0,cx,cy,r);q.addColorStop(0,col);q.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=q;x.fillRect(0,0,W,H)};glow(W,H,700,"rgba(255,112,82,.35)");glow(0,0,600,"rgba(140,110,255,.3)");
+  const rr=(X,Y,w,h,r)=>{x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()};
+  x.textAlign="center";x.fillStyle="#F6C76B";x.font="700 30px "+F;x.fillText("I'M IN!  🎉",W/2,120);
+  const X=110,Y=170,w=W-220,h=900;x.save();x.shadowColor="rgba(0,0,0,.35)";x.shadowBlur=60;x.shadowOffsetY=20;rr(X,Y,w,h,44);x.fillStyle="#fff";x.fill();x.restore();
+  x.save();rr(X,Y,w,h,44);x.clip();let t=x.createLinearGradient(X,0,X+w,0);t.addColorStop(0,"#2A1F78");t.addColorStop(1,"#4B2E9E");x.fillStyle=t;x.fillRect(X,Y,w,120);x.restore();
+  x.textAlign="left";x.fillStyle="#fff";x.font="800 30px "+F;x.fillText("MSSW",X+50,Y+72);let mw=x.measureText("MSSW ").width;x.fillStyle="#FF9B7A";x.fillText("CAREER HUB",X+50+mw,Y+72);x.textAlign="right";x.fillStyle="rgba(255,255,255,.8)";x.font="700 24px "+F;x.fillText("MEMBER PASS",X+w-50,Y+70);
+  x.textAlign="center";const cy=Y+260;x.beginPath();x.arc(W/2,cy,90,0,7);let ag=x.createLinearGradient(0,cy-90,0,cy+90);ag.addColorStop(0,"#9A82FF");ag.addColorStop(1,"#5A36E0");x.fillStyle=ag;x.fill();x.fillStyle="#fff";x.font="800 72px "+F;x.fillText(P.ini,W/2,cy+26);
+  x.fillStyle="#1E1C4E";let fs=64;x.font="800 "+fs+"px "+F;while(x.measureText(P.name).width>w-100&&fs>36){fs-=2;x.font="800 "+fs+"px "+F}x.fillText(P.name,W/2,Y+450);
+  x.fillStyle="#6B6890";x.font="600 30px "+F;x.fillText(P.line,W/2,Y+505);
+  x.strokeStyle="#E8E6F2";x.lineWidth=2;x.beginPath();x.moveTo(X+60,Y+560);x.lineTo(X+w-60,Y+560);x.stroke();
+  x.fillStyle="#8A88A6";x.font="700 22px "+F;x.fillText("MEMBER NO.",W/2-200,Y+620);x.fillText("JOINED",W/2+200,Y+620);x.fillStyle="#1E1C4E";x.font="800 64px "+F;x.fillText("#"+P.no,W/2-200,Y+695);x.font="800 40px "+F;x.fillText(P.date,W/2+200,Y+690);
+  x.setLineDash([14,12]);x.strokeStyle="#D7D3EA";x.beginPath();x.moveTo(X+30,Y+760);x.lineTo(X+w-30,Y+760);x.stroke();x.setLineDash([]);
+  x.fillStyle="#F6F5FB";x.beginPath();x.arc(X,Y+760,26,0,7);x.arc(X+w,Y+760,26,0,7);x.fillStyle="#2A1F78";x.fill();
+  for(let i=0;i<20;i++){x.fillStyle="#1E1C4E";const bw=[3,6,2,4][i%4];x.fillRect(X+70+i*14,Y+800,bw,60)}x.textAlign="right";x.fillStyle="#6B6890";x.font="600 24px "+F;x.fillText("Prepare · Share · Grow together",X+w-60,Y+842);
+  x.save();x.translate(X+w-140,Y+235);x.rotate(-.2);x.scale(.85,.85);x.strokeStyle="rgba(242,84,61,.9)";x.lineWidth=7;rr(-120,-70,240,140,22);x.stroke();x.fillStyle="rgba(242,84,61,.95)";x.textAlign="center";x.font="800 40px "+F;x.fillText("WELCOME",0,-6);x.fillText("IN!",0,42);x.restore();
+  x.textAlign="center";x.fillStyle="#fff";x.font="800 44px "+F;x.fillText("Join me on the MSSW Career Hub",W/2,1170);x.fillStyle="#DCD6FF";x.font="600 30px "+F;x.fillText("Students: your MSSW ID  ·  Alumni: any email",W/2,1225);
+  rr(W/2-260,1258,520,60,30);x.fillStyle="#fff";x.fill();x.fillStyle="#1A1650";x.font="800 28px "+F;x.fillText("mssw-career-hub.github.io",W/2,1298);return c}
+document.addEventListener("click",async e=>{if(e.target.closest("[data-passclose]")||e.target.classList.contains("pass-wrap")){document.querySelectorAll(".pass-wrap").forEach(x=>x.remove());return}
+  if(e.target.closest("[data-passshare]")){const P=passInfo();const text=`*I'm in! 🎉*\nI just joined the *MSSW Career Hub* as member *#${P.no}*.\nA Student-run partnership between MSSW Students and Alumni to prepare, share and grow together.\n\n*Students:* Sign Up with your MSSW ID\n*Alumni:* Sign Up with any email, no password\n${SITE_URL_P}/?s=pass`;
+    const cv=await drawPass();const blob=await new Promise(r=>cv.toBlob(r,"image/png"));const file=new File([blob],"my-mssw-career-hub-pass.png",{type:"image/png"});
+    try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}}catch(x){if(x&&x.name==="AbortError")return}
+    let copied=false;try{if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);copied=true}}catch(x){}
+    if(!copied){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file.name;document.body.appendChild(a);a.click();a.remove()}
+    openWa(waUrl(text));toast(copied?"Pass copied. In WhatsApp, pick a chat and press Ctrl+V to add it.":"Pass downloaded. In WhatsApp, attach it from your Downloads.",6000)}});
+const SITE_URL_P="https://mssw-career-hub.github.io";if(/[?&]chtest/.test(location.search))window.__pass={drawPass,showPass};
 {const _aa=applyAccess;applyAccess=function(){const o=_aa.apply(this,arguments);try{paintGate()}catch(x){}return o}}
 document.addEventListener("click",e=>{if(e.target.closest("[data-gate]")){e.preventDefault();gateSignIn()}});
 paintGate();
