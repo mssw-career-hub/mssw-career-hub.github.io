@@ -1525,7 +1525,7 @@ function previewApi(a,b){const id="L"+(++PSEQ);const now=new Date().toISOString(
 const findAny=id=>["journeys","openings","events","resources"].map(k=>D[k].find(x=>x.id===id)).find(Boolean);
 
 /* ---------- helpers ---------- */
-function toast(m){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3400)}
+function toast(m,ms){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),ms||3400)}
 const monoTile=name=>`<span class="mono" style="--c:${tone(name)}">${esc(initials(name))}</span>`;
 const sampleChip=()=>"";
 const ctcText=v=>v===""||v==null?"":Number(v)<1?"₹"+Math.round(Number(v)*100000).toLocaleString("en-IN")+"/mo":"₹"+Number(v).toFixed(Number(v)%1?1:0)+" LPA";
@@ -2461,6 +2461,9 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   x.fillStyle="#1A1650";x.font="800 32px "+F;x.fillText((CONFIG.site||"mssw-career-hub.github.io").replace(/^https?:\/\//,""),P+36,H-94);
   
   return c}
+/* laptop or desktop (mouse, not a phone or tablet) */
+const isDesk=()=>!/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)&&matchMedia("(pointer:fine)").matches;
+const waUrl=text=>(isDesk()?"https://web.whatsapp.com/send?text=":"https://wa.me/?text=")+encodeURIComponent(text);
 function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that item.");return}const kind=ref.split(":")[0];const K=SHARE_KIND[kind]||SHARE_KIND.notice;const on={what:1,for:1,when:1,link:1,hub:1};
   const hub=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
   const lp=(s.parts.find(([k,t])=>k==="link"&&t)||[])[1]||"";const lm=lp.match(/^(.*?):\s*(https?:\/\/\S+)/)||(lp.match(/^https?:\/\/\S+/)?["","Link",lp]:null);
@@ -2476,17 +2479,21 @@ function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that 
    <label class="lab" for="waN">Add a note <small>(optional)</small></label><input class="field" id="waN" maxlength="100" placeholder="e.g. Please share in your class group">
    <div class="wa-acts"><button class="btn wa" id="waGo">${ic("wa",16)} Share on WhatsApp</button></div>
    <p class="wa-more"><button class="link" id="waTx">Send as text only</button><span>·</span><button class="link" id="waCp">Copy caption</button></p>
-   <p class="muted" style="font-size:12px;margin-top:8px">On a phone, pick WhatsApp and then your group. On a laptop, the card downloads and WhatsApp opens with the caption, so attach the card there.</p>`);
+   <p class="muted" style="font-size:12px;margin-top:8px">On a phone, pick WhatsApp and then your group. On a laptop, WhatsApp Web opens with the caption ready and the card is copied: choose the chat, press Ctrl+V to add the card, then Send.</p>`);
   let blob=null,seq=0;const note=()=>body.querySelector("#waN").value.trim();
   const paintTx=()=>{body.querySelector("#waP").innerHTML=esc(caption(note())).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\*([^*\n]+)\*/g,"<b>$1</b>").replace(/(^|\n)_([^_\n]+)_/g,"$1<i>$2</i>").replace(/\n/g,"<br>")};
   const paint=async()=>{paintTx();const my=++seq;const cv=await drawShareCard(kind,s,on,note());if(my!==seq)return;body.querySelector("#waImg").src=cv.toDataURL("image/png");cv.toBlob(b=>{if(my===seq)blob=b},"image/png")};
   let t;body.querySelector("#waN").addEventListener("input",()=>{paintTx();clearTimeout(t);t=setTimeout(paint,250)});
   const fname="mssw-"+kind+"-"+(s.title||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,40)+".png";
   body.querySelector("#waGo").onclick=async()=>{if(!blob){toast("One moment, the card is still being made.");return}const text=caption(note());const file=new File([blob],fname,{type:"image/png"});
-    try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}}catch(e){if(e&&e.name==="AbortError")return}
-    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();a.remove();
-    window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");toast("Card downloaded. Attach it in WhatsApp.")};
-  body.querySelector("#waTx").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(fullText(note())),"_blank","noopener");
+    /* phones: the phone's own share sheet, straight into WhatsApp with the card and caption */
+    if(!isDesk()){try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}}catch(e){if(e&&e.name==="AbortError")return}}
+    /* laptops: copy the card, open WhatsApp Web with the caption ready; paste the card into the chat */
+    let copied=false;try{if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);copied=true}}catch(e){}
+    if(!copied){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();a.remove()}
+    window.open(waUrl(text),"_blank","noopener");
+    toast(copied?"Card copied. In WhatsApp Web, pick the chat and press Ctrl+V to add the card, then Send.":"Card downloaded. In WhatsApp Web, pick the chat and attach the card, then Send.",7000)};
+  body.querySelector("#waTx").onclick=()=>window.open(waUrl(fullText(note())),"_blank","noopener");
   body.querySelector("#waCp").onclick=async()=>{try{await navigator.clipboard.writeText(caption(note()));toast("Caption copied")}catch(e){toast("Couldn't copy.")}};paint()}
 
 /* ---------- preview-mode stand-ins for the new back-end actions ---------- */
