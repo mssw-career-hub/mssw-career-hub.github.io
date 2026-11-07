@@ -1233,6 +1233,22 @@ a.nlink:hover{background:#DDE6FF}
 .drawer [data-editpost],.drawer [data-hide]{background:#fff!important;border:1px solid #D9DCF2!important;color:#2A2770!important;box-shadow:none!important;padding:10px 18px!important;border-radius:999px!important;font-weight:600}
 .drawer [data-hide]{color:#B4233A!important;border-color:#F1C9D0!important}
 
+/* placement brochures */
+.bro-sec{margin-top:32px}
+.bro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.bro{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:18px;background:#fff;border:1px solid #E3E8F5;box-shadow:0 8px 24px -16px rgba(30,40,90,.25)}
+.bro-c{flex:none;width:48px;height:58px;border-radius:10px;background:linear-gradient(160deg,#E6F1FF,#C3DBFF);color:#1F5FA8;display:grid;place-items:center}
+.bro-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.bro-t small{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1F5FA8}
+.bro-t b{font-size:15px;color:#1E1C4E;line-height:1.35}
+.bro-t span{font-size:12.5px;color:#6E6A90;line-height:1.45}
+.bro-a{display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex:none}
+@media (max-width:600px){.bro{flex-wrap:wrap}.bro-t{flex:1 1 calc(100% - 64px)}.bro-a{width:100%;flex-direction:row;align-items:center;padding-left:62px}}
+.bro-sec{margin-top:0;margin-bottom:28px;padding:22px;border-radius:24px;background:linear-gradient(135deg,#EEF5FF,#F6F1FF);border:1px solid #DCE6FA}
+.bro-g+.bro-g{margin-top:18px}
+.bro-gh{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#1F5FA8;margin:0 2px 10px}
+@media (max-width:600px){.bro-sec{padding:16px 12px}}
+
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
 
@@ -2129,7 +2145,7 @@ const TRACKS=[
  ["psych","Psychometric tests","Personality and work-style assessments some companies use before interviews.","linear-gradient(180deg,#E8F6FB,#C2E6F2)","#0E6A8A",["What these tests measure","Personality and work-style questions","Situational judgement"]]];
 const TOPIC_TRACK={"Resume":"resume","LinkedIn":"resume","Interview prep":"interview","Aptitude":"aptitude","Group discussion":"gd","Psychometric":"psych"};
 const trackOfRes=r=>r.kind==="Course"?"cert":TOPIC_TRACK[r.topic]||"skills";
-const KIND={lead:["Hiring lead","#FFEDE7","#C2412A"],mentor:["Mentorship","#F1ECFF","#5A36E0"],skill:["Real-work skill","#FFF6DD","#8A5800"],cert:["Certification","#FFEDF7","#9E2F7B"],journey:["My journey","#E6F8F1","#0F6E68"],opp:["Conference, internship or fellowship","#EAF2FF","#2849A8"],material:["Learning material","#F4F2FB","#4A4670"]};
+const KIND={lead:["Hiring lead","#FFEDE7","#C2412A"],mentor:["Mentorship","#F1ECFF","#5A36E0"],skill:["Real-work skill","#FFF6DD","#8A5800"],cert:["Certification","#FFEDF7","#9E2F7B"],journey:["My journey","#E6F8F1","#0F6E68"],opp:["Conference, internship or fellowship","#EAF2FF","#2849A8"],material:["Learning material","#F4F2FB","#4A4670"],brochure:["Placement brochure","#E6F1FF","#1F5FA8"]};
 KIND.bite=["Career bite","#FFF1E6","#C2412A"];
 const KIND_ORDER=["lead","mentor","skill","cert","journey","opp","material"];
 const KIND_HINT={lead:"An opening at your organisation, or one you can refer students to.",mentor:"A short chat a month with one or two students in your field.",skill:"A guide or video on the tools and tasks your job really involves.",cert:"A course that helped you, what it cost and whether recruiters noticed.",journey:"Your rounds, the questions you were asked and one piece of advice.",opp:"Events and programmes worth a student's time, with dates and links.",material:"Notes, question banks, slides or templates for any prep track."};
@@ -2355,7 +2371,7 @@ const DRAFT=k=>"mch-draft-"+k;
 function openComposer(kind,trackPre,E){if(!needMe(()=>openComposer(kind,trackPre,E)))return;
   if(kind==="journey"){formJourney();return}if(kind==="mentor"){openProfile(true);return}
   let K=kind||"skill";const st=E?{files:(E.files||[]).map(f=>({...f,key:Math.random().toString(36).slice(2)})),cluster:E.cluster||"All",access:E.access||"Signed-in",track:E.track||""}:{files:[],cluster:"All",access:"Signed-in",track:trackPre||""};
-  const {body,close,sc}=drawer("Share with students",`<div class="comp"><aside><span class="eyebrow" style="color:var(--coral);padding:0 2px 4px">What are you sharing?</span>${KIND_ORDER.map((k,i)=>`<button type="button" class="ty" data-k="${k}" aria-pressed="${k===K}">${orb(`linear-gradient(180deg,#fff,${KIND[k][1]})`,KIND[k][2],`<b style="font-size:11px">0${i+1}</b>`,28)}${esc(KIND[k][0])}</button>`).join("")}
+  const {body,close,sc}=drawer("Share with students",`<div class="comp"><aside><span class="eyebrow" style="color:var(--coral);padding:0 2px 4px">What are you sharing?</span>${(LV()===3?[...KIND_ORDER,"brochure"]:KIND_ORDER).map((k,i)=>`<button type="button" class="ty" data-k="${k}" aria-pressed="${k===K}">${orb(`linear-gradient(180deg,#fff,${KIND[k][1]})`,KIND[k][2],`<b style="font-size:11px">0${i+1}</b>`,28)}${esc(KIND[k][0])}</button>`).join("")}
      <p style="margin-top:auto;padding:12px;border-radius:14px;background:linear-gradient(160deg,#F3EFFF,#FFF1EC);font-size:12px;color:var(--body)">Drafts save as you type. You can remove anything you post from your profile.</p></aside>
     <section id="cpF"></section><aside id="cpR"></aside></div>`);
   sc.querySelector(".drawer").classList.add("wide");
@@ -2367,7 +2383,7 @@ function openComposer(kind,trackPre,E){if(!needMe(()=>openComposer(kind,trackPre
   const fileRow=f=>`<div class="file"><span class="ext" style="background:${f.err?"#FFE4DC":"#F1ECFF"};color:${f.err?"#B4432A":"#5A36E0"}">${esc((f.name.split(".").pop()||"").toUpperCase().slice(0,4))}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px"><b style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f.name)}</b>${f.err?`<small style="color:#B4432A">${esc(f.err)}</small>`:f.url?`<small style="color:#22714A">Uploaded · ${(f.size/1048576).toFixed(1)} MB</small>`:`<span class="bar"><i style="width:60%;animation:upl 1.2s ease-in-out infinite alternate"></i></span>`}</span><button type="button" class="x" data-rmf="${esc(f.key)}" aria-label="Remove ${esc(f.name)}">✕</button></div>`;
   const paintFiles=()=>{const b=F2.querySelector("#cFiles");if(b)b.innerHTML=st.files.map(fileRow).join("")};
   const paint=()=>{const lead=K==="lead",opp=K==="opp",cert=K==="cert";
-    F2.innerHTML=`<span class="eyebrow" style="color:${KIND[K][2]}">${esc(KIND[K][0])}</span><h2 style="margin:4px 0 14px;font-size:18px">${lead?"Share a hiring lead":opp?"Post an opportunity":cert?"Suggest a certification":K==="skill"?"Teach the next batch":"Share learning material"}</h2>
+    F2.innerHTML=`<span class="eyebrow" style="color:${KIND[K][2]}">${esc(KIND[K][0])}</span><h2 style="margin:4px 0 14px;font-size:18px">${lead?"Share a hiring lead":opp?"Post an opportunity":cert?"Suggest a certification":K==="skill"?"Teach the next batch":K==="brochure"?"Add a department placement brochure":"Share learning material"}</h2>
      <label class="lab" for="cTitle">${lead?"Role":opp?"Name of the conference, internship or fellowship":cert?"Course name":"Title"}</label><input class="field" id="cTitle" maxlength="140" value="${esc(v.title)}">
      ${lead?`<div class="two"><div><label class="lab" for="cOrg">Organisation</label><input class="field" id="cOrg" maxlength="80" value="${esc(v.org)}"></div><div><label class="lab" for="cLoc">Location</label><input class="field" id="cLoc" maxlength="80" value="${esc(v.location)}"></div></div><label class="lab" for="cDl">Apply by</label><input class="field" id="cDl" type="date" value="${esc(v.deadline)}">`:""}
      ${opp?`<span class="lab">Type</span>${pickHtml("cSub",["Conference","Internship","Fellowship","Workshop","Competition"],v.subtype)}<div class="two"><div><label class="lab" for="cDate">Date or start</label><input class="field" id="cDate" type="date" value="${esc(v.date)}"></div><div><label class="lab" for="cDl">Apply by</label><input class="field" id="cDl" type="date" value="${esc(v.deadline)}"></div></div>`:""}
@@ -2382,7 +2398,7 @@ function openComposer(kind,trackPre,E){if(!needMe(()=>openComposer(kind,trackPre
     if(opp)wirePick(F2,"cSub");paintFiles();
     R.innerHTML=`<div><span class="lab">Who is it for?</span>${pickHtml("cCl",["Everyone","HR","Social sector","Psychology"],st.cluster==="All"?"Everyone":st.cluster)}</div>
      ${["skill","material","cert"].includes(K)?`<div><span class="lab">Show it under</span>${pickHtml("cTr",TRACKS.map(t=>t[1]),(TRACKS.find(t=>t[0]===(st.track||(K==="cert"?"cert":K==="skill"?"skills":"interview")))||TRACKS[0])[1])}</div>`:""}
-     <div><span class="lab">Who can see it</span>${pickHtml("cAc",["Signed-in students and alumni","Everyone"],st.access==="Everyone"?"Everyone":"Signed-in students and alumni")}</div>
+     ${K==="brochure"?`<div><span class="lab">Who can see it</span><p class="muted" style="font-size:12.5px;margin:2px 0 0">Only MSSW accounts and the placement team. Brochures carry student contact details, so they are never shown to alumni or visitors, and the PDF opens only for MSSW accounts.</p></div>`:`<div><span class="lab">Who can see it</span>${pickHtml("cAc",["Signed-in students and alumni","Everyone"],st.access==="Everyone"?"Everyone":"Signed-in students and alumni")}</div>`}
      <div><span class="lab">Preview</span><div id="cPrev"></div></div>
      <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px"><button type="button" class="btn coral" id="cGo">${E?"Save changes":"Publish to the hub"}</button>${E?"":`<button type="button" class="btn" id="cDraft">Save draft</button>`}<small class="muted" style="text-align:center;font-size:11.5px">Goes live straight away. The placement team is told if anything is reported.</small></div>`;
     ["cCl","cTr","cAc"].forEach(id=>{const el=R.querySelector("#"+id);if(!el)return;wirePick(R,id);el.addEventListener("click",()=>setTimeout(()=>{const p=picked(R,id)[0];if(id==="cCl")st.cluster=p==="Everyone"?"All":p;if(id==="cTr")st.track=(TRACKS.find(t=>t[1]===p)||[""])[0];if(id==="cAc")st.access=p==="Everyone"?"Everyone":"Signed-in";preview()},0))});
@@ -2789,6 +2805,17 @@ function alumniHomeSec(){const ms=(D.mentors||[]).filter(m=>m.slots>0).slice(0,3
   return `<section class="sec ah"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#5A36E0">Alumni corner</span><h2 style="margin-top:6px">Talk to someone who's been there</h2></div></div><button class="btn" data-go="alumni">Visit the Alumni corner</button></div>
    <div class="ah-grid"><div class="ah-col"><span class="ah-h">Mentors open this month</span>${left}</div>
    <div class="ah-col"><span class="ah-h">Latest from alumni</span>${ps.length?ps.map(pr).join(""):`<div class="ah-empty"><b>Nothing new yet</b><span>Conferences, internships and hiring leads shared by alumni show up here.</span></div>`}</div></div></section>`}
+
+/* placement brochures: on the Drives page, for MSSW accounts and the team only (they carry student contact details) */
+const bcl=c=>c&&c!=="All"?(CLUSTERS[c]||[c])[0]:"All departments";
+function brochureSec(){if(LV()<2)return "";const bs=(D.posts||[]).filter(p=>p.kind==="brochure").sort((a,b)=>(a.title||"").localeCompare(b.title||""));
+  if(!bs.length&&LV()<3)return "";
+  const card=p=>{const f=(p.files||[])[0],u=f?f.url:p.link;return `<article class="bro"><span class="bro-c">${ic("brief",22)}</span><span class="bro-t"><b>${esc(p.title)}</b>${p.body?`<span>${esc(String(p.body).slice(0,140))}</span>`:""}</span><span class="bro-a">${u?`<a class="btn dark small" href="${esc(u)}" target="_blank" rel="noopener">View brochure</a>`:""}<button class="link" data-post="${esc(p.id)}">Details</button></span></article>`};
+  const groups=[...new Set(bs.map(p=>bcl(p.cluster)))].sort((a,b)=>a==="All departments"?1:b==="All departments"?-1:a.localeCompare(b));
+  return `<section class="sec bro-sec"><div class="sec-h"><div class="t"><div><span class="eyebrow">For MSSW students and the team</span><h2 style="margin-top:6px">Department placement brochures</h2></div></div>${LV()===3?`<button class="btn" data-compose="brochure">+ Add a brochure</button>`:""}</div>
+   <p class="muted" style="font-size:13px;margin:-6px 0 14px">One brochure per department, grouped by sector. They include student contact details, so only MSSW accounts can see them. Please don't forward them outside MSSW; recruiters can request them from the placement cell.</p>
+   ${bs.length?groups.map(g=>`<div class="bro-g"><span class="bro-gh">${esc(g)}</span><div class="bro-grid">${bs.filter(p=>bcl(p.cluster)===g).map(card).join("")}</div></div>`).join(""):`<div class="empty"><b>No brochures yet</b><span>Add each department's brochure with "+ Add a brochure", choosing its sector.</span></div>`}</section>`}
+{const _rb=render;render=function(){const out=_rb.apply(this,arguments);try{if(view==="resources"){const w=document.querySelector("#main > .wrap");const h=brochureSec();if(w&&h)w.insertAdjacentHTML("afterbegin",h)}}catch(e){if(/chtest/.test(location.search))console.error("bro",e)}return out}}
 
 RAW=realData();applyAccess();
 /* show what this device saw last time straight away; fresh data replaces it a moment later */
