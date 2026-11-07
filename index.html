@@ -2442,9 +2442,8 @@ function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"
   if(k==="event"){const e=D.events.find(x=>x.id===id);if(!e)return null;return {title:e.title,parts:[["what",(e.about||"").split(/\.\s/)[0]],["for","For: "+(e.audience||cl(e.cluster))],["when",(e.date?nice(e.date):"Date to be announced")+(e.time?", "+e.time:"")+(e.mode?" · "+e.mode:"")+(e.venue?" · "+e.venue:"")]]}}
   if(k==="opening"){const o=D.openings.find(x=>x.id===id);if(!o)return null;return {title:o.company+" · "+o.roles,parts:[["what",[o.type,o.location,o.ctc].filter(Boolean).join(" · ")],["for",o.eligibility?"Who can apply: "+o.eligibility:""],["when",o.deadline?"Apply by: "+nice(o.deadline):""],["link",o.link?"Apply: "+o.link:""]]}}
   if(k==="mentor"){const m=(D.mentors||[]).find(x=>x.id===id);if(!m)return null;const nm=nmc(m.name);
-    return {title:nm+" has joined as a mentor",tag:"Mentor spotlight",photo:m.photo||"",initials:initials(m.name),
-      parts:[["what",[[m.role,m.org].filter(Boolean).join(", "),m.batch?"MSSW, batch "+m.batch:""].filter(Boolean).join(" · ")+". Students can now request a mentoring chat on the hub."],["for","Students and alumni"]],chip:"Alumni, join in: share, advise or mentor",
-      extra:"*"+nm+"* has joined the MSSW Career Hub as a mentor"+(m.role||m.org?" ("+[m.role,m.org].filter(Boolean).join(", ")+")":"")+". Students can request a mentoring chat with "+nm.split(" ")[0]+" on the hub.\n\n*Dear alumni, you are warmly welcome to join in too.* Share your placement journey, offer career or life advice to juniors, or mentor a student. Sign in, tap *MSSW Alumni*, and pick what suits you. Even one story or one chat a month helps a junior find their way."}}
+    return {title:nm+" has joined as a mentor!",tag:"Mentor spotlight",photo:m.photo||"",initials:initials(m.name),
+      parts:[["what",[[m.role,m.org].filter(Boolean).join(", "),m.batch?"MSSW, batch "+m.batch:""].filter(Boolean).join(" · ")+"."]],welcomeLabel:"A NOTE FOR ALUMNI",welcome:"Your story could be exactly what a junior needs to hear. Share your journey, give advice or mentor one student. It takes a few minutes, and it stays with them for years."}}
   if(k==="bite"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const urls=(p.body||"").match(/https?:\/\/[^\s]+/g)||[];return {title:p.title,parts:[["what",(p.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").trim()],["for","For: "+cl(p.cluster)],["when","Posted: "+nice((p.t||"").slice(0,10))],["link",p.link?"Read more: "+p.link:urls.length?"Link: "+urls[0]:""]]}}
   if(k==="post"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const m=p.meta||{};
     const sum=String(p.body||"").replace(/https?:\/\/\S+/g,"").replace(/[*_#>`]/g,"").replace(/^\s*[-\d.]+\s+/gm,"").replace(/\s+/g," ").trim();
@@ -2490,12 +2489,12 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   const when=part("when").replace(/^(Posted|Date|Status|Apply by|On): /,"");if(when){x.font="700 24px "+F;sp("2px");x.fillStyle="rgba(231,227,255,.8)";const dt=when.toUpperCase();x.fillText(dt,W-P-x.measureText(dt).width,y+36)}
   sp("0px");y+=118;
   /* mentor spotlight: their photo (or initials) in a glowing ring above the name */
-  if(s.initials){const R=96,cx0=P+R,cy0=y+R;const rg=x.createLinearGradient(P,y,P+2*R,y+2*R);rg.addColorStop(0,"#FFE29A");rg.addColorStop(1,"#F2A93B");
+  if(s.initials){const R=s.welcome?76:96,cx0=P+R,cy0=y+R;const rg=x.createLinearGradient(P,y,P+2*R,y+2*R);rg.addColorStop(0,"#FFE29A");rg.addColorStop(1,"#F2A93B");
     x.save();x.shadowColor="rgba(255,210,120,.55)";x.shadowBlur=40;x.fillStyle=rg;x.beginPath();x.arc(cx0,cy0,R,0,Math.PI*2);x.fill();x.restore();
     let im=null;if(s.photo){im=await new Promise(res=>{const i=new Image();i.crossOrigin="anonymous";i.referrerPolicy="no-referrer";i.onload=()=>res(i);i.onerror=()=>res(null);i.src=s.photo;setTimeout(()=>res(null),4000)})}
     x.save();x.beginPath();x.arc(cx0,cy0,R-9,0,Math.PI*2);x.closePath();x.clip();
     if(im){const sc=Math.max((2*R)/im.width,(2*R)/im.height);x.drawImage(im,cx0-im.width*sc/2,cy0-im.height*sc/2,im.width*sc,im.height*sc)}else{x.fillStyle="#2B2160";x.fillRect(P,y,2*R,2*R);x.fillStyle="#fff";x.font="800 64px "+F;const t=s.initials;x.fillText(t,cx0-x.measureText(t).width/2,cy0+22)}
-    x.restore();y+=2*R+44}
+    x.restore();y+=2*R+(s.welcome?36:44)}
   /* title */
   x.fillStyle="#fff";let fs=70,tl=[];for(const z of [70,62,56,50]){fs=z;x.font="800 "+z+"px "+F;tl=wrapLines(x,s.title,W-2*P,9);if(tl.length<=4)break}tl=tl.slice(0,5);const lh=Math.round(fs*1.2);tl.forEach(l=>{x.fillText(l,P,y+fs*.83);y+=lh});y+=26;
   x.fillStyle="rgba(255,255,255,.18)";x.fillRect(P,y,120,4);y+=48;
@@ -2504,6 +2503,11 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   const forT=part("for").replace(/^(For|Who can apply): /,"");const hasLink=!!part("link");const chipTop=noteTop-78;
   /* what */
   const what=part("what");if(what){x.font="500 36px "+F;const free=Math.floor((chipTop-24-y)/52);if(free>0){x.fillStyle="#E4E0FF";fitSentences(x,what,W-2*P,Math.min(4,free)).forEach(l=>{x.fillText(l,P,y+34);y+=52})}}
+  /* a separate warm note (mentor spotlight: the welcome to other alumni), in its own soft panel */
+  if(s.welcome){x.font="600 29px "+F;const wl=wrapLines(x,s.welcome,W-2*P-72,3);const bh=wl.length*41+88,lim=(forT||s.chip||hasLink)?chipTop-18:noteTop-26;let top=Math.max(y+30,lim-bh);
+    if(top>=y+20&&top+bh<=lim){x.fillStyle="rgba(255,226,140,.13)";rr(P,top,W-2*P,bh,24);x.fill();x.strokeStyle="rgba(255,214,120,.55)";x.lineWidth=2;rr(P+1,top+1,W-2*P-2,bh-2,23);x.stroke();
+      x.font="800 21px "+F;sp("3px");x.fillStyle="#FFD27A";x.fillText(s.welcomeLabel||"A NOTE",P+34,top+44);sp("0px");
+      x.font="600 29px "+F;x.fillStyle="#FFF1D2";wl.forEach((l,i)=>x.fillText(l,P+34,top+86+i*41));y=top+bh}}
   /* chips row: who it's for + link in caption */
   let cx=P;x.font="700 25px "+F;
   if(forT||s.chip){const t=s.chip||"For "+forT.replace(/^[A-Z](?=[a-z])/,m=>m.toLowerCase()),w=Math.min(x.measureText(t).width+44,W-2*P);x.fillStyle="rgba(255,255,255,.12)";rr(cx,chipTop,w,54,27);x.fill();x.fillStyle="#fff";x.fillText(wrapLines(x,t,w-44,1)[0],cx+22,chipTop+36);cx+=w+14}
