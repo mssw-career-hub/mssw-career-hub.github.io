@@ -2504,22 +2504,25 @@ function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that 
    <div class="wa-cap"><span class="lab" style="margin:0 0 6px">Sent with the card</span><div id="waP"></div></div>
    <label class="lab" for="waN">Add a note <small>(optional)</small></label><input class="field" id="waN" maxlength="100" placeholder="e.g. Please share in your class group">
    <div class="wa-acts"><button class="btn wa" id="waGo">${ic("wa",16)} Share on WhatsApp</button></div>
-   <p class="wa-more"><button class="link" id="waTx">Send as text only</button><span>·</span><button class="link" id="waCp">Copy caption</button></p>
-   <p class="muted" style="font-size:12px;margin-top:8px">On a phone, pick WhatsApp and then your group. On a laptop, WhatsApp Web opens with the caption ready and the card is copied: choose the chat, press Ctrl+V to add the card, then Send.</p>`);
+   <p class="wa-more">${isDesk()?`<button class="link" id="waWeb">Use WhatsApp Web instead</button><span>·</span>`:""}<button class="link" id="waTx">Send as text only</button><span>·</span><button class="link" id="waCp">Copy caption</button></p>
+   <p class="muted" style="font-size:12px;margin-top:8px">Pick WhatsApp, then your group or chat, and press Send. The card goes with the caption under it.${isDesk()?" On WhatsApp Web, the caption is typed for you and the card is copied: press Ctrl+V in the chat to add it.":""}</p>`);
   let blob=null,seq=0;const note=()=>body.querySelector("#waN").value.trim();
   const paintTx=()=>{body.querySelector("#waP").innerHTML=esc(caption(note())).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\*([^*\n]+)\*/g,"<b>$1</b>").replace(/(^|\n)_([^_\n]+)_/g,"$1<i>$2</i>").replace(/\n/g,"<br>")};
   const paint=async()=>{paintTx();const my=++seq;const cv=await drawShareCard(kind,s,on,note());if(my!==seq)return;body.querySelector("#waImg").src=cv.toDataURL("image/png");cv.toBlob(b=>{if(my===seq)blob=b},"image/png")};
   let t;body.querySelector("#waN").addEventListener("input",()=>{paintTx();clearTimeout(t);t=setTimeout(paint,250)});
   const fname="mssw-"+kind+"-"+(s.title||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,40)+".png";
   body.querySelector("#waGo").onclick=async()=>{if(!blob){toast("One moment, the card is still being made.");return}const text=caption(note());const file=new File([blob],fname,{type:"image/png"});
-    /* phones: the phone's own share sheet, straight into WhatsApp with the card and caption */
-    if(!isDesk()){try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}}catch(e){if(e&&e.name==="AbortError")return}}
-    /* laptops: copy the card, open WhatsApp Web with the caption ready; paste the card into the chat */
+    /* phones and laptops: the device's own share menu, into the WhatsApp app with the card and caption together */
+    try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}}catch(e){if(e&&e.name==="AbortError")return}
+    await webShare()};
+  /* WhatsApp Web: copy the card, open WhatsApp Web with the caption ready; paste the card into the chat */
+  const webShare=async()=>{if(!blob){toast("One moment, the card is still being made.");return}const text=caption(note());
     let copied=false;try{if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);copied=true}}catch(e){}
     if(!copied){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();a.remove()}
     window.open(waUrl(text),"_blank","noopener");
     toast(copied?"Card copied. In WhatsApp Web, pick the chat and press Ctrl+V to add the card, then Send.":"Card downloaded. In WhatsApp Web, pick the chat and attach the card, then Send.",7000)};
   body.querySelector("#waTx").onclick=()=>window.open(waUrl(fullText(note())),"_blank","noopener");
+  {const w=body.querySelector("#waWeb");if(w)w.onclick=webShare}
   body.querySelector("#waCp").onclick=async()=>{try{await navigator.clipboard.writeText(caption(note()));toast("Caption copied")}catch(e){toast("Couldn't copy.")}};paint()}
 
 /* ---------- preview-mode stand-ins for the new back-end actions ---------- */
