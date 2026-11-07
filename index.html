@@ -1283,7 +1283,7 @@ a.nlink:hover{background:#DDE6FF}
 /* sign-in invite for new visitors: the hub shows blurred behind it */
 html.gated body>*:not(#gate):not(.scrim):not(.toast):not(script){filter:blur(7px);pointer-events:none;user-select:none}
 html.gated,html.gated body{overflow:hidden}
-#gate{position:fixed;inset:0;z-index:55;display:grid;place-items:center;padding:20px;background:rgba(20,16,60,.28)}
+#gate{position:fixed;inset:0;z-index:500;overflow-y:auto;display:grid;place-items:center;padding:20px;background:rgba(20,16,60,.28)}
 .gate-card{width:min(440px,100%);background:#fff;border-radius:24px;padding:30px 28px 24px;text-align:center;box-shadow:0 30px 80px rgba(20,16,60,.35)}
 .gate-brand{font-weight:800;letter-spacing:.2em;font-size:.82rem;color:#1E1C4E}.gate-brand span{color:#F2543D}
 .gate-card h2{font-size:2rem;line-height:1.08;margin:14px 0 10px;color:#1E1C4E}.gate-card h2 em{font-style:normal;color:#F2543D}
@@ -1293,6 +1293,8 @@ html.gated,html.gated body{overflow:hidden}
 .gate-pitch{background:linear-gradient(135deg,#F1EEFF,#FFF1EC);border:1px solid #E4DEFF;border-radius:16px;padding:16px 18px;margin:0 0 18px}
 .gate-pitch b{display:block;font-size:1.05rem;color:#1E1C4E}.gate-pitch p{margin:6px 0 0;color:#4A4870;font-size:.93rem;line-height:1.5}
 .gate-card small a{color:#4B3FD1;font-weight:700;text-decoration:none}
+body:has(.scrim) #gate{display:none}
+html.gated .invite{display:none!important}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
