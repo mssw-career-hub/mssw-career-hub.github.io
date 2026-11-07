@@ -1198,6 +1198,31 @@ a.nlink:hover{background:#DDE6FF}
 .cpost.is-team{border-color:color-mix(in srgb,var(--tf) 28%,#fff)}
 @media (max-width:600px){.seg2{max-width:100%;flex-wrap:wrap;height:auto;border-radius:18px}}
 
+/* home alumni corner */
+.ah{background:linear-gradient(135deg,#F3EEFF 0%,#FFF1EA 100%);border:1px solid #E6DEFF;border-radius:28px;padding:28px}
+.ah .sec-h{margin-bottom:18px}
+.ah-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ah-col{display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.75);border-radius:20px;padding:16px;border:1px solid rgba(90,54,224,.1)}
+.ah-h{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#6E6A90;margin:2px 4px 4px}
+.ah-m{display:flex;align-items:center;gap:12px;padding:10px;border-radius:16px;background:#fff;border:1px solid #EEEAF8}
+.ah-m .rg{flex:none;width:52px;height:52px;border-radius:50%;padding:3px;box-sizing:border-box}
+.ah-m .rg span{font-size:15px}
+.rg img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;background:#fff;border:2px solid #fff;box-sizing:border-box}
+.ah-mt{flex:1;min-width:0;display:flex;flex-direction:column}
+.ah-mt b{font-size:14.5px;color:#1E1C4E}
+.ah-mt small{font-size:12px;color:#6E6A90;line-height:1.4}
+.ah-p{display:flex;align-items:center;gap:12px;width:100%;padding:10px;border-radius:16px;background:#fff;border:1px solid #EEEAF8;cursor:pointer;font:inherit;color:inherit}
+.ah-p:hover{border-color:#C9BEFF}
+.ah-p b{display:block;font-size:14px;color:#1E1C4E;line-height:1.35}
+.ah-p small{font-size:12px;color:#6E6A90}
+.ah-d{flex:none;width:46px;height:50px;border-radius:12px;background:linear-gradient(180deg,#EAF2FF,#C9DBFF);color:#2849A8;display:grid;place-items:center;align-content:center;line-height:1.05}
+.ah-d small{font-size:10px;font-weight:800;letter-spacing:.06em;color:#2849A8}
+.ah-d b{font-size:18px;color:#2849A8}
+.ah-empty{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:14px;border-radius:16px;background:#fff;border:1px dashed #D9D2F5}
+.ah-empty b{font-size:14px;color:#1E1C4E}.ah-empty span{font-size:13px;color:#6E6A90}
+@media (max-width:760px){.ah{padding:18px 14px}.ah-grid{grid-template-columns:1fr}.ah .sec-h{flex-wrap:wrap;gap:10px}}
+@media (max-width:760px){.ah-m{flex-wrap:wrap}.ah-m .ah-mt{flex:1 1 calc(100% - 70px)}.ah-m .btn{width:100%;justify-content:center}}
+
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
 
@@ -2160,6 +2185,7 @@ function renderHome(){const op=openOpenings(),up=upcoming().filter(inCl),cos=com
       ["alumni","Alumni, giving back","Mentor, share hiring leads and real-work skills","linear-gradient(180deg,#FFF6DD,#FFE3A3)","#9A6400","heart","Alumni corner"]].map(([g,t,s,bg,fg,i,cta],x)=>`<button class="door2" data-go="${g}" ${x===2?'style="box-shadow:inset 0 0 0 1.5px #FF9C82,var(--shadow)!important"':""}>${orb(bg,fg,ic(i,22))}<b>${t}</b><small>${s}</small><em style="color:${fg}">${cta} →</em></button>`).join("")}</div></section>
    ${nextThings.length?`<section class="sec"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#9A6400">For you, this week</span><h2 style="margin-top:6px">Your next things</h2></div></div><button class="link" data-go="notices">Noticeboard ${ic("arrow",14)}</button></div>
     <div class="doors">${nextThings.map(n=>`<button class="door2" ${n.k==="drive"?`data-drive="${esc(n.id)}"`:`data-open="event:${esc(n.id)}"`} style="flex-direction:row;align-items:center;gap:14px">${orb(n.k==="drive"?"linear-gradient(180deg,#EAF2FF,#C9DBFF)":"linear-gradient(180deg,#FFF6DD,#FFE3A3)",n.k==="drive"?"#2849A8":"#9A6400",ic(n.k==="drive"?"clock":"cal",20),46)}<span><b style="display:block;margin:0">${esc(n.t)}</b><small>${esc(n.s)}</small></span></button>`).join("")}</div></section>`:""}
+   ${alumniHomeSec()}
    <section class="sec" id="wall"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:var(--coral)">Wall of placements</span><h2 style="margin-top:6px">Placed this year</h2></div></div>
      <div class="seg2 gl">${[["all","All"],["sw","Social Work (Aided)"],["se","Social Entrepreneurship"]].map(([k,l])=>`<button data-f="pw" data-v="${k}" aria-pressed="${(F.pw||"all")===k}">${l}</button>`).join("")}</div></div>
     <div class="gl wall">${wall.map((p,i)=>{const j=jFor(p.name);return `<button class="person" ${j?`data-open="journey:${esc(j.id)}"`:""}><span class="ringp" style="background:${RINGS[i%4][0]}"><img src="${p.img}" alt="${esc(p.name)}" loading="lazy"></span><b>${esc(p.name)}</b><span class="co" style="color:${RINGS[i%4][1]}">${esc(p.co)}</span><small>${esc(p.dept)}</small></button>`}).join("")}</div>
@@ -2295,7 +2321,7 @@ function renderAlumni(){const ps=postsV(),leads=ps.filter(p=>p.kind==="lead"),op
     <div class="tgrid">${KIND_ORDER.map((k,i)=>`<button class="tcard tint" data-compose="${k}" style="--c:${KIND[k][2]};--t:${KIND[k][1]}">${orb(`linear-gradient(180deg,#fff,${KIND[k][1]})`,KIND[k][2],`<b>0${i+1}</b>`,52)}<b>${k==="journey"?"Share your journey":k==="mentor"?"Offer mentorship":k==="lead"?"Share a hiring lead":k==="skill"?"Teach a real-work skill":k==="cert"?"Suggest a certification":k==="opp"?"Post a conference, internship or fellowship":"Upload learning material"}</b><p>${KIND_HINT[k]}</p><em class="tgo">${ME?"Start":"Sign in to start"} →</em></button>`).join("")}</div></section>
    <section class="sec" id="mentors" style="scroll-margin-top:100px"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#5A36E0">For students</span><h2 style="margin-top:6px">Mentors open this month</h2></div></div>
      <div class="seg2 gl">${["all","HR","Social sector","Psychology","Other"].map(k=>`<button data-f="ms" data-v="${k}" aria-pressed="${(F.ms||"all")===k}">${k==="all"?"All sectors":k}</button>`).join("")}</div></div>
-    ${ms.length?`<div class="tgrid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">${ms.map((m,i)=>`<article class="mcard"><span class="rg" style="background:${RINGS[i%4][0]}"><span>${esc(initials(m.name))}</span></span><b style="font-size:15px">${esc(m.name)}</b><span class="muted" style="font-size:12.5px;line-height:1.5">${esc(m.role||"")}${m.org?" · "+esc(m.org):""}<br>${m.batch?"Batch "+esc(m.batch)+(m.sector&&m.sector!=="Other"?" · ":""):""}${m.sector&&m.sector!=="Other"?esc(m.sector):""}</span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${(m.tags||[]).map(t=>String(t).trim()).filter(t=>/[A-Za-z0-9]{2}/.test(t)).slice(0,3).map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</span><button class="btn dark small" data-mentor="${esc(m.id)}" ${m.slots>0?"":"disabled"}>${m.slots>0?"Request a chat":"Not available this month"}</button></article>`).join("")}</div>`
+    ${ms.length?`<div class="tgrid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">${ms.map((m,i)=>`<article class="mcard"><span class="rg" style="background:${RINGS[i%4][0]}">${m.photo?`<img src="${esc(m.photo)}" alt="" referrerpolicy="no-referrer">`:`<span>${esc(initials(m.name))}</span>`}</span><b style="font-size:15px">${esc(nmc(m.name))}</b><span class="muted" style="font-size:12.5px;line-height:1.5">${esc(m.role||"")}${m.org?" · "+esc(m.org):""}<br>${m.batch?"Batch "+esc(m.batch)+(m.sector&&m.sector!=="Other"?" · ":""):""}${m.sector&&m.sector!=="Other"?esc(m.sector):""}</span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${(m.tags||[]).map(t=>String(t).trim()).filter(t=>/[A-Za-z0-9]{2}/.test(t)).slice(0,3).map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</span><button class="btn dark small" data-mentor="${esc(m.id)}" ${m.slots>0?"":"disabled"}>${m.slots>0?"Request a chat":"Not available this month"}</button></article>`).join("")}</div>`
      :`<div class="empty"><b>No mentors listed yet</b>Alumni who offer mentorship appear here with their field and free slots. <div style="margin-top:12px"><button class="btn primary small" data-compose="mentor">Offer mentorship</button></div></div>`}</section>
    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:18px;margin-top:40px;align-items:start">
     <section class="gl" style="padding:24px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="font-size:16px;margin:0">Hiring leads from alumni</h2><button class="link" data-compose="lead">${ic("plus",13)} Add</button></div>
@@ -2710,6 +2736,16 @@ if(/chtest/.test(location.search))window.__chBell=paintBell;
 /* first visit on a device: show a loading shimmer instead of "nothing here" until the hub's data arrives */
 function markLoading(){document.querySelectorAll("#main .empty").forEach(e=>{if(e.dataset.ld)return;e.dataset.ld=1;e.classList.add("is-loading");e.innerHTML=`<span class="sk"><i></i><i></i><i></i></span><b>Loading the latest…</b><span>This takes a few seconds the first time.</span>`})}
 {const _r=render;render=function(){const out=_r.apply(this,arguments);if(!BOOTED)markLoading();return out}}
+
+/* home: alumni corner, so mentors and alumni updates are seen without visiting the Alumni page */
+function alumniHomeSec(){const ms=(D.mentors||[]).filter(m=>m.slots>0).slice(0,3);const ps=postsV().filter(p=>["lead","opp"].includes(p.kind)).sort((a,b)=>(b.t||"").localeCompare(a.t||"")).slice(0,3);
+  if(!ms.length&&!ps.length&&LV()>=1)return "";
+  const mc=(m,i)=>`<div class="ah-m"><span class="rg" style="background:${RINGS[i%4][0]}">${m.photo?`<img src="${esc(m.photo)}" alt="" referrerpolicy="no-referrer">`:`<span>${esc(initials(m.name))}</span>`}</span><span class="ah-mt"><b>${esc(nmc(m.name))}</b><small>${esc([m.role,m.org].filter(Boolean).join(" · "))}</small></span><button class="btn dark small" data-mentor="${esc(m.id)}">Request a chat</button></div>`;
+  const pr=p=>{const m=p.meta||{},d=m.date||p.deadline;return `<button class="ah-p" data-post="${esc(p.id)}"><span class="ah-d">${d?`<small>${esc(new Date(d+"T00:00").toLocaleString("en-IN",{month:"short"}).toUpperCase())}</small><b>${new Date(d+"T00:00").getDate()}</b>`:ic("brief",18)}</span><span style="flex:1;min-width:0;text-align:left"><b>${esc(p.title)}</b><small>${esc([m.subtype||(KIND[p.kind]||[""])[0],"Shared by "+nmc(p.by||"alumni")].filter(Boolean).join(" · "))}</small></span></button>`};
+  const left=ms.length?ms.map(mc).join(""):`<div class="ah-empty"><b>${LV()>=1?"Mentors open up each month":"Alumni mentors are here to help"}</b><span>${LV()>=1?"Check back soon, or share your own experience.":"Sign in to see who is mentoring this month and request a chat."}</span>${LV()>=1?"":`<button class="btn coral small" data-signin>Sign in to meet them</button>`}</div>`;
+  return `<section class="sec ah"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#5A36E0">Alumni corner</span><h2 style="margin-top:6px">Talk to someone who's been there</h2></div></div><button class="btn" data-go="alumni">Visit the Alumni corner</button></div>
+   <div class="ah-grid"><div class="ah-col"><span class="ah-h">Mentors open this month</span>${left}</div>
+   <div class="ah-col"><span class="ah-h">Latest from alumni</span>${ps.length?ps.map(pr).join(""):`<div class="ah-empty"><b>Nothing new yet</b><span>Conferences, internships and hiring leads shared by alumni show up here.</span></div>`}</div></div></section>`}
 
 RAW=realData();applyAccess();
 /* show what this device saw last time straight away; fresh data replaces it a moment later */
