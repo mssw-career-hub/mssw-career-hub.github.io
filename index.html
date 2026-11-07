@@ -1230,6 +1230,8 @@ a.nlink:hover{background:#DDE6FF}
 @media (max-width:600px){.orow{flex-wrap:wrap;align-items:flex-start!important;row-gap:10px}.orow>span:nth-child(2){flex:1 1 calc(100% - 64px)!important}.orow .oacts{width:100%;padding-left:60px;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;flex-wrap:wrap}}
 .ah-ma{display:flex;gap:8px;align-items:center;flex:none}
 @media (max-width:760px){.ah-ma{width:100%}.ah-ma .btn{flex:1}}
+.drawer [data-editpost],.drawer [data-hide]{background:#fff!important;border:1px solid #D9DCF2!important;color:#2A2770!important;box-shadow:none!important;padding:10px 18px!important;border-radius:999px!important;font-weight:600}
+.drawer [data-hide]{color:#B4233A!important;border-color:#F1C9D0!important}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2342,7 +2344,7 @@ function renderAlumni(){const ps=postsV(),leads=ps.filter(p=>p.kind==="lead"),op
 /* ---------- open one post ---------- */
 function openPost(id){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return;const m=p.meta||{};const files=p.files||[];
   drawer(KIND[p.kind]?KIND[p.kind][0]:"Post",`${kindTag(p.kind)}<h2 style="margin:12px 0 6px;text-transform:none;letter-spacing:0;font-size:20px">${esc(p.title)}</h2>
-   <div class="by" style="border:0;padding:0 0 12px">${byAv(p)}<span>${esc(p.by||"MSSW alumni")}${p.byBatch?" · batch "+esc(p.byBatch):""}${p.byOrg?" · "+esc(p.byOrg):""}<br>${ago(p.t)}</span></span>
+   <div class="by" style="border:0;padding:0 0 12px">${byAv(p)}<span>${esc(nmc(p.by||"MSSW alumni"))}${p.byBatch?" · batch "+esc(p.byBatch):""}${p.byOrg?" · "+esc(p.byOrg):""}<br>${ago(p.t)}</span></div>
    ${[m.org&&["Organisation",m.org],m.location&&["Location",m.location],p.deadline&&["Apply by",nice(p.deadline)],m.subtype&&["Type",m.subtype],m.date&&["Date",nice(m.date)],m.provider&&["Offered by",m.provider],m.cost&&["Cost",m.cost]].filter(Boolean).length?`<dl class="facts">${[m.org&&["Organisation",m.org],m.location&&["Location",m.location],p.deadline&&["Apply by",nice(p.deadline)],m.subtype&&["Type",m.subtype],m.date&&["Date",nice(m.date)],m.provider&&["Offered by",m.provider],m.cost&&["Cost",m.cost]].filter(Boolean).map(([a,b])=>`<dt>${a}</dt><dd>${esc(b)}</dd>`).join("")}</dl>`:""}
    <div class="prose2">${md(p.body).replace(/(^|[\s(>])@([A-Z][A-Za-z.'-]*(?: [A-Z][A-Za-z.'-]*){0,3})/g,'$1<span class="mention">@$2</span>')}</div>
    ${files.length?`<h3>Files</h3><div class="files">${files.map(f=>{const e=(f.name.split(".").pop()||"").toUpperCase().slice(0,4);return `<a class="file" href="${esc(f.url)}" target="_blank" rel="noopener"><span class="ext" style="background:#F1ECFF;color:#5A36E0">${esc(e)}</span><span style="flex:1;min-width:0"><b style="display:block;font-size:13px">${esc(f.name)}</b><small class="muted">${f.size?(f.size/1048576).toFixed(1)+" MB":""}</small></span>↗</a>`}).join("")}</div>`:""}
