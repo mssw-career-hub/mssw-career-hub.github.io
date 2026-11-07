@@ -1280,6 +1280,19 @@ a.nlink:hover{background:#DDE6FF}
 
 /* keep the line breaks and blank lines typed in a notice */
 .nrow p,.bite p{white-space:pre-line;overflow-wrap:anywhere}
+/* sign-in invite for new visitors: the hub shows blurred behind it */
+html.gated body>*:not(#gate):not(.scrim):not(.toast):not(script){filter:blur(7px);pointer-events:none;user-select:none}
+html.gated,html.gated body{overflow:hidden}
+#gate{position:fixed;inset:0;z-index:55;display:grid;place-items:center;padding:20px;background:rgba(20,16,60,.28)}
+.gate-card{width:min(440px,100%);background:#fff;border-radius:24px;padding:30px 28px 24px;text-align:center;box-shadow:0 30px 80px rgba(20,16,60,.35)}
+.gate-brand{font-weight:800;letter-spacing:.2em;font-size:.82rem;color:#1E1C4E}.gate-brand span{color:#F2543D}
+.gate-card h2{font-size:2rem;line-height:1.08;margin:14px 0 10px;color:#1E1C4E}.gate-card h2 em{font-style:normal;color:#F2543D}
+.gate-card p{color:#4A4870;margin:0 0 14px;line-height:1.55;font-size:.95rem}
+.gate-card ul{list-style:none;padding:0;margin:0 0 18px;text-align:left;display:grid;gap:6px;background:#F6F5FB;border-radius:14px;padding:12px 16px;font-size:.92rem;color:#4A4870}.gate-card ul b{color:#1E1C4E}
+.gate-card .btn{width:100%;justify-content:center}.gate-card small{display:block;margin-top:10px;color:#8A88A6}
+.gate-pitch{background:linear-gradient(135deg,#F1EEFF,#FFF1EC);border:1px solid #E4DEFF;border-radius:16px;padding:16px 18px;margin:0 0 18px}
+.gate-pitch b{display:block;font-size:1.05rem;color:#1E1C4E}.gate-pitch p{margin:6px 0 0;color:#4A4870;font-size:.93rem;line-height:1.5}
+.gate-card small a{color:#4B3FD1;font-weight:700;text-decoration:none}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2885,6 +2898,16 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
 document.addEventListener("keydown",e=>{if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||"")&&!document.querySelector(".scrim")){e.preventDefault();openSearch()}});
 {const _ps=paintBell;paintBell=function(){_ps.apply(this,arguments);const s=document.getElementById("bellSlot");if(s&&!s.querySelector("[data-search]"))s.insertAdjacentHTML("afterbegin",`<button class="bell hsearch" data-search aria-label="Search the hub"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11.5" cy="11.5" r="6"/><path d="M16 16l3.5 3.5"/></svg></button>`)}}
 {const _rs=render;render=function(){const out=_rs.apply(this,arguments);try{if(false&&view==="home"){const hx=document.querySelector("#main .hx");const an=document.querySelector("#main .hx .ha-si");if(hx&&!document.querySelector(".hsbar")){const h=`<button class="hsbar${an?" in-hero":""}" data-search aria-label="Search the hub">${ic("search",20)}<span><i class="sl-l">Search notices, drives, mentors, resources and more</i><i class="sl-s">Search the hub</i></span><kbd>/</kbd></button>`;if(an)an.insertAdjacentHTML("afterend",h);else hx.insertAdjacentHTML("afterend",`<div class="wrap">${h}</div>`)}}}catch(e){}return out}}
+
+/* New visitors see the hub blurred behind a sign-in invite; signing in unlocks it */
+const GATE_PITCH=`<div class="gate-pitch"><b>New here? This is your sign-up</b><p>Enter your name and email and we'll send a 6-digit code. That creates your account. No password needed.</p></div>`;
+function gateSignIn(then){if(document.querySelector(".scrim"))return;openSignIn(then);setTimeout(()=>{const d=[...document.querySelectorAll(".drawer")].pop();if(d&&!d.querySelector(".gate-pitch")){const h=d.querySelector("h2");if(h)h.insertAdjacentHTML("beforebegin",GATE_PITCH)}},0)}
+function paintGate(){const on=!ME;document.documentElement.classList.toggle("gated",on);let g=document.getElementById("gate");
+  if(on&&!g){document.body.insertAdjacentHTML("beforeend",`<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT"><div class="gate-card"><div class="gate-brand">MSSW <span>CAREER HUB</span></div><h2 id="gateT">They made it<br><em>You're next!</em></h2><p>An unofficial, student-run space where MSSW students and alumni share what they've learnt, so every batch walks in prepared.</p><ul><li><b>Students:</b> sign up with your MSSW ID</li><li><b>Alumni:</b> sign up with any email, no password</li></ul><button class="btn coral" data-gate>Sign up free</button><small>Already joined? <a href="#" data-gate>Sign in</a> with the same email.</small></div></div>`)}
+  if(!on&&g)g.remove()}
+{const _aa=applyAccess;applyAccess=function(){const o=_aa.apply(this,arguments);try{paintGate()}catch(x){}return o}}
+document.addEventListener("click",e=>{if(e.target.closest("[data-gate]")){e.preventDefault();gateSignIn()}});
+paintGate();
 
 RAW=realData();applyAccess();
 /* show what this device saw last time straight away; fresh data replaces it a moment later */
