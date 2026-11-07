@@ -1222,6 +1222,10 @@ a.nlink:hover{background:#DDE6FF}
 .ah-empty b{font-size:14px;color:#1E1C4E}.ah-empty span{font-size:13px;color:#6E6A90}
 @media (max-width:760px){.ah{padding:18px 14px}.ah-grid{grid-template-columns:1fr}.ah .sec-h{flex-wrap:wrap;gap:10px}}
 @media (max-width:760px){.ah-m{flex-wrap:wrap}.ah-m .ah-mt{flex:1 1 calc(100% - 70px)}.ah-m .btn{width:100%;justify-content:center}}
+.wa-steps{margin-top:12px;padding:14px 16px;border-radius:16px;background:#E9F8EF;border:1px solid #BFE7CD;color:#1E3D2C;font-size:13.5px;line-height:1.5}
+.wa-steps b{display:block;margin-bottom:6px;color:#14532D}
+.wa-steps ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.wa-steps kbd{font:600 12px Inter,system-ui,sans-serif;padding:1px 6px;border-radius:6px;background:#fff;border:1px solid #BFE7CD}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2489,7 +2493,11 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   return c}
 /* laptop or desktop (mouse, not a phone or tablet) */
 const isDesk=()=>!/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)&&matchMedia("(pointer:fine)").matches;
-const waUrl=text=>(isDesk()?"https://web.whatsapp.com/send?text=":"https://wa.me/?text=")+encodeURIComponent(text);
+/* WhatsApp Web shows the * and _ marks while you type, so it gets plain text */
+const plainWa=t=>String(t).replace(/\*([^*\n]+)\*/g,"$1").replace(/(^|\n)_([^_\n]+)_/g,"$1$2");
+/* on a laptop, reuse the WhatsApp Web tab the hub opened before, instead of a new tab each time */
+const openWa=url=>{if(!isDesk()){window.open(url,"_blank","noopener");return}const w=window.open(url,"mssw-whatsapp");try{if(w){w.opener=null;w.focus()}}catch(e){}};
+const waUrl=text=>isDesk()?"https://web.whatsapp.com/send?text="+encodeURIComponent(plainWa(text)):"https://wa.me/?text="+encodeURIComponent(text);
 function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that item.");return}const kind=ref.split(":")[0];const K=SHARE_KIND[kind]||SHARE_KIND.notice;const on={what:1,for:1,when:1,link:1,hub:1};
   const hub=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
   const lp=(s.parts.find(([k,t])=>k==="link"&&t)||[])[1]||"";const lm=lp.match(/^(.*?):\s*(https?:\/\/\S+)/)||(lp.match(/^https?:\/\/\S+/)?["","Link",lp]:null);
@@ -2519,9 +2527,12 @@ function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that 
   const webShare=async()=>{if(!blob){toast("One moment, the card is still being made.");return}const text=caption(note());
     let copied=false;try{if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);copied=true}}catch(e){}
     if(!copied){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();a.remove()}
-    window.open(waUrl(text),"_blank","noopener");
-    toast(copied?"Card copied. In WhatsApp Web, pick the chat and press Ctrl+V to add the card, then Send.":"Card downloaded. In WhatsApp Web, pick the chat and attach the card, then Send.",7000)};
-  body.querySelector("#waTx").onclick=()=>window.open(waUrl(fullText(note())),"_blank","noopener");
+    openWa(waUrl(text));
+    toast(copied?"Card copied. Now finish in WhatsApp Web.":"Card downloaded. Now finish in WhatsApp Web.",5000);
+    /* keep the steps on screen, so anyone sharing knows what to do in WhatsApp Web */
+    let g=body.querySelector(".wa-steps");if(!g){g=document.createElement("div");g.className="wa-steps";body.querySelector(".wa-more").after(g)}
+    g.innerHTML=`<b>Finish in WhatsApp Web (opened in a new tab)</b><ol><li>Choose the group or chat.</li><li>${copied?"Click in the message box and press <kbd>Ctrl</kbd> + <kbd>V</kbd> to add the card.":"Click the 📎 clip, choose Photos, and pick the card from your Downloads."} The text moves under the card.</li><li>Close the grey link preview with its ×, if you see one, then press Send.</li></ol>`};
+  body.querySelector("#waTx").onclick=()=>openWa(waUrl(fullText(note())));
   {const w=body.querySelector("#waWeb");if(w)w.onclick=webShare}
   body.querySelector("#waCp").onclick=async()=>{try{await navigator.clipboard.writeText(caption(note()));toast("Caption copied")}catch(e){toast("Couldn't copy.")}};paint()}
 
