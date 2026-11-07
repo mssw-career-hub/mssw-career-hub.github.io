@@ -1251,6 +1251,29 @@ a.nlink:hover{background:#DDE6FF}
 /* two-column page layouts stack into one column on phones */
 @media (max-width:760px){#main .grid2{grid-template-columns:minmax(0,1fr)!important}#main .grid2>aside{margin-top:8px!important}}
 
+/* universal search */
+.hsbar{display:flex;align-items:center;gap:12px;width:100%;margin:22px 0 4px;padding:16px 20px;border-radius:999px;background:#fff;border:1.5px solid #DCD6F5;box-shadow:0 12px 30px -18px rgba(40,30,110,.35);color:#6E6A90;font:500 15px/1.3 inherit;cursor:pointer;text-align:left}
+.hsbar:hover{border-color:#B7A9F5}
+.hsbar svg{color:#5A36E0;flex:none}
+.hsbar span{flex:1}
+.hsbar kbd{font:600 12px Inter,system-ui,sans-serif;padding:2px 8px;border-radius:6px;background:#F1EEFC;color:#5A36E0;border:1px solid #DCD6F5}
+@media (max-width:760px){.hsbar{font-size:14px;padding:14px 16px;margin-top:16px}.hsbar kbd{display:none}.hsearch{display:none!important}}
+.us-in{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:16px;background:#fff;border:1.5px solid #CFC6F5;color:#5A36E0;position:sticky;top:0;z-index:2}
+.us-in input{flex:1;border:0;outline:0;font:500 16px inherit;color:#1E1C4E;background:transparent;min-width:0}
+.us-r{margin-top:14px;display:flex;flex-direction:column;gap:16px}
+.us-tip{font-size:14px;color:#6E6A90;line-height:1.6}
+.us-gh{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#6E6A90;margin:0 4px 8px}
+.us-g{display:flex;flex-direction:column;gap:8px}
+.us-i{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #E6E8F2;cursor:pointer;font:inherit;color:inherit}
+.us-i:hover{border-color:#C9BEFF;box-shadow:0 4px 14px rgba(40,40,110,.08)}
+.us-i b{font-size:14.5px;color:#1E1C4E;line-height:1.35}
+.us-i span{font-size:12.5px;color:#6E6A90;line-height:1.45}
+.us-i mark{background:#FFE7A8;color:inherit;border-radius:3px;padding:0 1px}
+.hsbar.in-hero{max-width:560px;margin:18px 0 0;background:rgba(255,255,255,.96);border-color:rgba(255,255,255,.6)}
+@media (max-width:760px){.hsbar.in-hero{max-width:none}}
+.hsbar i{font-style:normal}.hsbar .sl-s{display:none}
+@media (max-width:760px){.hsbar .sl-l{display:none}.hsbar .sl-s{display:inline}}
+
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
 
@@ -2608,9 +2631,9 @@ document.addEventListener("click",e=>{const t=e.target;let b;
   const bar=document.createElement("div");bar.className="sprog";document.body.appendChild(bar);
   const dock=document.createElement("nav");dock.className="dock";dock.setAttribute("aria-label","Shortcuts");
   const items=[["notices","mega","Notices"],["drives","brief","Drives"],["readiness","check","Prepare"],["learn","book","Learn"],["community","chat","Community"],["alumni","users","Alumni"]];
-  dock.innerHTML=items.map(([v,i,l])=>`<button type="button" data-dock="${v}" title="${l}">${ic(i,18)}<span>${l}</span></button>`).join("")+`<button type="button" data-dock="top" class="dtop" title="Back to top"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span>Top</span></button>`;
+  dock.innerHTML=items.map(([v,i,l])=>`<button type="button" data-dock="${v}" title="${l}">${ic(i,18)}<span>${l}</span></button>`).join("")+`<button type="button" data-dock="search" class="dtop" title="Search the hub">${ic("search",18)}<span>Search</span></button>`;
   document.body.appendChild(dock);
-  dock.addEventListener("click",e=>{const b=e.target.closest("[data-dock]");if(!b)return;const v=b.dataset.dock;if(v==="top"){window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});return}go(v)});
+  dock.addEventListener("click",e=>{const b=e.target.closest("[data-dock]");if(!b)return;const v=b.dataset.dock;if(v==="top"){window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});return}if(v==="search"){openSearch();return}go(v)});
   const mark=()=>{const cur=typeof view!=="undefined"?view:"";dock.querySelectorAll("[data-dock]").forEach(b=>b.classList.toggle("on",b.dataset.dock===cur))};
   let lastY=0;
   const onScroll=()=>{const h=document.documentElement;const max=h.scrollHeight-h.clientHeight;const y=window.scrollY||h.scrollTop;bar.style.transform=`scaleX(${max>0?Math.min(1,y/max):0})`;dock.classList.toggle("show",y>260);dock.classList.toggle("tuck",y>lastY+4&&y>600&&innerWidth<1000);if(y<lastY-4)dock.classList.remove("tuck");lastY=y};
@@ -2818,6 +2841,37 @@ function brochureSec(){if(LV()<2)return "";const bs=(D.posts||[]).filter(p=>p.ki
    <p class="muted" style="font-size:13px;margin:-6px 0 14px">One brochure per department, grouped by sector. They include student contact details, so only MSSW accounts can see them. Please don't forward them outside MSSW; recruiters can request them from the placement cell.</p>
    ${bs.length?groups.map(g=>`<div class="bro-g"><span class="bro-gh">${esc(g)}</span><div class="bro-grid">${bs.filter(p=>bcl(p.cluster)===g).map(card).join("")}</div></div>`).join(""):`<div class="empty"><b>No brochures yet</b><span>Add each department's brochure with "+ Add a brochure", choosing its sector.</span></div>`}</section>`}
 {const _rb=render;render=function(){const out=_rb.apply(this,arguments);try{if(view==="resources"){const w=document.querySelector("#main > .wrap");const h=brochureSec();if(w&&h)w.insertAdjacentHTML("afterbegin",h)}}catch(e){if(/chtest/.test(location.search))console.error("bro",e)}return out}}
+
+/* ---------- universal search: everything on the hub this viewer can see ---------- */
+function searchIndex(){const out=[],add=(type,title,sub,act,text)=>{if(title)out.push({type,title:String(title),sub:String(sub||""),act,text:(String(title)+" "+String(sub||"")+" "+String(text||"")).toLowerCase()})};
+  const strip=t=>String(t||"").replace(/https?:\/\/\S+/g,"").replace(/[*_#>`]/g,"").replace(/\s+/g," ").trim();
+  (D.notices||[]).forEach(n=>add("Notice",n.title,strip(n.body).slice(0,120),{go:"notices"},n.body+" "+(n.cluster||"")));
+  (D.drives||[]).forEach(d=>add("Campus drive",d.company,[d.role,d.status].filter(Boolean).join(" · "),{go:"drives"},(d.stages||[]).map(x=>x.join(" ")).join(" ")+" "+(d.cluster||"")+" "+(d.location||"")));
+  (D.events||[]).forEach(e=>add("Event",e.title,[e.date&&nice(e.date),e.mode].filter(Boolean).join(" · "),{go:"events"},e.about));
+  (D.openings||[]).forEach(o=>add("Opening",o.company,[o.roles,o.location].filter(Boolean).join(" · "),{go:"companies"},o.about));
+  (D.journeys||[]).forEach(j=>add("Placement journey",[j.role,j.company].filter(Boolean).join(" at "),j.name?"Shared by "+nmc(j.name):"",{go:"journeys"},JSON.stringify(j.rounds||"")+" "+(j.advice||"")));
+  (D.posts||[]).forEach(p=>{const t=p.kind==="bite"?"Career bite":p.kind==="brochure"?"Placement brochure":(KIND[p.kind]||["From alumni"])[0];add(t,p.title,strip(p.body).slice(0,120),{post:p.id},p.body+" "+JSON.stringify(p.meta||{}))});
+  (D.resources||[]).forEach(r=>add("Resource",r.title,[r.kind,r.topic].filter(Boolean).join(" · "),{open:"resource:"+r.id},r.about));
+  (D.mentors||[]).forEach(m=>add("Mentor",nmc(m.name),[m.role,m.org].filter(Boolean).join(" · "),{go:"alumni"},(m.tags||[]).join(" ")+" "+(m.sector||"")));
+  (D.community||[]).forEach(c=>add("Community",strip(c.text).slice(0,70),"by "+nmc(c.name)+(c.tag?" · "+c.tag:""),{go:"community",jump:"cp-"+c.id},c.text));
+  [["Readiness checklist","Prepare, step by step","readiness","resume interview gd checklist ready prepare"],["Resources","Templates, guides and samples","resources","resume template guide sample brochure"],["Learn","Tracks and the rounds you'll face","learn","aptitude gd interview psychometric compliance practise"],["Companies","Recruiters and openings","companies","company recruiter opening"],["Placement journeys","How seniors got placed","journeys","journey experience interview questions"],["Alumni corner","Mentors, leads and conferences","alumni","mentor alumni lead internship fellowship conference"],["Community wall","Questions, wins and thanks","community","question ask help"],["Notice board","This season's notices","notices","notice update deadline"],["Campus drives","Every company this season","drives","drive campus placement"],["Events","Talks and sessions","events","event talk webinar"]].forEach(([t,s2,g,k])=>add("Page",t,s2,{go:g},k));
+  return out}
+function openSearch(q0){const {body,close}=drawer("Search the hub",`<div class="us"><label class="us-in">${ic("search",18)}<input id="usQ" type="search" placeholder="Search notices, drives, mentors, resources…" autocomplete="off" enterkeyhint="search"></label><div id="usR" class="us-r"></div></div>`);
+  const idx=searchIndex(),R=body.querySelector("#usR"),Q=body.querySelector("#usQ");
+  const hl=(t,ws)=>{let h=esc(t);ws.forEach(w=>{if(w.length>1)h=h.replace(new RegExp("("+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>")});return h};
+  const run=()=>{const q=Q.value.trim().toLowerCase(),ws=q.split(/\s+/).filter(Boolean);
+    if(!ws.length){R.innerHTML=`<p class="us-tip">Try <button class="link" data-usq="Tata Power">Tata Power</button>, <button class="link" data-usq="resume">resume</button>, <button class="link" data-usq="psychometric">psychometric</button> or <button class="link" data-usq="mentor">mentor</button>.${LV()<2?" Sign in with your MSSW ID to search notices and drives too.":""}</p>`;return}
+    const hits=idx.filter(x=>ws.every(w=>x.text.includes(w))).map(x=>({...x,sc:ws.reduce((a,w)=>a+(x.title.toLowerCase().includes(w)?3:0)+(x.type==="Page"?-1:0),0)})).sort((a,b)=>b.sc-a.sc).slice(0,40);
+    if(!hits.length){R.innerHTML=`<p class="us-tip">Nothing found for "<b>${esc(Q.value.trim())}</b>". Try a shorter word, or a company or topic name.</p>`;return}
+    const groups=[...new Set(hits.map(h=>h.type))];
+    R.innerHTML=groups.map(g=>`<div class="us-g"><span class="us-gh">${esc(g)}</span>${hits.filter(h=>h.type===g).map(h=>{const a=h.act;const at=a.post?`data-post="${esc(a.post)}"`:a.open?`data-open="${esc(a.open)}"`:`data-go="${esc(a.go)}"${a.jump?` data-jumpto="${esc(a.jump)}"`:""}`;return `<button class="us-i" ${at}><b>${hl(h.title,ws)}</b>${h.sub?`<span>${hl(h.sub,ws)}</span>`:""}</button>`}).join("")}</div>`).join("")};
+  Q.addEventListener("input",run);R.addEventListener("click",e=>{const t=e.target.closest("[data-usq]");if(t){Q.value=t.dataset.usq;run();Q.focus();return}const b=e.target.closest(".us-i");if(b&&(b.dataset.post||b.dataset.open)){setTimeout(()=>{document.querySelectorAll(".scrim").forEach((s,i,a)=>{if(i<a.length-1)s.remove()})},50)}});
+  if(q0)Q.value=q0;run();setTimeout(()=>Q.focus(),60)}
+/* header search button (laptops) and the home page search bar */
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-search]");if(b){e.preventDefault();const i=b.querySelector&&b.querySelector("input");openSearch(i?i.value:"")}},true);
+document.addEventListener("keydown",e=>{if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||"")&&!document.querySelector(".scrim")){e.preventDefault();openSearch()}});
+{const _ps=paintBell;paintBell=function(){_ps.apply(this,arguments);const s=document.getElementById("bellSlot");if(s&&!s.querySelector("[data-search]"))s.insertAdjacentHTML("afterbegin",`<button class="bell hsearch" data-search aria-label="Search the hub">${ic("search",18)}</button>`)}}
+{const _rs=render;render=function(){const out=_rs.apply(this,arguments);try{if(view==="home"){const hx=document.querySelector("#main .hx");const an=document.querySelector("#main .hx .ha-si");if(hx&&!document.querySelector(".hsbar")){const h=`<button class="hsbar${an?" in-hero":""}" data-search aria-label="Search the hub">${ic("search",20)}<span><i class="sl-l">Search notices, drives, mentors, resources and more</i><i class="sl-s">Search the hub</i></span><kbd>/</kbd></button>`;if(an)an.insertAdjacentHTML("afterend",h);else hx.insertAdjacentHTML("afterend",`<div class="wrap">${h}</div>`)}}}catch(e){}return out}}
 
 RAW=realData();applyAccess();
 /* show what this device saw last time straight away; fresh data replaces it a moment later */
