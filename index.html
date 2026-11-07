@@ -1295,6 +1295,13 @@ html.gated,html.gated body{overflow:hidden}
 .gate-card small a{color:#4B3FD1;font-weight:700;text-decoration:none}
 body:has(.scrim) #gate{display:none}
 html.gated .invite{display:none!important}
+.bcredit{margin:8px 0 0!important;font-size:.88rem;font-weight:600;color:#1E62AC}.bcredit span{color:#C2412A}
+/* career bites: full-width rectangles, one under another */
+.bites{grid-template-columns:1fr!important}
+.bite{padding:20px 26px}
+.bite h3{font-size:18px}
+.bite p{max-width:880px}
+.bite .bfoot{margin-top:6px}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -1324,7 +1331,7 @@ const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMo
 const isoPlus=n=>{const d=new Date(Date.now()+n*864e5);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const dOf=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||"");return m?new Date(+m[1],m[2]-1,+m[3]):null};
 const nice=iso=>{const d=dOf(iso);return d?d.getDate()+" "+MONTHS[d.getMonth()].slice(0,3)+" "+d.getFullYear():""};
-const ago=t=>{const s=(Date.now()-new Date(t))/1e3;if(s<3600)return Math.max(1,Math.round(s/60))+" min ago";if(s<86400)return Math.round(s/3600)+" hr ago";const d=Math.round(s/86400);return d<30?d+" days ago":nice(new Date(t).toISOString())};
+const ago=t=>{const s=(Date.now()-new Date(t))/1e3;if(s<3600)return Math.max(1,Math.round(s/60))+" min ago";if(s<86400)return Math.round(s/3600)+" hr ago";const d=Math.round(s/86400);return d<30?(d===1?"1 day ago":d+" days ago"):nice(new Date(t).toISOString())};
 const hash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;return h};
 const initials=n=>String(n||"?").trim().split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase();
 const norm=s=>String(s||"").toLowerCase().replace(/\b(pvt|private|ltd|limited|llp|inc|foundation|trust)\b/g,"").replace(/[^a-z0-9]/g,"");
@@ -2514,7 +2521,7 @@ function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"
   if(k==="mentor"){const m=(D.mentors||[]).find(x=>x.id===id);if(!m)return null;const nm=nmc(m.name);
     return {title:nm+" has joined as a mentor!",tag:"Mentor spotlight",photo:m.photo||"",initials:initials(m.name),
       parts:[["what",[[m.role,m.org].filter(Boolean).join(", "),m.batch?"MSSW, batch "+m.batch:""].filter(Boolean).join(" · ")+"."]],welcomeLabel:"A NOTE FOR ALUMNI",welcome:"Your story could be exactly what a junior needs to hear. Share your journey, give advice or mentor one student. It takes a few minutes, and it stays with them for years."}}
-  if(k==="bite"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const urls=(p.body||"").match(/https?:\/\/[^\s]+/g)||[];return {title:p.title,parts:[["what",(p.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").trim()],["for","For: "+cl(p.cluster)],["when","Posted: "+nice((p.t||"").slice(0,10))],["link",p.link?"Read more: "+p.link:urls.length?"Link: "+urls[0]:""]],links:bodyLinks((p.link?p.link+" ":"")+p.body)}}
+  if(k==="bite"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const urls=(p.body||"").match(/https?:\/\/[^\s]+/g)||[];return {title:p.title,tag:p.meta&&p.meta.provider?"Expert note":undefined,parts:[["what",(p.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").trim()+(p.meta&&p.meta.provider?" ("+p.meta.provider+")":"")],["for","For: "+cl(p.cluster)],["when","Posted: "+nice((p.t||"").slice(0,10))],["link",p.link?"Read more: "+p.link:urls.length?"Link: "+urls[0]:""]],links:bodyLinks((p.link?p.link+" ":"")+p.body)}}
   if(k==="post"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const m=p.meta||{};
     const sum=String(p.body||"").replace(/https?:\/\/\S+/g,"").replace(/[*_#>`]/g,"").replace(/^\s*[-\d.]+\s+/gm,"").replace(/\s+/g," ").trim();
     const by="Shared by "+nmc(p.by||"MSSW alumni")+(p.byOrg?", "+p.byOrg:"");
@@ -2777,18 +2784,19 @@ document.addEventListener("submit",async e=>{const f=e.target;
 
 /* ---------- career bites ---------- */
 function bitesSec(){const bs=(D.posts||[]).filter(p=>p.kind==="bite").sort((a,b)=>(b.t||"").localeCompare(a.t||"")).slice(0,3);if(!bs.length&&LV()<3)return "";
-  return `<section class="sec" id="bites"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#C2412A">From the placement team</span><h2 style="margin-top:6px">Career bites</h2><p>Short reads on jobs, skills and sectors. New bites are emailed to everyone who has signed in.</p></div></div>${LV()>=3?`<button class="btn primary small" data-bitenew>${ic("plus",14)} Post a career bite</button>`:""}</div>
-   <div class="bites">${bs.length?bs.map(b=>`<article class="bite gl"><span class="bchip">${esc(b.cluster&&b.cluster!=="All"?clLabel(b.cluster):"For everyone")}</span><h3>${esc(b.title)}</h3><p>${lnk(String(b.body||"").trim())}</p>${b.link?`<a class="nlink" href="${esc(b.link)}" target="_blank" rel="noopener">Read more ↗</a>`:""}<div class="bfoot"><small>${ago(b.t)}</small><span style="display:flex;gap:6px">${LV()>=3?`<button class="cbtn" data-hide="posts:${esc(b.id)}">Remove</button>`:""}<button class="cbtn" data-share="bite:${esc(b.id)}">${ic("wa",14)} Share</button></span></div></article>`).join(""):`<div class="empty" style="grid-column:1/-1"><b>No career bites yet</b>Post a short read on a sector, a skill or a job trend. It goes to everyone who has signed in.</div>`}</div></section>`}
+  return `<section class="sec" id="bites"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#C2412A">From the Career Hub</span><h2 style="margin-top:6px">Career bites</h2><p>Short reads on jobs, skills and sectors. New bites are emailed to everyone who has signed in.</p></div></div>${LV()>=3?`<button class="btn primary small" data-bitenew>${ic("plus",14)} Post a career bite</button>`:""}</div>
+   <div class="bites">${bs.length?bs.map(b=>`<article class="bite gl"><span class="bchip">${esc(b.cluster&&b.cluster!=="All"?clLabel(b.cluster):"For everyone")}</span><h3>${esc(b.title)}</h3><p>${lnk(String(b.body||"").trim())}</p>${b.meta&&b.meta.provider?`<p class="bcredit"><span>✦</span> ${esc(b.meta.provider)}</p>`:""}${b.link?`<a class="nlink" href="${esc(b.link)}" target="_blank" rel="noopener">Read more ↗</a>`:""}<div class="bfoot"><small>${ago(b.t)}</small><span style="display:flex;gap:6px">${LV()>=3?`<button class="cbtn" data-hide="posts:${esc(b.id)}">Remove</button>`:""}<button class="cbtn" data-share="bite:${esc(b.id)}">${ic("wa",14)} Share</button></span></div></article>`).join(""):`<div class="empty" style="grid-column:1/-1"><b>No career bites yet</b>Post a short read on a sector, a skill or a job trend. It goes to everyone who has signed in.</div>`}</div></section>`}
 function openBite(){const {body,close}=drawer("Career bite",`<span class="eyebrow" style="color:#C2412A">Career bite</span><h2 style="margin:4px 0 6px">Post a career bite</h2><p class="muted" style="margin:0 0 12px;font-size:13.5px">Keep it short: one idea, three or four lines. It appears on the home page and is emailed to everyone who has signed in.</p>
    <form id="bF"><label class="lab" for="bT">Headline</label><input class="field" id="bT" maxlength="120" placeholder="e.g. CSR teams are hiring impact analysts">
    <label class="lab" for="bB">The bite</label><textarea class="field" id="bB" rows="5" maxlength="1200" placeholder="What is happening, why it matters for MSSW students, and one thing to do about it."></textarea>
    <span class="lab">For</span><div class="pick" id="bC">${[["All","Everyone"],["HR","HR"],["Social sector","Social sector"],["Psychology","Psychology"]].map(([k,l],i)=>`<button type="button" data-v="${k}" aria-pressed="${i===0}">${l}</button>`).join("")}</div>
    <label class="lab" for="bL">Link <small>(optional)</small></label><input class="field" id="bL" maxlength="400" placeholder="https://">
+   <label class="lab" for="bX">Expert credit <small>(optional)</small></label><input class="field" id="bX" maxlength="80" placeholder="e.g. Ravi Kumar, Programme Manager, Fairtrade India"><p class="muted" style="margin:4px 0 0;font-size:12.5px">For a note from an expert. Shown as a credit line under the bite. Only add a name they've agreed to share.</p>
    <p class="err" id="bE" role="alert"></p><button class="btn coral" id="bGo">Post and email it</button></form>`);
   let cl="All";const pk=body.querySelector("#bC");pk.addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;cl=b.dataset.v;pk.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
   body.querySelector("#bF").addEventListener("submit",async e=>{e.preventDefault();const er=body.querySelector("#bE");er.textContent="";const g=body.querySelector("#bGo");g.disabled=true;
-    try{const title=body.querySelector("#bT").value.trim(),text=body.querySelector("#bB").value.trim(),link=body.querySelector("#bL").value.trim();if(title.length<4)throw new Error("Add a short headline.");if(text.length<10)throw new Error("Write a few lines.");
-      await api("post",{kind:"bite",title,body:text,cluster:cl,link,access:"Everyone"});close();toast("Career bite posted and on its way to everyone's inbox");await refresh();go("home");setTimeout(()=>{const el=document.getElementById("bites");el&&el.scrollIntoView({block:"start"})},120)}
+    try{const title=body.querySelector("#bT").value.trim(),text=body.querySelector("#bB").value.trim(),link=body.querySelector("#bL").value.trim(),credit=body.querySelector("#bX").value.trim();if(title.length<4)throw new Error("Add a short headline.");if(text.length<10)throw new Error("Write a few lines.");
+      await api("post",{kind:"bite",title,body:text,cluster:cl,link,access:"Everyone",meta:credit?{provider:credit}:{}});close();toast("Career bite posted and on its way to everyone's inbox");await refresh();go("home");setTimeout(()=>{const el=document.getElementById("bites");el&&el.scrollIntoView({block:"start"})},120)}
     catch(x){er.textContent=x.message}finally{g.disabled=false}})}
 document.addEventListener("click",e=>{if(e.target.closest("[data-bitenew]")){if(LV()<3){toast("Only the placement team can post career bites.");return}openBite()}});
 /* email preference */
