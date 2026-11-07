@@ -2497,13 +2497,13 @@ const isDesk=()=>!/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)&&
 const plainWa=t=>String(t).replace(/\*([^*\n]+)\*/g,"$1").replace(/(^|\n)_([^_\n]+)_/g,"$1$2");
 /* on a laptop, reuse the WhatsApp Web tab the hub opened before, instead of a new tab each time */
 const openWa=url=>{if(!isDesk()){window.open(url,"_blank","noopener");return}const w=window.open(url,"mssw-whatsapp");try{if(w){w.opener=null;w.focus()}}catch(e){}};
-const waUrl=text=>isDesk()?"https://web.whatsapp.com/send?text="+encodeURIComponent(plainWa(text)):"https://wa.me/?text="+encodeURIComponent(text);
+const waUrl=text=>(isDesk()?"https://web.whatsapp.com/send?text=":"https://wa.me/?text=")+encodeURIComponent(text);
 function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that item.");return}const kind=ref.split(":")[0];const K=SHARE_KIND[kind]||SHARE_KIND.notice;const on={what:1,for:1,when:1,link:1,hub:1};
   const hub=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
   const lp=(s.parts.find(([k,t])=>k==="link"&&t)||[])[1]||"";const lm=lp.match(/^(.*?):\s*(https?:\/\/\S+)/)||(lp.match(/^https?:\/\/\S+/)?["","Link",lp]:null);
   const lu=lm?lm[2]:"";const lab=!lu?"":/docs\.google\.com\/forms|forms\.gle/.test(lu)?"Fill the form":/spreadsheets/.test(lu)?"Fill the sheet":/docs\.google\.com\/document|drive\.google|\.pdf/.test(lu)?"Open the document":/meet\.google|zoom\.us|teams\./.test(lu)?"Join the meeting":lm[1]==="Read more"?"Read more":"Open the link";
   const linkLine=lu?"*"+lab+"*\n"+lu:"";
-  const join="*Join the MSSW Career Hub*\n_Placement notices, alumni journeys and mentors in one place._\n*Students:* sign in with your MSSW ID\n*Alumni:* sign in with any email, no password\n"+hub;
+  const join="*Join the MSSW Career Hub*\n_Placement notices, alumni journeys and mentors in one place._\n\n*Students:* sign in with your MSSW ID\n*Alumni:* sign in with any email, no password\n"+hub;
   const caption=note=>[note,linkLine,join].filter(Boolean).join("\n\n");
   const fullText=note=>{const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?p[1]:""};const meta=[part("for"),part("when")].filter(Boolean).join(" · ");
     return [note?note+"\n":"","*"+s.title+"*",part("what"),meta,"",linkLine,"",join].filter((v,i,a)=>v!==""||(a[i-1]&&a[i-1]!=="")).join("\n").trim()};
