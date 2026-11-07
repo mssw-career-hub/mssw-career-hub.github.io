@@ -2478,8 +2478,13 @@ function openMentorReq(id){if(!needMe(()=>openMentorReq(id)))return;const m=(D.m
     try{await api("mentorReq",{id,note});close();toast("Request sent. They'll reply by email.")}catch(x){body.querySelector("#mE").textContent=x.message}})}
 
 /* ---------- WhatsApp share ---------- */
+/* every link in a text, each with the short label written just before it (e.g. "HR: <link>") */
+const bodyLinks=t=>{const out=[],seen={};const re=/https?:\/\/[^\s)]+/g;let m,last=0;t=String(t||"");
+  while((m=re.exec(t))){const u=m[0].replace(/[.,;:)\]]+$/,"");const before=t.slice(last,m.index).replace(/\s*:\s*$/,"");last=m.index+m[0].length;
+    if(seen[u])continue;seen[u]=1;const seg=before.split(/[.:\n]/).pop().trim();out.push([seg&&seg.split(/\s+/).length<=3&&seg.length<=24?seg:"",u])}
+  return out};
 function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"?(CLUSTERS[c]||[c])[0]+" students":"All departments";
-  if(k==="notice"){const n=D.notices.find(x=>x.id===id);if(!n)return null;const urls=(n.body||"").match(/https?:\/\/[^\s]+/g)||[];const txt=(n.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").replace(/\s+([.,:;])/g,"$1").replace(/:\s*\./g,".").trim();return {title:n.title,parts:[["what",txt],["for","For: "+cl(n.cluster)],["when","Posted: "+nice(n.date)],["link",urls.length?"Link: "+urls[0].replace(/[.,;:)\]]+$/,""):""]]}}
+  if(k==="notice"){const n=D.notices.find(x=>x.id===id);if(!n)return null;const urls=(n.body||"").match(/https?:\/\/[^\s]+/g)||[];const txt=(n.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").replace(/\s+([.,:;])/g,"$1").replace(/:\s*\./g,".").trim();return {title:n.title,parts:[["what",txt],["for","For: "+cl(n.cluster)],["when","Posted: "+nice(n.date)],["link",urls.length?"Link: "+urls[0].replace(/[.,;:)\]]+$/,""):""]],links:bodyLinks(n.body)}}
   if(k==="drive"){const d=D.drives.find(x=>x.id===id);if(!d)return null;const st=d.stages||[],nx=st[doneCount(d)];
     return {title:d.company+" · "+d.role,parts:[["what",d.outcome?d.outcome+".":nx?"Next: "+nx[1]+(nx[2]?" ("+nx[2]+")":"")+".":"Status: "+d.status+"."],["for","For: "+cl(d.cluster)],["when",nx&&nx[0]?"Date: "+nice(nx[0]):"Status: "+d.status]]}}
   if(k==="event"){const e=D.events.find(x=>x.id===id);if(!e)return null;return {title:e.title,parts:[["what",(e.about||"").split(/\.\s/)[0]],["for","For: "+(e.audience||cl(e.cluster))],["when",(e.date?nice(e.date):"Date to be announced")+(e.time?", "+e.time:"")+(e.mode?" · "+e.mode:"")+(e.venue?" · "+e.venue:"")]]}}
@@ -2487,13 +2492,13 @@ function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"
   if(k==="mentor"){const m=(D.mentors||[]).find(x=>x.id===id);if(!m)return null;const nm=nmc(m.name);
     return {title:nm+" has joined as a mentor!",tag:"Mentor spotlight",photo:m.photo||"",initials:initials(m.name),
       parts:[["what",[[m.role,m.org].filter(Boolean).join(", "),m.batch?"MSSW, batch "+m.batch:""].filter(Boolean).join(" · ")+"."]],welcomeLabel:"A NOTE FOR ALUMNI",welcome:"Your story could be exactly what a junior needs to hear. Share your journey, give advice or mentor one student. It takes a few minutes, and it stays with them for years."}}
-  if(k==="bite"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const urls=(p.body||"").match(/https?:\/\/[^\s]+/g)||[];return {title:p.title,parts:[["what",(p.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").trim()],["for","For: "+cl(p.cluster)],["when","Posted: "+nice((p.t||"").slice(0,10))],["link",p.link?"Read more: "+p.link:urls.length?"Link: "+urls[0]:""]]}}
+  if(k==="bite"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const urls=(p.body||"").match(/https?:\/\/[^\s]+/g)||[];return {title:p.title,parts:[["what",(p.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").trim()],["for","For: "+cl(p.cluster)],["when","Posted: "+nice((p.t||"").slice(0,10))],["link",p.link?"Read more: "+p.link:urls.length?"Link: "+urls[0]:""]],links:bodyLinks((p.link?p.link+" ":"")+p.body)}}
   if(k==="post"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const m=p.meta||{};
     const sum=String(p.body||"").replace(/https?:\/\/\S+/g,"").replace(/[*_#>`]/g,"").replace(/^\s*[-\d.]+\s+/gm,"").replace(/\s+/g," ").trim();
     const by="Shared by "+nmc(p.by||"MSSW alumni")+(p.byOrg?", "+p.byOrg:"");
     const urls=(p.body||"").match(/https?:\/\/[^\s)]+/g)||[];
     return {title:p.title,tag:m.subtype||(KIND[p.kind]||KIND.material)[0],parts:[["what",sum?sum+" "+by+".":(KIND[p.kind]||KIND.material)[0]+" s"+by.slice(1)],["for",p.cluster&&p.cluster!=="All"?"For: "+cl(p.cluster):""],
-      ["when",[m.date&&"On: "+nice(m.date),p.deadline&&"Apply by: "+nice(p.deadline)].filter(Boolean).join(" · ")],["link",p.link?"Details: "+p.link:urls.length?"Details: "+urls[0]:""]]}}
+      ["when",[m.date&&"On: "+nice(m.date),p.deadline&&"Apply by: "+nice(p.deadline)].filter(Boolean).join(" · ")],["link",p.link?"Details: "+p.link:urls.length?"Details: "+urls[0]:""]],links:bodyLinks((p.link?p.link+" ":"")+p.body)}}
   return null}
 const SHARE_KIND={bite:["Career bite","💡","home"],notice:["Notice","📢","notices"],drive:["Campus drive","💼","drives"],event:["Event","📅","events"],opening:["Opening","🧭","openings"],post:["From alumni","🤝","alumni"],mentor:["Mentor spotlight","🌟","alumni"]};
 const SHARE_LAB={what:"What's happening",for:"Who it's for",when:"When"};
@@ -2572,7 +2577,8 @@ function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that 
   const hub=(CONFIG.site||"https://mssw-career-hub.github.io").replace(/\/$/,"")+"/?s=wa#"+K[2];
   const lp=(s.parts.find(([k,t])=>k==="link"&&t)||[])[1]||"";const lm=lp.match(/^(.*?):\s*(https?:\/\/\S+)/)||(lp.match(/^https?:\/\/\S+/)?["","Link",lp]:null);
   const lu=lm?lm[2]:"";const lab=!lu?"":/docs\.google\.com\/forms|forms\.gle/.test(lu)?"Fill the form":/spreadsheets/.test(lu)?"Fill the sheet":/docs\.google\.com\/document|drive\.google|\.pdf/.test(lu)?"Open the document":/meet\.google|zoom\.us|teams\./.test(lu)?"Join the meeting":lm[1]==="Read more"?"Read more":"Open the link";
-  const linkLine=lu?"*"+lab+"*\n"+lu:"";
+  const labOf=u=>/docs\.google\.com\/forms|forms\.gle/.test(u)?"Fill the form":/spreadsheets/.test(u)?"Fill the sheet":/docs\.google\.com\/document|drive\.google|\.pdf/.test(u)?"Open the document":/meet\.google|zoom\.us|teams\./.test(u)?"Join the meeting":"Open the link";
+  const linkLine=s.links&&s.links.length>1?s.links.map(([w,u])=>"*"+(w?w+": ":"")+labOf(u)+"*\n"+u).join("\n\n"):lu?"*"+lab+"*\n"+lu:"";
   const join="*Join the MSSW Career Hub*\n_Placement notices, alumni journeys and mentors in one place._\n\n*Students:* sign in with your MSSW ID\n*Alumni:* sign in with any email, no password\n"+hub;
   const caption=note=>[note,s.extra||"",linkLine,join].filter(Boolean).join("\n\n");
   const fullText=note=>{const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?p[1]:""};const meta=[part("for"),part("when")].filter(Boolean).join(" · ");
