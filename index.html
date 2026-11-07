@@ -1370,6 +1370,28 @@ html:not(.gated) #gate{background:none}
 #gate.open .sh-lock i{transform:translateY(-8px) rotate(-18deg)}
 #gate.open .shutter{animation:shUp 1.4s .45s cubic-bezier(.6,0,.2,1) forwards!important}
 .sh-lock{margin-top:10px!important}.sh-bar{height:52px!important}
+/* pull-it-up: the user drags the shutter up after signing up */
+#gate.ready .shutter{pointer-events:auto;cursor:grab;touch-action:none;will-change:transform}
+#gate.ready.tug .shutter{cursor:grabbing;animation:rattle .12s linear infinite}
+@keyframes rattle{50%{margin-left:1.5px}}
+#gate.ready{touch-action:none}
+.pull-card{position:relative;z-index:1;pointer-events:none;background:linear-gradient(180deg,#FFF6E0,#F2E3BF);border:3px solid #1E1C4E;border-radius:10px;padding:18px 26px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.25),0 18px 40px rgba(0,0,0,.35);transform:rotate(-1.5deg);max-width:min(360px,86vw)}
+.pull-hi{font-size:1.5rem;font-weight:800;color:#C2271B}.pull-card p{margin:6px 0 0;color:#1E1C4E;font-weight:600}
+.pull-grip{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:3;display:grid;justify-items:center;gap:4px;background:none;border:0;color:#fff;cursor:grab;touch-action:none;padding:6px 20px}
+.pg-arrows{font-size:22px;line-height:.55;color:#F6C76B;animation:arrUp 1.1s ease-in-out infinite;text-shadow:0 0 10px rgba(246,199,107,.8)}
+@keyframes arrUp{0%{transform:translateY(6px);opacity:.3}60%{opacity:1}100%{transform:translateY(-6px);opacity:0}}
+.pg-knob{width:120px;height:18px;border-radius:5px;background:linear-gradient(180deg,#f1f1f4,#8d8d96);box-shadow:0 3px 0 #2a0504,0 0 0 4px rgba(246,199,107,.35),0 0 24px rgba(246,199,107,.6);animation:knob 1.6s ease-in-out infinite}
+@keyframes knob{50%{box-shadow:0 3px 0 #2a0504,0 0 0 8px rgba(246,199,107,.15),0 0 34px rgba(246,199,107,.85)}}
+.pg-lab{font-weight:800;font-size:12px;letter-spacing:.24em;color:#FFF6E0;text-shadow:0 2px 4px rgba(0,0,0,.6)}
+#gate.ready .sh-bar .sh-handle{visibility:hidden}
+/* warm light spills out from under the shutter as it rises */
+#gate.ready::before{content:"";position:fixed;left:0;right:0;bottom:0;height:var(--gap,0px);z-index:0;pointer-events:none;background:linear-gradient(0deg,rgba(255,214,140,.0),rgba(255,214,140,.55) 85%,rgba(255,240,200,.9));mix-blend-mode:screen}
+#gate.rolling .shutter{animation:rattle .09s linear 8}
+#gate.rolling .pull-card,#gate.rolling .pull-grip{opacity:0;transition:opacity .25s}
+#gate.gone{opacity:0;transition:opacity .5s}
+.confetti{position:fixed;inset:0;z-index:600;pointer-events:none}
+#gate .pull-card{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-1.5deg)}
+#gate.ready .sh-lock i{transform:translateY(-8px) rotate(-18deg);transition-delay:.4s}#gate.tug .pull-grip{opacity:.4}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2991,7 +3013,38 @@ function paintGate(){const on=!ME;let g=document.getElementById("gate");
   const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;let waited=0;
   const go=()=>{if(document.querySelector(".scrim")&&waited<2500){waited+=60;setTimeout(go,60);return}
     document.documentElement.classList.remove("gated");if(reduce){g.remove();showPass();return}
-    g.classList.add("open");setTimeout(()=>{g.remove();showPass()},1500)};go()}
+    readyToPull(g)};go()}
+/* after sign-up the shutter stays down: they pull it up themselves (drag, swipe or tap) */
+function readyToPull(g){const sh=g.querySelector(".shutter");const card=g.querySelector(".gate-card");const first=(nmc(ME.name||"").split(" ")[0])||"friend";
+  card.remove();sh.insertAdjacentHTML("beforeend",`<div class="pull-card"><div class="pull-hi">Welcome, ${esc(first)}! 🎉</div><p>The shop is yours. Pull the shutter up to open it.</p></div>`);
+  g.insertAdjacentHTML("beforeend",`<button class="pull-grip" aria-label="Pull the shutter up"><span class="pg-arrows">︿<br>︿</span><span class="pg-knob"></span><span class="pg-lab">PULL UP</span></button>`);
+  g.classList.add("ready");setTimeout(()=>SFX.lock(),400);const grip=g.querySelector(".pull-grip");let y0=null,dy=0,done=false,last=0;const H=()=>innerHeight;
+  const set=v=>{sh.style.transform=`translateY(${v}px)`;g.style.setProperty("--gap",Math.max(0,-v)+"px")};
+  const open=()=>{if(done)return;done=true;SFX.roll();g.classList.add("rolling");sh.style.transition="transform 1.1s cubic-bezier(.5,0,.15,1)";set(-H()*1.08);
+    setTimeout(()=>{confetti();SFX.chime();g.classList.add("gone")},700);setTimeout(()=>{g.remove();showPass()},1500)};
+  const down=e=>{if(done)return;SFX.ok();y0=e.clientY;last=0;sh.style.transition="none";g.classList.add("tug");try{e.target.setPointerCapture(e.pointerId)}catch(x){}};
+  const move=e=>{if(y0==null||done)return;dy=Math.min(0,e.clientY-y0);set(dy*1.05);if(Math.abs(dy-last)>=22){last=dy;SFX.clank(.8)}};
+  const up=()=>{if(y0==null||done)return;g.classList.remove("tug");const pulled=-dy;y0=null;if(pulled>H()*.18||pulled<6){open();return}sh.style.transition="transform .45s cubic-bezier(.3,1.6,.5,1)";set(0);dy=0};
+  [g,grip].forEach(el=>{el.addEventListener("pointerdown",down);el.addEventListener("pointermove",move);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up)});
+  grip.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}});
+  /* nudge: if nobody touches it, the shutter lifts a little to invite a pull */
+  setTimeout(()=>{if(!done&&y0==null){sh.style.transition="transform .5s ease";set(-26);setTimeout(()=>{if(!done&&y0==null){sh.style.transition="transform .6s cubic-bezier(.3,1.6,.5,1)";set(0)}},520)}},1800);
+  setTimeout(()=>{if(!done&&g.isConnected)open()},15000)}
+function confetti(){const c=document.createElement("canvas");c.className="confetti";c.width=innerWidth;c.height=innerHeight;document.body.appendChild(c);const x=c.getContext("2d");
+  const col=["#F2543D","#F6C76B","#7FE0C5","#9A82FF","#FF9B7A","#ffffff"];const P=Array.from({length:150},()=>({x:innerWidth/2+(Math.random()-.5)*innerWidth*.5,y:innerHeight*.9,vx:(Math.random()-.5)*14,vy:-(10+Math.random()*16),s:5+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:col[Math.floor(Math.random()*col.length)]}));
+  let t=0;const step=()=>{x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.45;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6);x.restore()});if(++t<150)requestAnimationFrame(step);else c.remove()};step()}
+/* shutter sounds, made in the browser (no files): padlock clicks, the metal rattle as it rises, and a little chime */
+const SFX={ctx:null,ok(){try{if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return false;this.ctx=new A()}if(this.ctx.state==="suspended")this.ctx.resume();return true}catch(e){return false}},
+  noise(t,dur,f,q,vol){const c=this.ctx,n=Math.ceil(c.sampleRate*dur),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
+    const s=c.createBufferSource();s.buffer=b;const bp=c.createBiquadFilter();bp.type="bandpass";bp.frequency.value=f;bp.Q.value=q;const g=c.createGain();g.gain.value=vol;s.connect(bp).connect(g).connect(c.destination);s.start(t)},
+  tone(t,f,dur,vol,type){const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.type=type||"sine";o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05)},
+  lock(){if(!this.ok())return;const t=this.ctx.currentTime;[0,.12].forEach(d=>{this.noise(t+d,.05,3200,6,.5);this.tone(t+d,1900,.06,.08,"square")})},
+  clank(v){if(!this.ok())return;const t=this.ctx.currentTime;this.noise(t,.07,1400+Math.random()*900,9,.35*(v||1));this.noise(t,.04,4200,4,.12*(v||1))},
+  roll(){if(!this.ok())return;const t=this.ctx.currentTime;for(let i=0;i<22;i++){const d=Math.pow(i/22,1.6)*1.0;this.noise(t+d,.06,1200+Math.random()*1100,8,.28*(1-i/30))}
+    const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.type="sawtooth";o.frequency.setValueAtTime(70,t);o.frequency.linearRampToValueAtTime(45,t+1);g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.0001,t+1.1);const lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=300;o.connect(lp).connect(g).connect(c.destination);o.start(t);o.stop(t+1.2)},
+  chime(){if(!this.ok())return;const t=this.ctx.currentTime;[1046.5,1318.5,1568,2093].forEach((f,i)=>this.tone(t+i*.09,f,.5,.09,"triangle"))}};
+document.addEventListener("click",e=>{if(e.target.closest("[data-gate]"))SFX.ok()},true);
+
 /* member number: from 100 up, fixed for each person */
 const memberNo=id=>{let h=0;for(const ch of String(id||"x"))h=(h*31+ch.charCodeAt(0))>>>0;return 100+h%900};
 function passInfo(){const r=ME.team?"Placement team":ME.role||(ME.mssw?"Student":"Member");return {name:nmc(ME.name||"MSSW member"),no:memberNo(ME.id),line:[r,ME.programme,ME.batch?"Batch "+ME.batch:""].filter(Boolean).join(" · "),date:new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}),ini:initials(ME.name)}}
