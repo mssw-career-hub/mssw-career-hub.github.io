@@ -1278,6 +1278,9 @@ a.nlink:hover{background:#DDE6FF}
 .bell{flex:none;aspect-ratio:1}.hsearch svg{display:block;margin:0}
 @media (max-width:345px){.hsearch{display:none!important}}
 
+/* keep the line breaks and blank lines typed in a notice */
+.nrow p,.bite p{white-space:pre-line;overflow-wrap:anywhere}
+
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
 
@@ -2265,7 +2268,7 @@ function ntype(n){if(n.type&&NT[n.type])return n.type;const t=(n.title+" "+n.bod
 function noticeCard(n){const d=dOf(n.date),ty=ntype(n),x=NT[ty],past=ty==="Act"&&n.date<isoPlus(-1);
   return `<article class="gl nrow${past?" past":""}"><span class="d"><b>${d?d.getDate():""}</b><small>${d?MON[d.getMonth()]:""}</small></span><span style="min-width:0">
    <span class="ntags" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ntag" style="background:${x[1]};color:${x[2]}">${x[0]}</span>${clChip(n.cluster)}${n.pinned?`<span class="ntag" style="background:#FFF2CC;color:#8A5800">Pinned</span>`:""}${past?`<small class="muted">Closed</small>`:n.date>=isoPlus(-3)?`<span class="ntag" style="background:linear-gradient(180deg,#FF8E72,#E8573A);color:#fff">New</span>`:""}</span>
-   <h3>${esc(n.title)}</h3><p>${lnk(n.body)}</p><span class="nacts">${LV()===3?`<button class="link" data-editnotice="${esc(n.id)}">Edit</button>`:""}${shareBtn("notice:"+n.id)}</span></span></article>`}
+   <h3>${esc(n.title)}</h3><p>${lnk(String(n.body||"").trim())}</p><span class="nacts">${LV()===3?`<button class="link" data-editnotice="${esc(n.id)}">Edit</button>`:""}${shareBtn("notice:"+n.id)}</span></span></article>`}
 function lnk(t){return esc(t||"").replace(/https?:\/\/[^\s<]+/g,u=>{const v=u.replace(/[.,;:)\]]+$/,"");return `<a href="${v}" target="_blank" rel="noopener" class="nlink">Open link ↗</a>`+u.slice(v.length)})}
 function renderNotices(){if(LV()<2){$("#main").innerHTML=band("ev","Placement cell","Noticeboard","Announcements from the placement cell this season, newest first, by department.")+`<div class="wrap" style="padding-top:26px">${lockPanel("The noticeboard")}</div>`;return}
   const list=D.notices.filter(inCl).filter(n=>match(n,["title","body"])).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||b.date.localeCompare(a.date));
@@ -2760,7 +2763,7 @@ document.addEventListener("submit",async e=>{const f=e.target;
 /* ---------- career bites ---------- */
 function bitesSec(){const bs=(D.posts||[]).filter(p=>p.kind==="bite").sort((a,b)=>(b.t||"").localeCompare(a.t||"")).slice(0,3);if(!bs.length&&LV()<3)return "";
   return `<section class="sec" id="bites"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#C2412A">From the placement team</span><h2 style="margin-top:6px">Career bites</h2><p>Short reads on jobs, skills and sectors. New bites are emailed to everyone who has signed in.</p></div></div>${LV()>=3?`<button class="btn primary small" data-bitenew>${ic("plus",14)} Post a career bite</button>`:""}</div>
-   <div class="bites">${bs.length?bs.map(b=>`<article class="bite gl"><span class="bchip">${esc(b.cluster&&b.cluster!=="All"?clLabel(b.cluster):"For everyone")}</span><h3>${esc(b.title)}</h3><p>${lnk(b.body)}</p>${b.link?`<a class="nlink" href="${esc(b.link)}" target="_blank" rel="noopener">Read more ↗</a>`:""}<div class="bfoot"><small>${ago(b.t)}</small><span style="display:flex;gap:6px">${LV()>=3?`<button class="cbtn" data-hide="posts:${esc(b.id)}">Remove</button>`:""}<button class="cbtn" data-share="bite:${esc(b.id)}">${ic("wa",14)} Share</button></span></div></article>`).join(""):`<div class="empty" style="grid-column:1/-1"><b>No career bites yet</b>Post a short read on a sector, a skill or a job trend. It goes to everyone who has signed in.</div>`}</div></section>`}
+   <div class="bites">${bs.length?bs.map(b=>`<article class="bite gl"><span class="bchip">${esc(b.cluster&&b.cluster!=="All"?clLabel(b.cluster):"For everyone")}</span><h3>${esc(b.title)}</h3><p>${lnk(String(b.body||"").trim())}</p>${b.link?`<a class="nlink" href="${esc(b.link)}" target="_blank" rel="noopener">Read more ↗</a>`:""}<div class="bfoot"><small>${ago(b.t)}</small><span style="display:flex;gap:6px">${LV()>=3?`<button class="cbtn" data-hide="posts:${esc(b.id)}">Remove</button>`:""}<button class="cbtn" data-share="bite:${esc(b.id)}">${ic("wa",14)} Share</button></span></div></article>`).join(""):`<div class="empty" style="grid-column:1/-1"><b>No career bites yet</b>Post a short read on a sector, a skill or a job trend. It goes to everyone who has signed in.</div>`}</div></section>`}
 function openBite(){const {body,close}=drawer("Career bite",`<span class="eyebrow" style="color:#C2412A">Career bite</span><h2 style="margin:4px 0 6px">Post a career bite</h2><p class="muted" style="margin:0 0 12px;font-size:13.5px">Keep it short: one idea, three or four lines. It appears on the home page and is emailed to everyone who has signed in.</p>
    <form id="bF"><label class="lab" for="bT">Headline</label><input class="field" id="bT" maxlength="120" placeholder="e.g. CSR teams are hiring impact analysts">
    <label class="lab" for="bB">The bite</label><textarea class="field" id="bB" rows="5" maxlength="1200" placeholder="What is happening, why it matters for MSSW students, and one thing to do about it."></textarea>
