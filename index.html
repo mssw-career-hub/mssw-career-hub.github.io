@@ -1228,6 +1228,8 @@ a.nlink:hover{background:#DDE6FF}
 .wa-steps kbd{font:600 12px Inter,system-ui,sans-serif;padding:1px 6px;border-radius:6px;background:#fff;border:1px solid #BFE7CD}
 /* alumni lists on phones: date or icon beside the title across the full width, buttons in a row underneath */
 @media (max-width:600px){.orow{flex-wrap:wrap;align-items:flex-start!important;row-gap:10px}.orow>span:nth-child(2){flex:1 1 calc(100% - 64px)!important}.orow .oacts{width:100%;padding-left:60px;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;flex-wrap:wrap}}
+.ah-ma{display:flex;gap:8px;align-items:center;flex:none}
+@media (max-width:760px){.ah-ma{width:100%}.ah-ma .btn{flex:1}}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -2327,7 +2329,7 @@ function renderAlumni(){const ps=postsV(),leads=ps.filter(p=>p.kind==="lead"),op
     <div class="tgrid">${KIND_ORDER.map((k,i)=>`<button class="tcard tint" data-compose="${k}" style="--c:${KIND[k][2]};--t:${KIND[k][1]}">${orb(`linear-gradient(180deg,#fff,${KIND[k][1]})`,KIND[k][2],`<b>0${i+1}</b>`,52)}<b>${k==="journey"?"Share your journey":k==="mentor"?"Offer mentorship":k==="lead"?"Share a hiring lead":k==="skill"?"Teach a real-work skill":k==="cert"?"Suggest a certification":k==="opp"?"Post a conference, internship or fellowship":"Upload learning material"}</b><p>${KIND_HINT[k]}</p><em class="tgo">${ME?"Start":"Sign in to start"} →</em></button>`).join("")}</div></section>
    <section class="sec" id="mentors" style="scroll-margin-top:100px"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#5A36E0">For students</span><h2 style="margin-top:6px">Mentors open this month</h2></div></div>
      <div class="seg2 gl">${["all","HR","Social sector","Psychology","Other"].map(k=>`<button data-f="ms" data-v="${k}" aria-pressed="${(F.ms||"all")===k}">${k==="all"?"All sectors":k}</button>`).join("")}</div></div>
-    ${ms.length?`<div class="tgrid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">${ms.map((m,i)=>`<article class="mcard"><span class="rg" style="background:${RINGS[i%4][0]}">${m.photo?`<img src="${esc(m.photo)}" alt="" referrerpolicy="no-referrer">`:`<span>${esc(initials(m.name))}</span>`}</span><b style="font-size:15px">${esc(nmc(m.name))}</b><span class="muted" style="font-size:12.5px;line-height:1.5">${esc(m.role||"")}${m.org?" · "+esc(m.org):""}<br>${m.batch?"Batch "+esc(m.batch)+(m.sector&&m.sector!=="Other"?" · ":""):""}${m.sector&&m.sector!=="Other"?esc(m.sector):""}</span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${(m.tags||[]).map(t=>String(t).trim()).filter(t=>/[A-Za-z0-9]{2}/.test(t)).slice(0,3).map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</span><button class="btn dark small" data-mentor="${esc(m.id)}" ${m.slots>0?"":"disabled"}>${m.slots>0?"Request a chat":"Not available this month"}</button></article>`).join("")}</div>`
+    ${ms.length?`<div class="tgrid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">${ms.map((m,i)=>`<article class="mcard"><span class="rg" style="background:${RINGS[i%4][0]}">${m.photo?`<img src="${esc(m.photo)}" alt="" referrerpolicy="no-referrer">`:`<span>${esc(initials(m.name))}</span>`}</span><b style="font-size:15px">${esc(nmc(m.name))}</b><span class="muted" style="font-size:12.5px;line-height:1.5">${esc(m.role||"")}${m.org?" · "+esc(m.org):""}<br>${m.batch?"Batch "+esc(m.batch)+(m.sector&&m.sector!=="Other"?" · ":""):""}${m.sector&&m.sector!=="Other"?esc(m.sector):""}</span><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${(m.tags||[]).map(t=>String(t).trim()).filter(t=>/[A-Za-z0-9]{2}/.test(t)).slice(0,3).map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</span><span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center"><button class="btn dark small" data-mentor="${esc(m.id)}" ${m.slots>0?"":"disabled"}>${m.slots>0?"Request a chat":"Not available this month"}</button>${shareBtn("mentor:"+m.id)}</span></article>`).join("")}</div>`
      :`<div class="empty"><b>No mentors listed yet</b>Alumni who offer mentorship appear here with their field and free slots. <div style="margin-top:12px"><button class="btn primary small" data-compose="mentor">Offer mentorship</button></div></div>`}</section>
    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:18px;margin-top:40px;align-items:start">
     <section class="gl" style="padding:24px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="font-size:16px;margin:0">Hiring leads from alumni</h2><button class="link" data-compose="lead">${ic("plus",13)} Add</button></div>
@@ -2439,6 +2441,10 @@ function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"
     return {title:d.company+" · "+d.role,parts:[["what",d.outcome?d.outcome+".":nx?"Next: "+nx[1]+(nx[2]?" ("+nx[2]+")":"")+".":"Status: "+d.status+"."],["for","For: "+cl(d.cluster)],["when",nx&&nx[0]?"Date: "+nice(nx[0]):"Status: "+d.status]]}}
   if(k==="event"){const e=D.events.find(x=>x.id===id);if(!e)return null;return {title:e.title,parts:[["what",(e.about||"").split(/\.\s/)[0]],["for","For: "+(e.audience||cl(e.cluster))],["when",(e.date?nice(e.date):"Date to be announced")+(e.time?", "+e.time:"")+(e.mode?" · "+e.mode:"")+(e.venue?" · "+e.venue:"")]]}}
   if(k==="opening"){const o=D.openings.find(x=>x.id===id);if(!o)return null;return {title:o.company+" · "+o.roles,parts:[["what",[o.type,o.location,o.ctc].filter(Boolean).join(" · ")],["for",o.eligibility?"Who can apply: "+o.eligibility:""],["when",o.deadline?"Apply by: "+nice(o.deadline):""],["link",o.link?"Apply: "+o.link:""]]}}
+  if(k==="mentor"){const m=(D.mentors||[]).find(x=>x.id===id);if(!m)return null;const nm=nmc(m.name);
+    return {title:nm+" has joined as a mentor",tag:"Mentor spotlight",photo:m.photo||"",initials:initials(m.name),
+      parts:[["what",[[m.role,m.org].filter(Boolean).join(", "),m.batch?"MSSW, batch "+m.batch:""].filter(Boolean).join(" · ")+". Students can now request a mentoring chat on the hub."],["for","Students and alumni"]],chip:"Alumni, join in: share, advise or mentor",
+      extra:"*"+nm+"* has joined the MSSW Career Hub as a mentor"+(m.role||m.org?" ("+[m.role,m.org].filter(Boolean).join(", ")+")":"")+". Students can request a mentoring chat with "+nm.split(" ")[0]+" on the hub.\n\n*Dear alumni, you are warmly welcome to join in too.* Share your placement journey, offer career or life advice to juniors, or mentor a student. Sign in, tap *MSSW Alumni*, and pick what suits you. Even one story or one chat a month helps a junior find their way."}}
   if(k==="bite"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const urls=(p.body||"").match(/https?:\/\/[^\s]+/g)||[];return {title:p.title,parts:[["what",(p.body||"").replace(/\s*https?:\/\/[^\s]+/g,"").trim()],["for","For: "+cl(p.cluster)],["when","Posted: "+nice((p.t||"").slice(0,10))],["link",p.link?"Read more: "+p.link:urls.length?"Link: "+urls[0]:""]]}}
   if(k==="post"){const p=(D.posts||[]).find(x=>x.id===id);if(!p)return null;const m=p.meta||{};
     const sum=String(p.body||"").replace(/https?:\/\/\S+/g,"").replace(/[*_#>`]/g,"").replace(/^\s*[-\d.]+\s+/gm,"").replace(/\s+/g," ").trim();
@@ -2447,7 +2453,7 @@ function shareData(ref){const [k,id]=ref.split(/:(.*)/);const cl=c=>c&&c!=="All"
     return {title:p.title,tag:m.subtype||(KIND[p.kind]||KIND.material)[0],parts:[["what",sum?sum+" "+by+".":(KIND[p.kind]||KIND.material)[0]+" s"+by.slice(1)],["for",p.cluster&&p.cluster!=="All"?"For: "+cl(p.cluster):""],
       ["when",[m.date&&"On: "+nice(m.date),p.deadline&&"Apply by: "+nice(p.deadline)].filter(Boolean).join(" · ")],["link",p.link?"Details: "+p.link:urls.length?"Details: "+urls[0]:""]]}}
   return null}
-const SHARE_KIND={bite:["Career bite","💡","home"],notice:["Notice","📢","notices"],drive:["Campus drive","💼","drives"],event:["Event","📅","events"],opening:["Opening","🧭","openings"],post:["From alumni","🤝","alumni"]};
+const SHARE_KIND={bite:["Career bite","💡","home"],notice:["Notice","📢","notices"],drive:["Campus drive","💼","drives"],event:["Event","📅","events"],opening:["Opening","🧭","openings"],post:["From alumni","🤝","alumni"],mentor:["Mentor spotlight","🌟","alumni"]};
 const SHARE_LAB={what:"What's happening",for:"Who it's for",when:"When"};
 function wrapLines(ctx,text,maxW,maxLines){const words=String(text||"").replace(/\s+/g," ").trim().split(" ");const out=[];let line="",cut=false;
   for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width<=maxW||!line)line=t;else{out.push(line);line=w;if(out.length===maxLines){cut=true;break}}}
@@ -2460,9 +2466,17 @@ function fitSentences(ctx,text,maxW,maxLines){const t=String(text||"").replace(/
   return best||wrapLines(ctx,t,maxW,maxLines)}
 async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
   const F='"Plus Jakarta Sans", Inter, system-ui, sans-serif';try{await Promise.all([document.fonts.load("800 60px "+F),document.fonts.load("500 30px "+F),document.fonts.load("700 24px "+F)])}catch(e){}
-  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,"#120F38");g.addColorStop(.55,"#2A1F78");g.addColorStop(1,"#4B2E9E");x.fillStyle=g;x.fillRect(0,0,W,H);
+  /* each kind has its own colours, so a run of shared cards doesn't all look the same */
+  const TH={notice:["#120F38","#2A1F78","#4B2E9E","rgba(255,112,82,.30)","rgba(140,110,255,.26)"],
+    drive:["#04262A","#0B4A4F","#14706A","rgba(255,190,90,.28)","rgba(80,220,200,.22)"],
+    event:["#240A2A","#561450","#8C2C6C","rgba(255,150,90,.30)","rgba(255,120,200,.22)"],
+    post:["#2A1306","#5C2C10","#9A5418","rgba(255,200,120,.30)","rgba(255,140,90,.22)"],
+    bite:["#08183A","#103872","#1E62AC","rgba(110,220,255,.26)","rgba(150,140,255,.24)"],
+    opening:["#1C1B2E","#33305A","#4F4A86","rgba(255,170,120,.28)","rgba(150,140,255,.22)"],
+    mentor:["#241A04","#5A4210","#A07A1C","rgba(255,226,140,.34)","rgba(255,170,90,.24)"]}[kind]||["#120F38","#2A1F78","#4B2E9E","rgba(255,112,82,.30)","rgba(140,110,255,.26)"];
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,TH[0]);g.addColorStop(.55,TH[1]);g.addColorStop(1,TH[2]);x.fillStyle=g;x.fillRect(0,0,W,H);
   const glow=(cx,cy,r,col)=>{const rg=x.createRadialGradient(cx,cy,0,cx,cy,r);rg.addColorStop(0,col);rg.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=rg;x.fillRect(0,0,W,H)};
-  glow(W*.95,H*.92,620,"rgba(255,112,82,.30)");glow(W*.05,H*.05,520,"rgba(140,110,255,.26)");
+  glow(W*.95,H*.92,620,TH[3]);glow(W*.05,H*.05,520,TH[4]);
   const rr=(X,Y,w,h,r)=>{x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()};
   const sp=v=>{try{x.letterSpacing=v}catch(e){}};const P=88;const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?String(p[1]):""};
   /* header */
@@ -2475,6 +2489,13 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   const cg=x.createLinearGradient(P,y,P+kw,y);cg.addColorStop(0,"#FF8A65");cg.addColorStop(1,"#F2543D");x.fillStyle=cg;rr(P,y,kw,54,27);x.fill();x.fillStyle="#fff";x.fillText(kt,P+26,y+36);
   const when=part("when").replace(/^(Posted|Date|Status|Apply by|On): /,"");if(when){x.font="700 24px "+F;sp("2px");x.fillStyle="rgba(231,227,255,.8)";const dt=when.toUpperCase();x.fillText(dt,W-P-x.measureText(dt).width,y+36)}
   sp("0px");y+=118;
+  /* mentor spotlight: their photo (or initials) in a glowing ring above the name */
+  if(s.initials){const R=96,cx0=P+R,cy0=y+R;const rg=x.createLinearGradient(P,y,P+2*R,y+2*R);rg.addColorStop(0,"#FFE29A");rg.addColorStop(1,"#F2A93B");
+    x.save();x.shadowColor="rgba(255,210,120,.55)";x.shadowBlur=40;x.fillStyle=rg;x.beginPath();x.arc(cx0,cy0,R,0,Math.PI*2);x.fill();x.restore();
+    let im=null;if(s.photo){im=await new Promise(res=>{const i=new Image();i.crossOrigin="anonymous";i.referrerPolicy="no-referrer";i.onload=()=>res(i);i.onerror=()=>res(null);i.src=s.photo;setTimeout(()=>res(null),4000)})}
+    x.save();x.beginPath();x.arc(cx0,cy0,R-9,0,Math.PI*2);x.closePath();x.clip();
+    if(im){const sc=Math.max((2*R)/im.width,(2*R)/im.height);x.drawImage(im,cx0-im.width*sc/2,cy0-im.height*sc/2,im.width*sc,im.height*sc)}else{x.fillStyle="#2B2160";x.fillRect(P,y,2*R,2*R);x.fillStyle="#fff";x.font="800 64px "+F;const t=s.initials;x.fillText(t,cx0-x.measureText(t).width/2,cy0+22)}
+    x.restore();y+=2*R+44}
   /* title */
   x.fillStyle="#fff";let fs=70,tl=[];for(const z of [70,62,56,50]){fs=z;x.font="800 "+z+"px "+F;tl=wrapLines(x,s.title,W-2*P,9);if(tl.length<=4)break}tl=tl.slice(0,5);const lh=Math.round(fs*1.2);tl.forEach(l=>{x.fillText(l,P,y+fs*.83);y+=lh});y+=26;
   x.fillStyle="rgba(255,255,255,.18)";x.fillRect(P,y,120,4);y+=48;
@@ -2485,7 +2506,7 @@ async function drawShareCard(kind,s,on,note){const W=1080,H=1350,c=document.crea
   const what=part("what");if(what){x.font="500 36px "+F;const free=Math.floor((chipTop-24-y)/52);if(free>0){x.fillStyle="#E4E0FF";fitSentences(x,what,W-2*P,Math.min(4,free)).forEach(l=>{x.fillText(l,P,y+34);y+=52})}}
   /* chips row: who it's for + link in caption */
   let cx=P;x.font="700 25px "+F;
-  if(forT){const t="For "+forT.replace(/^./,m=>m.toLowerCase()),w=Math.min(x.measureText(t).width+44,W-2*P);x.fillStyle="rgba(255,255,255,.12)";rr(cx,chipTop,w,54,27);x.fill();x.fillStyle="#fff";x.fillText(wrapLines(x,t,w-44,1)[0],cx+22,chipTop+36);cx+=w+14}
+  if(forT||s.chip){const t=s.chip||"For "+forT.replace(/^[A-Z](?=[a-z])/,m=>m.toLowerCase()),w=Math.min(x.measureText(t).width+44,W-2*P);x.fillStyle="rgba(255,255,255,.12)";rr(cx,chipTop,w,54,27);x.fill();x.fillStyle="#fff";x.fillText(wrapLines(x,t,w-44,1)[0],cx+22,chipTop+36);cx+=w+14}
   if(hasLink){const t="Link in caption",w=x.measureText(t).width+44;if(cx+w>W-P){cx=P}x.fillStyle="rgba(255,190,150,.18)";rr(cx,chipTop,w,54,27);x.fill();x.fillStyle="#FFD9C2";x.fillText(t,cx+22,chipTop+36)}
   if(nh){x.font="600 30px "+F;x.fillStyle="rgba(255,255,255,.1)";rr(P,noteTop,W-2*P,nh,24);x.fill();x.fillStyle="#fff";nl.forEach((l,i)=>x.fillText(l,P+32,noteTop+52+i*42))}
   /* footer */
@@ -2506,7 +2527,7 @@ function openShare(ref){const s=shareData(ref);if(!s){toast("Couldn't find that 
   const lu=lm?lm[2]:"";const lab=!lu?"":/docs\.google\.com\/forms|forms\.gle/.test(lu)?"Fill the form":/spreadsheets/.test(lu)?"Fill the sheet":/docs\.google\.com\/document|drive\.google|\.pdf/.test(lu)?"Open the document":/meet\.google|zoom\.us|teams\./.test(lu)?"Join the meeting":lm[1]==="Read more"?"Read more":"Open the link";
   const linkLine=lu?"*"+lab+"*\n"+lu:"";
   const join="*Join the MSSW Career Hub*\n_Placement notices, alumni journeys and mentors in one place._\n\n*Students:* sign in with your MSSW ID\n*Alumni:* sign in with any email, no password\n"+hub;
-  const caption=note=>[note,linkLine,join].filter(Boolean).join("\n\n");
+  const caption=note=>[note,s.extra||"",linkLine,join].filter(Boolean).join("\n\n");
   const fullText=note=>{const part=k=>{const p=s.parts.find(([kk,t])=>kk===k&&t);return p?p[1]:""};const meta=[part("for"),part("when")].filter(Boolean).join(" · ");
     return [note?note+"\n":"","*"+s.title+"*",part("what"),meta,"",linkLine,"",join].filter((v,i,a)=>v!==""||(a[i-1]&&a[i-1]!=="")).join("\n").trim()};
   const {body}=drawer("Share on WhatsApp",`<span class="eyebrow" style="color:#137A41">Share</span><h2 style="margin:4px 0 14px">Send on WhatsApp</h2>
@@ -2756,7 +2777,7 @@ function markLoading(){document.querySelectorAll("#main .empty").forEach(e=>{if(
 /* home: alumni corner, so mentors and alumni updates are seen without visiting the Alumni page */
 function alumniHomeSec(){const ms=(D.mentors||[]).filter(m=>m.slots>0).slice(0,3);const ps=postsV().filter(p=>["lead","opp"].includes(p.kind)).sort((a,b)=>(b.t||"").localeCompare(a.t||"")).slice(0,3);
   if(!ms.length&&!ps.length&&LV()>=1)return "";
-  const mc=(m,i)=>`<div class="ah-m"><span class="rg" style="background:${RINGS[i%4][0]}">${m.photo?`<img src="${esc(m.photo)}" alt="" referrerpolicy="no-referrer">`:`<span>${esc(initials(m.name))}</span>`}</span><span class="ah-mt"><b>${esc(nmc(m.name))}</b><small>${esc([m.role,m.org].filter(Boolean).join(" · "))}</small></span><button class="btn dark small" data-mentor="${esc(m.id)}">Request a chat</button></div>`;
+  const mc=(m,i)=>`<div class="ah-m"><span class="rg" style="background:${RINGS[i%4][0]}">${m.photo?`<img src="${esc(m.photo)}" alt="" referrerpolicy="no-referrer">`:`<span>${esc(initials(m.name))}</span>`}</span><span class="ah-mt"><b>${esc(nmc(m.name))}</b><small>${esc([m.role,m.org].filter(Boolean).join(" · "))}</small></span><span class="ah-ma"><button class="btn dark small" data-mentor="${esc(m.id)}">Request a chat</button>${shareBtn("mentor:"+m.id)}</span></div>`;
   const pr=p=>{const m=p.meta||{},d=m.date||p.deadline;return `<button class="ah-p" data-post="${esc(p.id)}"><span class="ah-d">${d?`<small>${esc(new Date(d+"T00:00").toLocaleString("en-IN",{month:"short"}).toUpperCase())}</small><b>${new Date(d+"T00:00").getDate()}</b>`:ic("brief",18)}</span><span style="flex:1;min-width:0;text-align:left"><b>${esc(p.title)}</b><small>${esc([m.subtype||(KIND[p.kind]||[""])[0],"Shared by "+nmc(p.by||"alumni")].filter(Boolean).join(" · "))}</small></span></button>`};
   const left=ms.length?ms.map(mc).join(""):`<div class="ah-empty"><b>${LV()>=1?"Mentors open up each month":"Alumni mentors are here to help"}</b><span>${LV()>=1?"Check back soon, or share your own experience.":"Sign in to see who is mentoring this month and request a chat."}</span>${LV()>=1?"":`<button class="btn coral small" data-signin>Sign in to meet them</button>`}</div>`;
   return `<section class="sec ah"><div class="sec-h"><div class="t"><div><span class="eyebrow" style="color:#5A36E0">Alumni corner</span><h2 style="margin-top:6px">Talk to someone who's been there</h2></div></div><button class="btn" data-go="alumni">Visit the Alumni corner</button></div>
