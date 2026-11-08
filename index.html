@@ -1479,6 +1479,27 @@ html:not(.gated) #gate{background:none}
 @media (max-height:720px) and (min-width:700px){.sh-paint{top:54px!important}.sh-paint b{font-size:38px!important}.sh-paint span{font-size:21px!important}.sh-paint small{display:none}}
 @media (max-height:720px) and (min-width:700px){#gate .hang{margin-top:113px!important}}
 .sboard{width:min(620px,calc(100vw - 64px))!important}
+/* OPEN sign: arrows sit clear of the "pull the shutter up" line; no extra arrows on the handle */
+.board-back .bb-arrow{line-height:1!important;font-size:28px!important;margin:12px 0 14px!important;gap:0;height:auto}
+.board-back .bb-arrow span{display:block;height:16px;line-height:16px}
+.pg-arrows{display:none!important}
+.bb-chev{display:block;margin:14px auto 10px;fill:none;stroke:#5BF0A0;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(91,240,160,.6))}.bb-chev polyline{animation:chev 1.4s ease-in-out infinite;opacity:.25}.bb-chev polyline:nth-child(1){animation-delay:.4s}.bb-chev polyline:nth-child(2){animation-delay:.2s}@keyframes chev{40%{opacity:1}}
+.board-band{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.bb-cta{display:inline-block;background:#5A36E0;color:#fff;padding:5px 12px;border-radius:999px;letter-spacing:.14em;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+@media (max-width:520px){.board-band{flex-direction:column;gap:7px;padding:10px 10px 11px!important}.bb-cta{font-size:.7rem}}
+.bb-cta{padding:3px 10px}@media (max-width:520px) and (max-height:760px){#gate .hang{margin-top:88px!important}.sh-paint small{display:none}}
+@media (max-width:520px) and (max-height:760px){.sh-paint{top:54px!important}.sh-paint b{font-size:27px!important}.sh-paint span{font-size:16px!important}}
+/* phones: a shorter board so the bottom bar and padlocks stay in view */
+@media (max-width:520px){
+  #gate .gate-card{padding:0 16px 14px!important}#gate .gate-card .board-band{margin:0 -16px 10px!important;padding:8px 8px 9px!important;gap:5px!important}
+  #gate .gate-card h2{font-size:1.45rem!important;line-height:1.08!important;margin:0 0 6px!important}
+  #gate .gate-card p{font-size:.84rem!important;line-height:1.45!important;margin:0 0 6px!important}
+  #gate .gate-card .gate-note{font-size:.72rem!important;margin:0 0 8px!important;line-height:1.35!important}
+  #gate .gate-card ul{padding:8px 10px!important;margin:0 0 10px!important;font-size:.8rem!important;gap:3px!important}
+  #gate .gate-card .btn{padding-top:11px!important;padding-bottom:11px!important}
+  #gate .gate-card small{margin-top:7px!important;font-size:.76rem!important}}
+#gate{align-items:start!important;align-content:start!important}
+#gate .hang{margin-top:clamp(150px,22vh,200px)!important}@media (max-width:520px){#gate .hang{margin-top:clamp(120px,15.5vh,140px)!important}}@media (max-width:520px) and (max-height:760px){#gate .hang{margin-top:88px!important}}@media (max-height:720px) and (min-width:700px){#gate .hang{margin-top:113px!important}}
 
 </style>
 <script>try{var ao=location.ancestorOrigins;if(ao&&(Array.prototype.some.call(ao,function(o){return o.indexOf("sites.google.com")>-1})||ao.length>2))document.documentElement.className+=" in-site"}catch(e){}</script>
@@ -3092,7 +3113,7 @@ function gateSignIn(then){if(document.querySelector(".scrim"))return;openSignIn(
 function paintGate(){const on=!ME;let g=document.getElementById("gate");
   if(on){document.documentElement.classList.add("gated");
     if(!g){document.body.insertAdjacentHTML("beforeend",`<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT"><div class="shutter" aria-hidden="true"><div class="sh-box"><span class="sh-bolt"></span><span class="sh-bolt"></span></div><span class="sh-rail l"></span><span class="sh-rail r"></span><div class="sh-paint"><b>MSSW</b><span>CAREER HUB</span><small>Madras School of Social Work</small></div><div class="sh-bar"><span class="sh-lock l"><i></i></span><span class="sh-handle"></span><span class="sh-lock r"><i></i></span></div></div><div class="sh-floor" aria-hidden="true"></div>
-      <div class="hang"><span class="nail"></span><div class="sboard"><div class="gate-card"><div class="board-band">SORRY, WE'RE CLOSED <span>·</span> SIGN UP TO OPEN</div><h2 id="gateT">They made it<br><em>You're next!</em></h2><p>A Student-run partnership between MSSW Students and Alumni. We share what we've learnt, lift each other up and grow together, batch after batch.</p><p class="gate-note">An unofficial initiative. Official updates come from the placement cell.</p><ul><li><b>Students:</b> Sign Up with your MSSW ID</li><li><b>Alumni:</b> Sign Up with any email, no password</li></ul><button class="btn coral" data-gate>SIGN UP FREE</button><small>Already joined? <a href="#" data-gate>SIGN IN</a> with the same email.</small></div><div class="board-back"></div></div></div></div>`)}
+      <div class="hang"><span class="nail"></span><div class="sboard"><div class="gate-card"><div class="board-band"><span class="bb-closed">SORRY, WE'RE CLOSED</span><span class="bb-cta">SIGN UP TO OPEN</span></div><h2 id="gateT">They made it<br><em>You're next!</em></h2><p>A Student-run partnership between MSSW Students and Alumni. We share what we've learnt, lift each other up and grow together, batch after batch.</p><p class="gate-note">An unofficial initiative. Official updates come from the placement cell.</p><ul><li><b>Students:</b> Sign Up with your MSSW ID</li><li><b>Alumni:</b> Sign Up with any email, no password</li></ul><button class="btn coral" data-gate>SIGN UP FREE</button><small>Already joined? <a href="#" data-gate>SIGN IN</a> with the same email.</small></div><div class="board-back"></div></div></div></div>`)}
     return}
   if(!g){document.documentElement.classList.remove("gated");return}
   if(g.dataset.opening)return;g.dataset.opening="1";
@@ -3103,7 +3124,7 @@ function paintGate(){const on=!ME;let g=document.getElementById("gate");
     readyToPull(g)};go()}
 /* after sign-up the shutter stays down: they pull it up themselves (drag, swipe or tap) */
 function readyToPull(g){const sh=g.querySelector(".shutter");const first=(nmc(ME.name||"").split(" ")[0])||"friend";
-  const hang=g.querySelector(".hang"),back=g.querySelector(".board-back");back.innerHTML=`<div class="bb-bulbs" aria-hidden="true"></div><div class="bb-in"><div class="bb-brand">MSSW <b>CAREER HUB</b></div><div class="bb-open">WE'RE<br><span>OPEN!</span></div><div class="pull-hi">Welcome in, ${esc(first)} 🎉</div><p>Your member pass is waiting inside.</p><div class="bb-arrow" aria-hidden="true"><span>↑</span><span>↑</span><span>↑</span></div><p class="bb-pull">PULL THE SHUTTER UP</p></div>`;g.querySelector(".sboard").classList.add("flipped");
+  const hang=g.querySelector(".hang"),back=g.querySelector(".board-back");back.innerHTML=`<div class="bb-bulbs" aria-hidden="true"></div><div class="bb-in"><div class="bb-brand">MSSW <b>CAREER HUB</b></div><div class="bb-open">WE'RE<br><span>OPEN!</span></div><div class="pull-hi">Welcome in, ${esc(first)} 🎉</div><p>Your member pass is waiting inside.</p><svg class="bb-chev" viewBox="0 0 40 46" width="40" height="46" aria-hidden="true"><polyline points="8,16 20,5 32,16"/><polyline points="8,28 20,17 32,28"/><polyline points="8,40 20,29 32,40"/></svg><p class="bb-pull">PULL THE SHUTTER UP</p></div>`;g.querySelector(".sboard").classList.add("flipped");
   g.insertAdjacentHTML("beforeend",`<button class="pull-grip" aria-label="Pull the shutter up"><span class="pg-arrows">︿<br>︿</span><span class="pg-knob"></span><span class="pg-lab">PULL UP</span></button>`);
   g.classList.add("ready");setTimeout(()=>SFX.lock(),400);const grip=g.querySelector(".pull-grip");let y0=null,dy=0,done=false,last=0;const H=()=>innerHeight;
   const set=v=>{sh.style.transform=`translateY(${v}px)`;if(hang){hang.style.transition=sh.style.transition;hang.style.transform=`translateY(${v}px)`}g.style.setProperty("--gap",Math.max(0,-v)+"px")};
